@@ -13,3 +13,46 @@ Pour interagir avec une base de données, le framework vous donne le choix en l'
   new ModelName(true, ["db_name" => "database"]) // initialise ModelName avec MySQLi et les config ["db_name" => "database"] mergés avec les config par défaut App/Config/Config.php
   
 ```
+
+# Exemple de création de model
+```php
+  <?php
+    namespace App\Model;
+    use Core\Model;
+    
+    class ModelName extends Model{
+      public function __contruct(){
+        parent::__construct(...func_get_args());
+      }
+     
+     ...
+    }
+  
+```
+
+# Exemple de création de Controller
+```php
+  <?php
+    namespace App\Controller;
+    use Core\Controller;
+    use App\Model\Data;
+
+    class Home extends Controller{
+        public function __construct(){
+            parent::__construct();
+        }
+        public function index(){
+            return $this->view("view_file", $data_array);
+        }
+        public function another_page(){
+            $model = new ModelName();
+            return $this->view("view_file", $data_array);
+        }
+        
+        
+        
+        ...
+    }
+    
+    
+```
