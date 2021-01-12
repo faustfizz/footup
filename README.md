@@ -35,7 +35,7 @@ Pour interagir avec une base de données, le framework vous donne le choix en l'
   <?php
     namespace App\Controller;
     use Core\Controller;
-    use App\Model\Data;
+    use App\Model\ModelName;
 
     class Home extends Controller{
         public function __construct(){
