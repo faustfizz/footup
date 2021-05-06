@@ -16,7 +16,7 @@ use PDO;
 class Model {
     public static $db = null;
 
-    public function __construct($init = false, ?array $db_config = null, ?string $connector = "mysqli")
+    public function __construct($init = true, ?array $db_config = null, ?string $connector = "mysqli")
     {
         return self::db($init, $db_config, $connector);
     }
@@ -26,7 +26,7 @@ class Model {
         self::$db = null;
     }
 
-    static function db($init = false, $config = null, $connector = "mysqli"){
+    static function db($init = true, $config = null, $connector = "mysqli"){
         if($init){
             Config::$config = empty($config) ? Config::$config : array_merge(Config::$config, $config);
 

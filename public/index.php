@@ -21,16 +21,18 @@ spl_autoload_register(function($class){
 
 use App\Config\Config;
 
-$config = new Config();
+$controller = "App\Controller\\".Config::$config['default_controller'];
+$method = Config::$config['default_method'];
+
 $uri = explode('/', trim($_SERVER["REQUEST_URI"], "/"));
 // print_r($uri); die();
 if(is_array($uri) && $uri[0] != null){
     $controller = "App\Controller\\".ucfirst($uri[0]);
-    $method = isset($uri[1]) ? $uri[1] : "index";
+    $method = isset($uri[1]) ? $uri[1] : Config::$config['default_method'];
 
     unset($uri[0], $uri[1]);
     
     (new $controller())->{$method}(...$uri);
 }else{
-    (new App\Controller\Home())->index();
+    (new $controller())->{$method}();
 }
