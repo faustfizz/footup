@@ -13,7 +13,8 @@ class Home extends Controller{
     }
 
     public function index(){
-        // $data = func_get_args();
+        // $model = new Data();
+	// $result = $model::$db->query($sql);
         
         return $this->view("accueil", [
             "titre" => "Accueil"
