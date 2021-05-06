@@ -68,4 +68,3 @@ class Config{
 
 }
 
-/* End of file Controllername.php */
