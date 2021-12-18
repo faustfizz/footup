@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{status} - {title}</title>
+
+    <style>
+        body{
+            height: 100vh;
+            overflow: clip;
+            padding: 20px;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.479) 0%, rgba(255, 166, 0, 0.253) 30%, rgba(0, 0, 0, 0.329));
+            background-position: bottom;
+        }
+        div.cover{
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-content: center;
+            height: 80vh;
+        }
+        div.cover a{
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="cover">
+        <h1 style="text-align: center">{title}</h1>
+        <h2 style="text-align: center">{message}</h2>
+        <a href="/">Revenir à l'accueil</a>
+    </div>
+</body>
+</html>
