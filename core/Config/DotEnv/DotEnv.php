@@ -101,7 +101,7 @@ class DotEnv extends \ArrayObject
     }
 
     public static function parseFile(string $file, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED):array{
-        $newFile = fopen(substr($file, 0, strrpos($file, "/")).'ini', "w");
+        $newFile = fopen(substr($file, 0, strrpos($file, "/")).'/footup.ini', "w");
         foreach (file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
             # code...
             $line = trim($line);
@@ -112,8 +112,8 @@ class DotEnv extends \ArrayObject
             fwrite($newFile, $line."\n");
         }
         fclose($newFile);
-        $data = parse_ini_file(substr($file, 0, strrpos($file, "/")).'ini', $processSections, $scannerMode);
-        @unlink(substr($file, 0, strrpos($file, "/")).'ini');
+        $data = parse_ini_file(substr($file, 0, strrpos($file, "/")).'/footup.ini', $processSections, $scannerMode);
+        @unlink(substr($file, 0, strrpos($file, "/")).'/footup.ini');
         return $data;
     }
 

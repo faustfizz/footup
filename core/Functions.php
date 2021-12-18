@@ -17,6 +17,7 @@ use Footup\Http\Request;
 use Footup\Http\Response;
 use Footup\Http\Session;
 use App\Config\Config;
+use Footup\Config\Mime;
 
 // Tableau de caractères à remplacer
 defined("STRTR") or define("STRTR", array(
@@ -566,9 +567,91 @@ if (! function_exists('slugify'))
 
 // ---------------------------------------------------------------------
 
+if(!function_exists("favicon"))
+{
+    /**
+     * Link Favicon
+     *
+     * @param string $file
+     * @return string
+     */
+    function favicon($file)
+    {
+		$mime = Mime::getMime(pathinfo($file, PATHINFO_EXTENSION));
+        return file_exists(BASE_PATH.$file) ? Html::link(null, [
+            "rel"       =>  "icon",
+            "href"      =>  base_url($file),
+            "type"      =>  $mime
+        ]) : "";
+    }
+}
+
 if(!function_exists("assets"))
 {
-    
+    /**
+     * Link assets
+     *
+     * @param string $file
+     * @return string
+     */
+    function assets($file)
+    {
+		switch (pathinfo($file, PATHINFO_EXTENSION)) {
+			case "css":
+				return css($file);
+				break;
+			case "png":
+			case "jpg":
+			case "jpeg":
+			case "gif":
+				return img($file);
+				break;
+			case "js":
+				return js($file);
+				break;
+			default:
+				return "";
+		}
+    }
+}
+
+if(!function_exists("img"))
+{
+    /**
+	 * Link image
+	 *
+	 * @param string $file
+	 * @param string $class
+	 * @param int|string $width
+	 * @param int|string $height
+	 * @return string
+	 */
+    function img($file, $class = "img-fluid", $width = null, $height = null)
+    {
+		if(file_exists(ASSETS_DIR."img/".$file))
+		{
+			return Html::img(null, array_filter([
+				"rel"       =>  "image",
+				"src"      	=>  base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"])."img/".$file),
+				"width"     =>  $width,
+				"height"    =>  $height,
+				"class"		=>	$class
+			]));
+		}
+
+		if(file_exists(BASE_PATH."uploads/".$file))
+		{
+			return Html::img(null, array_filter([
+				"rel"       =>  "image",
+				"src"      	=>  base_url("uploads/".$file),
+				"width"     =>  $width,
+				"height"    =>  $height,
+				"class"		=>	$class
+			]));
+		}
+
+        return "";
+    }
 }
 
 if(!function_exists("css"))
