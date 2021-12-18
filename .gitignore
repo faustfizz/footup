@@ -1,2 +1,5 @@
 *.local.php
+/app/Libs/*
+/*/*.gitignore
+/public/uploads/*.*
 /.env
