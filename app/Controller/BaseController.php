@@ -12,7 +12,6 @@
 
 namespace App\Controller;
 use Footup\Controller;
-use App\Libs\Latter;
 
 class BaseController extends Controller
 {
