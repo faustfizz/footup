@@ -14,6 +14,8 @@
 
 namespace Footup\Html;
 
+use App\Config\Form as ConfigForm;
+
 class Form
 {
 
@@ -64,7 +66,8 @@ class Form
      * @param [bool] ...$config
      */
     public function __construct(string $action = "#", array $fields, array $data = null, ...$config) {
-        array_merge($this->config, $config);
+        $this->config = array_merge($this->config, $config);
+        self::$class = array_merge(self::$class, ConfigForm::$class);
         $this->action = $action;
         $this->prepareFields($fields, $data);
     }
@@ -91,7 +94,7 @@ class Form
                     ["class"    =>  self::$class["label"]]
                 ).
                 Html::{$field->name}(null, $field->attributes),
-                ["class" => "form-group"]
+                ["class" => self::$class[ "form-group"]]
             ) : Html::{$field->name}(null, $field->attributes);
         }
         $this->output .= $this->selectPart." ". $this->submitBtn();
@@ -254,7 +257,7 @@ class Form
                 isset($data[$field->name]) ? $data[$field->name] : $field->default,
             array_filter(["class" => self::$class['default'], "name" =>  $field->name, "id" =>  $field->name, "required" => !$field->null, "maxLength" => $field->maxLength]))
             ,
-            ["class" => "form-group"]
+            ["class" => self::$class[ "form-group"]]
         );
     }
 
@@ -276,7 +279,7 @@ class Form
                 Html::select(
                 $opt,
                 array_filter(["class" => self::$class['default'], "name" =>  $field->name, "id" =>  $field->name, "required" => !$field->null, "maxLength" => $field->maxLength])),
-                ["class" => "form-group"]
+                ["class" => self::$class[ "form-group"]]
             );
     }
 

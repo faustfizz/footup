@@ -39,6 +39,13 @@ defined('CONFIG_PATH') or define('CONFIG_PATH', realpath(__DIR__.DIRECTORY_SEPAR
 defined('APP_PATH') or define('APP_PATH', realpath(CONFIG_PATH."..").DIRECTORY_SEPARATOR);
 
 /**
+ * C'est ici que je charge vos contantes donc ne faites pas de vos constates une partie très importante
+ * du framework mais plutôt de votre application
+ */
+if(file_exists(CONFIG_PATH."Constants.php"))
+	require_once(CONFIG_PATH."Constants.php");
+
+/**
  * @todo Vous pouvez modifier ceci dansle cas où le dossier système n'est pas le dossier core
  * @example - require_once(ROOT_PATH.'sys/Boot.php');
  */
