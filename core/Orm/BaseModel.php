@@ -218,9 +218,12 @@ class BaseModel
      */
     public function fill(array $data) 
     {
-        foreach ($data as $key => $value) {
+        $fields = $this->getFieldNames();
+        foreach ($fields as $field) {
             # code...
-            $this->$key = $value;
+            if(isset($data[$field]))
+                $this->$field = $data[$field];
+                
         }
         return $this;
     }
