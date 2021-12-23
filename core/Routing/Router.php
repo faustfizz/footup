@@ -358,9 +358,9 @@ class Router
             
             [$class, $action] = count($uri) < 2 ? [$uri[0], null] : $uri;
 
-            if(ucfirst($class) === (new Config)->config['default_controller'])
+            if(ucfirst($class) === (new Config)->config['default_controller'] || $exist = file_exists(APP_PATH.'Controller/'.ucfirst($class).'.php'))
             {
-                $controller = "App\Controller\\".(new Config)->config['default_controller'];
+                $controller = "App\Controller\\".($exist ? ucfirst($class) : (new Config)->config['default_controller']);
                 $method = (!is_null($action) ? $action : (new Config)->config['default_method']);
 
                 $route = new Route($this->request->path().'/'.$method,  $controller.'@'.$method);

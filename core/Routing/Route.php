@@ -125,7 +125,7 @@ class Route
 
         // No such method - bail.
         if (! method_exists($controller, $method)) {
-            throw new Exception($handler);
+            throw new Exception("La méthode '$method' n'éxiste pas dans le controlleur '$controller'");
         }
 
         $this->handler = $controller;
