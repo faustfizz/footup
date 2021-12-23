@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.3 - 11.2021
+ * FOOTUP - 0.1.4 - 12.2021
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -355,6 +355,7 @@ class Router
         {
             $uri = explode('/', trim($this->request->path(), "/"));
             $uri = array_filter($uri);
+            
             [$class, $action] = count($uri) < 2 ? [$uri[0], null] : $uri;
 
             if(ucfirst($class) === (new Config)->config['default_controller'])
@@ -375,6 +376,32 @@ class Router
                 $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
 
                 return $route;
+            }else{
+                // discoery of a dir
+                $dir = ucfirst($uri[0]);
+                if(is_dir(APP_PATH.'Controller/'.$dir))
+                {
+                    $controller = isset($uri[1]) && $uri[1] != "/" ? ucfirst($uri[0]).'\\'.ucfirst($uri[1]) : ucfirst($uri[0]).'\\'.(new Config)->config['default_controller'];
+                    
+                    if(file_exists(APP_PATH.'Controller/'.strtr($controller, ["\\" => "/"]).'.php')){
+                        $controller = "App\Controller\\".$controller;
+                        $method = (isset($uri[2]) ? $uri[2] : (new Config)->config['default_method']);
+        
+                        $route = new Route($this->request->path().'/'.$method,  $controller.'@'.$method);
+                        
+                        // Add the URI arguments to the request
+                        foreach ($route->getArgs() as $key => $value) {
+                            # code...
+                            $this->request->{$key} = $value;
+                        }
+                        
+                        $this->request->controllerName = $route->getHandler();
+                        $this->request->controllerMethod = $route->getMethod();
+                        $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
+        
+                        return $route;
+                    }
+                }
             }
 
             if(is_null($class))
