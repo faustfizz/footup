@@ -18,12 +18,11 @@ class Config
      * @var array
      */
     public $page_error = [
-        "1s"     =>  BASE_PATH."error/100.html",
-        "2s"     =>  BASE_PATH."error/200.html",
-        "3s"     =>  BASE_PATH."error/300.html",
-        "4s"     =>  BASE_PATH."error/400.html",
-        "404s"   =>  BASE_PATH."error/404.html",
-        "5s"     =>  BASE_PATH."error/500.html",
+        "300s"      =>  BASE_PATH."error/300.html",
+        "4s"        =>  BASE_PATH."error/400.html",
+        "404s"      =>  BASE_PATH."error/404.html",
+        "5s"        =>  BASE_PATH."error/500.html",
+        "500s"      =>  BASE_PATH."error/500.html",
     ];
     
     /**
@@ -98,11 +97,15 @@ class Config
             $this->page_error = array_merge($this->page_error, $page_error);
         }
         
-        if($this->config["environment"] === "prod")
+        if(isset($this->config["environment"]) && $this->config["environment"] === "prod")
         {
             error_reporting(0);
+            ini_set("display_errors", "Off");
+            ini_set("display_startup_errors", "Off");
         }else{
             error_reporting(E_ALL);
+            ini_set("display_errors", "On");
+            ini_set("display_startup_errors", "On");
         }
     }
 

@@ -48,6 +48,7 @@ Options All -Indexes
     # If we don't have mod_rewrite installed, all 404's
     # can be sent to index.php, and everything works as normal.
     ErrorDocument 404 index.php
+    ErrorDocument 500 error/500.html
 </IfModule>
 
 # Disable server signature start

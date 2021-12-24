@@ -16,12 +16,11 @@ class Config extends \Footup\Config\Config
      * @var array
      */
     public $page_error = [
-        "1s"     =>  BASE_PATH."error/100.html",
-        "2s"     =>  BASE_PATH."error/200.html",
-        "3s"     =>  BASE_PATH."error/300.html",
-        "4s"     =>  BASE_PATH."error/400.html",
-        "404s"   =>  BASE_PATH."error/404.html",
-        "5s"     =>  BASE_PATH."error/500.html",
+        "300s"      =>  BASE_PATH."error/300.html",
+        "4s"        =>  BASE_PATH."error/400.html",
+        "404s"      =>  BASE_PATH."error/404.html",
+        "5s"        =>  BASE_PATH."error/500.html",
+        "500s"      =>  BASE_PATH."error/500.html",
     ];
 
     /**
