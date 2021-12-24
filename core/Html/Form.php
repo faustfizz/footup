@@ -32,28 +32,96 @@ class Form
     protected $submitText = "Envoyer";
 
     /**
+     * Definir les class à appliquer dans champs ( inputs )
+     * @example - "inputType" => [
+     *  "wrapper"       =>  "col-lg-6",
+     *  "form_group"    =>  "input-group input-group-outline my-3",
+     *  "label"         =>  "form-label",
+     *  "input"         =>  "form-control form-control-lg"
+     * ]
      * @var array
      */
-    public static $class = array(
+    protected $class = array(
         // for all input
-        'default'   =>  "form-control",
-        // for input type text
-        'form_group'=>  "form-group",
-        'label'     =>  "form-control-label",
-        'text'      =>  "",
-        'tel'      =>  "",
-        'textarea'  =>  "",
-        'file'      =>  "",
-        'date'      =>  "date",
-        'month'      =>  "date",
-        'datetime'  =>  "datetime",
-        'number'    =>  "",
-        'checkbox'  =>  "",
-        'hidden'  =>  "",
-        'email'     =>  "",
-        'password'  =>  "",
-        'radio'     =>  "",
-        'select'    =>  "",
+        'default'   =>  [
+            // div's class. e: col-lg-4
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-outline my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-control form-control-lg"
+        ],
+        'text'      =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-outline my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-control form-control-lg"
+        ],
+        'tel'       =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-outline my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-control form-control-lg"
+        ],
+        'textarea'   =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-static my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-control form-control-lg"
+        ],
+        'select'   =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-static my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-select form-select-lg"
+        ],
+        'checkbox'   =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "form-check form-switch my-3",
+            "label"         =>  "form-check-label",
+            "input"         =>  "form-check-input"
+        ],
+        'radio'   =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "form-check my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-check-input"
+        ],
+        'date'      =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-outline date datepicker my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-control form-control-lg"
+        ],
+        'datetime'      =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-outline datetime datetimepicker my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-control form-control-lg"
+        ],
+        'time'      =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-outline time timepicker my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-control form-control-lg"
+        ],
+        'month'      =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-outline date datepicker my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-control form-control-lg"
+        ],
+        'file'       =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-outline my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-control form-control-lg"
+        ],
+        'color'      =>  [
+            "wrapper"       =>  "",
+            "form_group"    =>  "input-group input-group-outline my-3",
+            "label"         =>  "form-label",
+            "input"         =>  "form-control-color form-control-lg"
+        ],
         'submit'    =>  "btn btn-outline-primary"
     );
     
@@ -67,7 +135,7 @@ class Form
      */
     public function __construct(string $action = "#", array $fields, array $data = null, ...$config) {
         $this->config = array_merge($this->config, $config);
-        self::$class = array_merge(self::$class, ConfigForm::$class);
+        $this->class = array_merge($this->class, ConfigForm::$class);
         $this->action = $action;
         $this->prepareFields($fields, $data);
     }
@@ -87,16 +155,22 @@ class Form
 
         foreach ($this->fields as $key => $field) {
             # code...
+            $class = isset($this->class[$field->attributes["type"]]) ? $this->class[$field->attributes["type"]] : $this->class["default"];
+            $field->attributes["class"] = isset($field->attributes["class"]) && !empty($field->attributes["class"]) ? $field->attributes["class"]." ".$class["input"] : $class["input"];
+
             $this->output .= 
             $field->attributes["type"] != "hidden" ? Html::div(
-                Html::label(
-                    ucwords(strtr($field->attributes["name"], ["_" => " "])),
-                    ["class"    =>  self::$class["label"]]
-                ).
-                Html::{$field->name}(null, $field->attributes),
-                ["class" => self::$class["form_group"]]
+                Html::div(
+                    Html::label(
+                        ucwords(strtr($field->attributes["name"], ["_" => " "])),
+                        ["class"    =>  $class["label"]]
+                    ).
+                    Html::{$field->name}(null, $field->attributes),
+                    ["class" => $class[ "form_group"]]
+                ), ["class" => $class[ "wrapper"]]
             ) : Html::{$field->name}(null, $field->attributes);
         }
+
         $this->output .= $this->selectPart." ". $this->submitBtn();
 
         if($this->config['close'] === true)
@@ -118,7 +192,7 @@ class Form
 
     private function submitBtn()
     {
-        return Html::button($this->submitText, ["type" => "submit", "class" => self::$class['submit']]);
+        return Html::button($this->submitText, ["type" => "submit", "class" => $this->class['submit']]);
     }
 
     private function switchType(object $field)
@@ -137,6 +211,9 @@ class Form
             case 'pass':
                 $type = "password";
                 break;
+            case 'color':
+            case 'tint':
+                $type = "color";
             case 'telephone':
             case 'phone':
             case 'phone_number':
@@ -175,7 +252,6 @@ class Form
                     case "select":
                         $this->dropdown((object)array_merge([
                             "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
-                            "class"     => self::$class['default']." ".self::$class[$field->type],
                             "name"      =>  $field->name,
                             "id"        =>  $field->id
                         ], (array)$field ), $data);
@@ -183,7 +259,6 @@ class Form
                     case "textarea":
                         $this->textarea((object)array_merge([
                             "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
-                            "class"     => self::$class['default']." ".self::$class[$field->type],
                             "name"      =>  $field->name,
                             "id"        =>  $field->id
                         ], (array)$field ), $data);
@@ -193,7 +268,6 @@ class Form
                             "input",
                             array_filter([
                                 "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
-                                "class"     =>  self::$class['default']." ".self::$class[$field->crudType],
                                 "name"      =>  $field->name,
                                 "id"        =>  $field->name,
                                 "required"  =>  !$field->null,
@@ -215,7 +289,6 @@ class Form
                     case "select":
                         $this->dropdown((object)array_merge([
                             "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
-                            "class"     => self::$class['default']." ".self::$class[$field->type],
                             "name"      =>  $field->name,
                             "id"        =>  $field->id
                         ], (array)$field), $data);
@@ -223,7 +296,6 @@ class Form
                     case "textarea":
                         $this->textarea((object)array_merge([
                             "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
-                            "class"     => self::$class['default']." ".self::$class[$field->type],
                             "name"      =>  $field->name,
                             "id"        =>  $field->id
                         ], (array)$field), $data);
@@ -233,7 +305,6 @@ class Form
                             "input",
                             array_merge([
                                 "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
-                                "class"     => self::$class['default']." ".self::$class[$field->type],
                                 "name"      =>  $field->name,
                                 "id"        =>  $field->id
                             ], (array)$field)
@@ -247,22 +318,30 @@ class Form
 
     private function textarea(object $field, $data)
     {
+        $class = $this->class["textarea"];
+
         $this->selectPart .= 
         Html::div(
-            Html::label(
-                ucwords(strtr($field->name, ["_" => " "])),
-                ["class"    =>  self::$class["label"]]
-            ).
-            Html::textarea(
-                isset($data[$field->name]) ? $data[$field->name] : $field->default,
-            array_filter(["class" => self::$class['default'], "name" =>  $field->name, "id" =>  $field->name, "required" => !$field->null, "maxLength" => $field->maxLength]))
-            ,
-            ["class" => self::$class["form_group"]]
+            Html::div(
+                Html::label(
+                    ucwords(strtr($field->name, ["_" => " "])),
+                    ["class"    =>  $class["label"]]
+                ).
+                Html::textarea(
+                    isset($data[$field->name]) ? $data[$field->name] : $field->default,
+                    array_filter(["class" => $class['input'], "name" =>  $field->name, "id" =>  $field->name, "required" => !$field->null, "maxLength" => $field->maxLength])
+                )
+                ,
+                ["class" => $class[ "form_group"]]
+            ),
+            ["class" => $class[ "wrapper"]]
         );
     }
 
     private function dropdown(object $field, $data)
     {
+        $class = $this->class["select"];
+
         $opt = "";
         foreach ($field->options as $key => $value) {
             # code...
@@ -271,16 +350,21 @@ class Form
             $opt .= Html::option(ucfirst($value), $attr);
         }
         $this->selectPart .= 
+        Html::div(
             Html::div(
                 Html::label(
                     ucwords(strtr($field->name, ["_" => " "])),
-                    ["class"    =>  self::$class["label"]]
+                    ["class"    =>  $class["label"]]
                 ).
                 Html::select(
-                $opt,
-                array_filter(["class" => self::$class['default'], "name" =>  $field->name, "id" =>  $field->name, "required" => !$field->null, "maxLength" => $field->maxLength])),
-                ["class" => self::$class["form_group"]]
-            );
+                    $opt,
+                    array_filter(["class" => $class['input'], "name" =>  $field->name, "id" =>  $field->name, "required" => !$field->null, "maxLength" => $field->maxLength])
+                )
+            ,
+                ["class" => $class[ "form_group"]]
+            ),
+            ["class" => $class[ "wrapper"]]
+        );
     }
 
     public function print($display = false)
