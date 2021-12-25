@@ -410,7 +410,7 @@ class Router
             }
         }
 
-        $this->die('404', "Page: Not Found !", "Erreur 404 : L'Url <span style='color: blue'>{$requestUri}</span> ne correspond à aucune des routes définies");
+        $this->die('404', "Page: Not Found !", "Erreur 404 : L'Url <code style='color: blue;background-color: #d3d3f43d;padding: 2px 6px;border: 1px solid #eff2f4;border-radius: 6px;'>{$requestUri}</code> ne correspond à aucune des routes définies");
     }
 
     /**
