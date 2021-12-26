@@ -2,6 +2,7 @@
 
 Un mini framework MVC PHP qui comporte :
 
+* CLI support for generating class
 * Config using PHP File or .env (Rename env to .env)
 * Gestion de Requête (Request)
 * Gestion de Reponse (Response)
