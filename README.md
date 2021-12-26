@@ -36,7 +36,7 @@ Un mini framework MVC PHP qui comporte :
 	│   ├── Model
 	│   │   └── Contact.php
 	│   └── View
-	│      └── accueil.php">accueil.php
+	│      └── accueil.php
 	├── core
 	│   ├── Boot.php
 	│   ├── Cli
