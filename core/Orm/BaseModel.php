@@ -19,7 +19,6 @@ use PDO;
 use PDOException;
 use PDOStatement;
 use ReflectionClass;
-use ReflectionProperty;
 
 class BaseModel
 {
@@ -77,6 +76,21 @@ class BaseModel
      * @var string $sql SQL statement
      */
     protected $sql;
+
+    /**
+     * @var int
+     */
+    protected $page_count = null;
+    
+    /**
+     * @var int
+     */
+    protected $current_page = 0;
+    
+    /**
+     * @var int
+     */
+    protected $per_page = 10;
 
     /**
      * @var \PDO $db connection
@@ -652,10 +666,12 @@ class BaseModel
      * @param int $offset Number of rows to offset
      * @return object Self reference
      */
-    public function limit($limit, $offset = null)
+    public function limit($limit = null, $offset = null)
     {
         if ($limit !== null) {
             $this->limit = 'LIMIT ' . $limit;
+        }else{
+            $this->limit = 'LIMIT ' . $this->per_page;
         }
         if ($offset !== null) {
             $this->offset($offset);
@@ -678,6 +694,8 @@ class BaseModel
         }
         if ($limit !== null) {
             $this->limit($limit);
+        }else{
+            $this->limit($this->per_page);
         }
 
         return $this;
@@ -1143,11 +1161,35 @@ class BaseModel
 
         return $eventData['data'];
     }
+    
+    /**
+     * Fonction de pagination | paginate function
+     *
+     * @param integer|null $perPage
+     * @param integer $page
+     * @return array
+     */
+    public function paginate(int $perPage = null, int $page = 0)
+	{
+        $page = (int)request()->get('page', $page);
+		$page  = $page >= 1 ? $page : 1;
+
+		$total = (int)$this->count();
+
+		// Store it in the Pager library so it can be
+		// paginated in the views.
+		$this->page_count = $total / $perPage;
+		$this->current_page = $page;
+		$perPage     = is_null($perPage) ? $this->per_page : $perPage;
+		$offset      = ($page - 1) * $perPage;
+
+        return $this->get("*", null, $perPage, $offset);
+	}
 
     /**
      * Fetch a single row from a select query.
      *
-     * @return array Row
+     * @return object|array Row
      */
     public function one($field = null)
     {
@@ -1200,7 +1242,7 @@ class BaseModel
     {
         $row = $this->one();
 
-        $value = (!empty($row)) ? $row[$name] : null;
+        $value = (!empty($row)) ? $row->$name : null;
 
         return $value;
     }
@@ -1209,7 +1251,7 @@ class BaseModel
      * Gets the min value for a specified field.
      *
      * @param string $field Field name
-     * @return object Self reference
+     * @return mixed Self reference
      */
     public function min($field, $key = null, $expire = 0)
     {
@@ -1224,7 +1266,7 @@ class BaseModel
      * Gets the max value for a specified field.
      *
      * @param string $field Field name
-     * @return object Self reference
+     * @return mixed Self reference
      */
     public function max($field, $key = null, $expire = 0)
     {
@@ -1239,7 +1281,7 @@ class BaseModel
      * Gets the sum value for a specified field.
      *
      * @param string $field Field name
-     * @return object Self reference
+     * @return mixed Self reference
      */
     public function sum($field, $key = null, $expire = 0)
     {
@@ -1254,7 +1296,7 @@ class BaseModel
      * Gets the average value for a specified field.
      *
      * @param string $field Field name
-     * @return object Self reference
+     * @return mixed Self reference
      */
     public function avg($field, $key = null, $expire = 0)
     {
@@ -1265,11 +1307,12 @@ class BaseModel
         );
     }
 
+
     /**
      * Gets a count of records for a table.
      *
      * @param string $field Field name
-     * @return object Self reference
+     * @return mixed Self reference
      */
     public function count($field = '*')
     {
