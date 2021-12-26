@@ -1,7 +1,5 @@
 *.local.php
 /app/Libs/*
 /*/*.gitignore
-/public/uploads/*.*
 /.env
-public/uploads/cache/app-View-accueil.php--83432cf7fc.php
-public/uploads/cache/app-View-accueil.php--83432cf7fc.php.lock
+public/uploads/*/
