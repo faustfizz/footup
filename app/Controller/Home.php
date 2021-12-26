@@ -5,10 +5,6 @@
  */
 
 namespace App\Controller;
-
-use App\Model\Contact;
-use Footup\Config\DotEnv\DotEnv;
-
 class Home extends BaseController
 {
     public function index()
