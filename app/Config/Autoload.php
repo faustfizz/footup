@@ -35,9 +35,7 @@ class Autoload extends \Footup\Config\Autoload{
      *
      * @var array
      */ 
-    protected $psr4 = [
-        "Latte"     => APP_PATH.'Libs/Latte/'
-    ];
+    protected $psr4 = [ ];
 
     /**
      * NE Modifier Pas | Don't Edit

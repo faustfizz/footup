@@ -15,6 +15,88 @@ Un mini framework MVC PHP qui comporte :
 * Fichiers (Upload File)
 * Extensible (You can integrate any library you want and you can add (news folders and class) in the App Directory in condition you use psr4)
 
+## Directories tree
+
+	├── app
+	│   ├── Config
+	│   │   ├── Autoload.php
+	│   │   ├── Config.php
+	│   │   ├── Constants.php
+	│   │   ├── Email.php
+	│   │   ├── Form.php
+	│   │   └── Routes.php
+	│   ├── Controller
+	│   │   ├── BaseController.php
+	│   │   └── Home.php
+	│   ├── Functions.php
+	│   ├── Libs
+	│   ├── Middle
+	│   │   └── Maintenance.php
+	│   ├── Model
+	│   │   └── Contact.php
+	│   └── View
+	│      └── accueil.php">accueil.php
+	├── core
+	│   ├── Boot.php
+	│   ├── Cli
+	│   │   ├── CLI.php
+	│   │   ├── Colors.php
+	│   │   ├── Console.php
+	│   │   ├── Exception.php
+	│   │   ├── Generator.php
+	│   │   ├── Options.php
+	│   │   ├── TableFormatter.php
+	│   │   └── Tpl
+	│   │       ├── Controller.tpl
+	│   │       ├── Middle.tpl
+	│   │       ├── Model.tpl
+	│   │       └── View.tpl
+	│   ├── Config
+	│   │   ├── Autoload.php
+	│   │   ├── Config.php
+	│   │   ├── DotEnv
+	│   │   │   ├── DotEnv.php
+	│   │   │   └── Exception
+	│   │   │       ├── Exception.php
+	│   │   │       └── InvalidPathException.php
+	│   │   ├── Email.php
+	│   │   └── Mime.php
+	│   ├── Controller.php
+	│   ├── Files
+	│   │   ├── File.php
+	│   │   └── FileSystem.php
+	│   ├── Footup.php
+	│   ├── Functions.php
+	│   ├── Html
+	│   │   ├── Form.php
+	│   │   └── Html.php
+	│   ├── Http
+	│   │   ├── Request.php
+	│   │   ├── Response.php
+	│   │   └── Session.php
+	│   ├── Model.php
+	│   ├── Orm
+	│   │   └── BaseModel.php
+	│   └── Routing
+	│       ├── Middle.php
+	│       ├── Route.php
+	│       └── Router.php
+	├── env
+	├── foot
+	├── LICENSE
+	├── public
+	│   ├── assets
+	│   │   ├── css
+	│   │   │   └── style.css
+	│   │   └── js
+	│   │       └── script.js
+	│   ├── error
+	│   │   ├── 404.html
+	│   │   └── 500.html
+	│   ├── index.php
+	│   └── uploads
+	└── README.md
+
 ## Description
 
 Ce framework utilise les namespaces pour auto-loading des class.
@@ -27,6 +109,12 @@ Vous êtes libre et maître de votre code, soyez à l'aise
 Ce framework a tout ce qu'il faut pour vous aider à developper vite votre application.
 
 **#TO-DO:** Une documentation complète doit être rédigée si possible
+
+## Exemple d'Utilisation du CLI
+
+```bash
+nuka@hacker_pc:~$ php foot 
+```
 
 ## Exemple de Model
 
