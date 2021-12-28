@@ -144,46 +144,69 @@ class BaseModel
      */
 	protected $tmp_callbacks;
 
+    
     /**
-     * @var array des fonctions à éxecuter avant l'insertion
-     * @todo profiter de modifier les données, c'est le moment ou jamais
+     * Permet de passer un array de la forme $data = [ 'data' => [] ] avant insertion
+     * les callbacks doivent obligatoirement retourner $data
+     * 
+     * @var array
      */
-	protected $beforeInsert         = [];
+    protected $beforeInsert         = [];
 
     /**
-     * @var array des fonctions à éxecuter avant recupération des données
+     * Permet de passer un array de la forme $data = [ 'data' => [], 'where'    => ,'limit' =>, 'offset'    =>  ] 
+     * avant recuperation
+     * les callbacks doivent obligatoirement retourner $data
+     * 
+     * @var array
      */
 	protected $beforeFind           = [];
 
     /**
-     * @var array des fonctions à éxecuter avant suppression des données
+     * Permet de passer un array de la forme $data = [ 'id' => $primaryKeyValue ] avant suppression
+     * les callbacks doivent obligatoirement retourner $data
+     * 
+     * @var array
      */
 	protected $beforeDelete         = [];
-
+    
     /**
-     * @var array des fonctions à éxecuter avant mise à jour des données
+     * Permet de passer un array de la forme $data = [ 'id' =>  $primaryKeyValue, 'data' => [] ] avant modification
+     * 
+     * @var array
      */
 	protected $beforeUpdate         = [];
+    
+    /**
+     * Permet de passer un array de la forme $data = [ 'id' =>  $primaryKeyValue, 'data' => [] ] après insertion
+     * 
+     * @var array
+     */
+	protected $afterInsert          = [];
 
     /**
-     * @var array des fonctions à éxecuter après insertion des données
+     * Permet de passer un array de la forme $data = [ 'data' => [ ModelObjectFetched ] ] après recupération
+     * les callbacks doivent obligatoirement retourner $data
+     * 
+     * @var array
      */
-	protected $afterInsert         = [];
+	protected $afterFind            = [];
 
     /**
-     * @var array des fonctions à éxecuter après recupération des données
+     * Permet de passer un array de la forme $data = [ 'id' => $primaryKeyValue, 'result'   => bool ] 
+     * après suppression
+     * 
+     * @var array
      */
-	protected $afterFind           = [];
-
+	protected $afterDelete          = [];
+    
     /**
-     * @var array des fonctions à éxecuter après suppression des données
+     * Permet de passer un array de la forme $data = [ 'id' =>  $primaryKeyValue, 'data' => [], 'result'  => bool ] 
+     * après modification
+     * 
+     * @var array
      */
-	protected $afterDelete         = [];
-
-    /**
-     * @var array des fonctions à éxecuter après modification des données
-     */
-	protected $afterUpdate         = [];
+	protected $afterUpdate          = [];
 
     /**
      * @var array|string $tableInfo informations de la table
@@ -1847,7 +1870,7 @@ class BaseModel
             $foreign_key = 'id_' . preg_replace('/^(\\%s)(.*)(\\%s)$/', '$2', $this->getTable());
         }
         if (!$local_key) {
-            $local_key = 'id';
+            $local_key = $this->getPrimaryKey();
         }
         return [
             'field' => $foreign_key,

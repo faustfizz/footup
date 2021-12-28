@@ -212,6 +212,8 @@ class Form
                 $type = "password";
                 break;
             case 'color':
+            case 'colour':
+            case 'couleur':
             case 'tint':
                 $type = "color";
             case 'telephone':
