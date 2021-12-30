@@ -5555,7 +5555,8 @@ class Mime
         $mimes_keys = array_keys(self::$mimes);
         if(in_array($ext, $mimes_keys))
         {
-            return self::$mimes[$ext];
+            $mim = is_array(self::$mimes[$ext]) ? self::$mimes[$ext][0] : self::$mimes[$ext];
+            return $mim;
         }
         return false;
     }
@@ -5569,6 +5570,7 @@ class Mime
         $ext_keys = array_keys(self::$extensions);
         if(is_array($mime, $ext_keys))
         {
+            $ext = is_array(self::$extensions[$mime]) ? self::$extensions[$mime][0] : self::$extensions[$mime];
             return self::$extensions[$mime];
         }
         return false;
