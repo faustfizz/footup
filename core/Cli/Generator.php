@@ -25,6 +25,7 @@ class Generator
         $this->replacements = array(
             "{name_space}"  =>  ucfirst($this->namespace),
             "{class_name}"  =>  ucfirst($this->classname),
+            "{class_view}"  =>  strtolower($this->classname),
             "{append_table}"  =>  "_".strtolower($this->classname),
             "{use_header}"  =>  "",
         );
@@ -72,6 +73,7 @@ class Generator
                 $this->genReplace([
                     "{name_space}" => '\\'.strtr($dir, "/" , "\\"),
                     "{class_name}" => ucfirst($file),
+                    "{class_view}" => $dir.DIRECTORY_SEPARATOR.strtolower($file),
                     "{use_header}" => $scaffold ? "use App\Controller\BaseController;\nuse App\Model\\".strtr($dir, "/" , "\\")."\\".ucfirst($file)." as ".ucfirst($file)."Model;\n" : "use App\Controller\BaseController;\n"
                 ])->parse_file_content(__DIR__."/Tpl/Controller.tpl")
             );

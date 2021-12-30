@@ -12,7 +12,7 @@ class {class_name} extends BaseController
 {
     public function index()
     {
-        return $this->view("{class_name}", [
+        return $this->view("{class_view}", [
             "titre" => "Accueil"
         ]);
     }
