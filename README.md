@@ -243,7 +243,7 @@ class Contact extends Model{
   $this->request->image
 ```
 
-## Geting Auto Genereted Form | Avoir un formulaire auto généré
+## Getting Auto Genereted Form | Avoir un formulaire auto généré
 
 ```php
   $contact = new ContactModel();
