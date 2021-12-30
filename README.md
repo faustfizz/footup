@@ -211,7 +211,7 @@ class Contact extends Model{
   calledController($withNamespace = true)
 ```
 
-> **calledController($withNamespace = true)**
+> **calledMethod()**
 
 ```php
   /**
