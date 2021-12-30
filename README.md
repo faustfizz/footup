@@ -3,6 +3,7 @@
 Un mini framework MVC PHP qui comporte :
 
 * CLI support for generating class
+* Translation support
 * Config using PHP File or .env (Rename env to .env)
 * Gestion de Requête (Request)
 * Gestion de Reponse (Response)
@@ -17,86 +18,104 @@ Un mini framework MVC PHP qui comporte :
 * Extensible (You can integrate any library you want and you can add (news folders and class) in the App Directory in condition you use psr4)
 
 ## Directories tree
-
-	├── app
-	│   ├── Config
-	│   │   ├── Autoload.php
-	│   │   ├── Config.php
-	│   │   ├── Constants.php
-	│   │   ├── Email.php
-	│   │   ├── Form.php
-	│   │   └── Routes.php
-	│   ├── Controller
-	│   │   ├── BaseController.php
-	│   │   └── Home.php
-	│   ├── Functions.php
-	│   ├── Libs
-	│   ├── Middle
-	│   │   └── Maintenance.php
-	│   ├── Model
-	│   │   └── Contact.php
-	│   └── View
-	│      └── accueil.php
-	├── core
-	│   ├── Boot.php
-	│   ├── Cli
-	│   │   ├── CLI.php
-	│   │   ├── Colors.php
-	│   │   ├── Console.php
-	│   │   ├── Exception.php
-	│   │   ├── Generator.php
-	│   │   ├── Options.php
-	│   │   ├── TableFormatter.php
-	│   │   └── Tpl
-	│   │       ├── Controller.tpl
-	│   │       ├── Middle.tpl
-	│   │       ├── Model.tpl
-	│   │       └── View.tpl
-	│   ├── Config
-	│   │   ├── Autoload.php
-	│   │   ├── Config.php
-	│   │   ├── DotEnv
-	│   │   │   ├── DotEnv.php
-	│   │   │   └── Exception
-	│   │   │       ├── Exception.php
-	│   │   │       └── InvalidPathException.php
-	│   │   ├── Email.php
-	│   │   └── Mime.php
-	│   ├── Controller.php
-	│   ├── Files
-	│   │   ├── File.php
-	│   │   └── FileSystem.php
-	│   ├── Footup.php
-	│   ├── Functions.php
-	│   ├── Html
-	│   │   ├── Form.php
-	│   │   └── Html.php
-	│   ├── Http
-	│   │   ├── Request.php
-	│   │   ├── Response.php
-	│   │   └── Session.php
-	│   ├── Model.php
-	│   ├── Orm
-	│   │   └── BaseModel.php
-	│   └── Routing
-	│       ├── Middle.php
-	│       ├── Route.php
-	│       └── Router.php
-	├── env
-	├── foot
-	├── LICENSE
-	├── public
-	│   ├── assets
-	│   │   ├── css
-	│   │   │   └── style.css
-	│   │   └── js
-	│   │       └── script.js
-	│   ├── error
-	│   │   ├── 404.html
-	│   │   └── 500.html
-	│   ├── index.php
-	│   └── uploads
-	└── README.md
+```
+.
+├── app
+│   ├── Config
+│   │   ├── Autoload.php
+│   │   ├── Config.php
+│   │   ├── Constants.php
+│   │   ├── Email.php
+│   │   ├── Form.php
+│   │   └── Routes.php
+│   ├── Controller
+│   │   ├── BaseController.php
+│   │   └── Home.php
+│   ├── Functions.php
+│   ├── Lang
+│   ├── Libs
+│   ├── Middle
+│   │   └── Maintenance.php
+│   ├── Model
+│   │   └── Contact.php
+│   └── View
+│       └── accueil.php
+├── core
+│   ├── Boot.php
+│   ├── Cli
+│   │   ├── CLI.php
+│   │   ├── Colors.php
+│   │   ├── Console.php
+│   │   ├── Exception.php
+│   │   ├── Generator.php
+│   │   ├── Options.php
+│   │   ├── TableFormatter.php
+│   │   └── Tpl
+│   │       ├── Controller.tpl
+│   │       ├── Middle.tpl
+│   │       ├── Model.tpl
+│   │       └── View.tpl
+│   ├── Config
+│   │   ├── Autoload.php
+│   │   ├── Config.php
+│   │   ├── DotEnv
+│   │   │   ├── DotEnv.php
+│   │   │   └── Exception
+│   │   │       ├── Exception.php
+│   │   │       └── InvalidPathException.php
+│   │   ├── Email.php
+│   │   └── Mime.php
+│   ├── Controller.php
+│   ├── Files
+│   │   ├── File.php
+│   │   └── FileSystem.php
+│   ├── Footup.php
+│   ├── Functions.php
+│   ├── Html
+│   │   ├── Form.php
+│   │   └── Html.php
+│   ├── Http
+│   │   ├── Request.php
+│   │   ├── Response.php
+│   │   └── Session.php
+│   ├── I18n
+│   │   ├── Exceptions
+│   │   │   └── I18nException.php
+│   │   ├── TimeDifference.php
+│   │   └── Time.php
+│   ├── Lang
+│   │   ├── fr
+│   │   │   ├── Core.php
+│   │   │   ├── Date.php
+│   │   │   ├── Db.php
+│   │   │   ├── Email.php
+│   │   │   ├── File.php
+│   │   │   ├── Http.php
+│   │   │   └── View.php
+│   │   └── Lang.php
+│   ├── Model.php
+│   ├── Orm
+│   │   └── BaseModel.php
+│   └── Routing
+│       ├── Middle.php
+│       ├── Route.php
+│       └── Router.php
+├── public
+│   ├── assets
+│   │   ├── css
+│   │   │   └── style.css
+│   │   └── js
+│   │       └── script.js
+│   ├── error
+│   │   ├── 404.html
+│   │   └── 500.html
+│   ├── index.php
+│   └── uploads
+├── env
+├── foot
+├── LICENSE
+└── README.md
+```
 
 ## Description
 
