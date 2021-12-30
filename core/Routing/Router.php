@@ -381,19 +381,6 @@ class Router
                     $controller = "App\Controller\\".($exist ? ucfirst($class) : $config->config['default_controller']);
                     $method = (!is_null($action) ? $action : $config->config['default_method']);
 
-                    $route = new Route($requestUri,  $controller.'@'.$method);
-                    
-                    // Add the URI arguments to the request
-                    foreach ($route->getArgs() as $key => $value) {
-                        # code...
-                        $this->request->{$key} = $value;
-                    }
-                    
-                    $this->request->controllerName = $route->getHandler();
-                    $this->request->controllerMethod = $route->getMethod();
-                    $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
-
-                    return $route;
                 }else{
                     // discoery of a dir
                     $dir = ucfirst($uri[0]);
@@ -404,41 +391,27 @@ class Router
                         if(file_exists(APP_PATH.'Controller/'.strtr($controller, ["\\" => "/"]).'.php')){
                             $controller = "App\Controller\\".$controller;
                             $method = (isset($uri[2]) ? $uri[2] : $config->config['default_method']);
-            
-                            $route = new Route($requestUri,  $controller.'@'.$method);
-                            
-                            // Add the URI arguments to the request
-                            foreach ($route->getArgs() as $key => $value) {
-                                # code...
-                                $this->request->{$key} = $value;
-                            }
-                            
-                            $this->request->controllerName = $route->getHandler();
-                            $this->request->controllerMethod = $route->getMethod();
-                            $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
-            
-                            return $route;
                         }
                     }
                 }
             }else{
                 $controller = "App\Controller\\".ucfirst($config->config['default_controller']);
                 $method = $config->config['default_method'];
-
-                $route = new Route("/",  $controller.'@'.$method);
-                
-                // Add the URI arguments to the request
-                foreach ($route->getArgs() as $key => $value) {
-                    # code...
-                    $this->request->{$key} = $value;
-                }
-                
-                $this->request->controllerName = $route->getHandler();
-                $this->request->controllerMethod = $route->getMethod();
-                $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
-
-                return $route;
             }
+
+            $route = new Route($requestUri,  $controller.'@'.$method);
+                        
+            // Add the URI arguments to the request
+            foreach ($route->getArgs() as $key => $value) {
+                # code...
+                $this->request->{$key} = $value;
+            }
+            
+            $this->request->controllerName = $route->getHandler();
+            $this->request->controllerMethod = $route->getMethod();
+            $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
+
+            return $route;
         }
 
         $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
