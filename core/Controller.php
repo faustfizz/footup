@@ -10,9 +10,11 @@
  */
 namespace Footup;
 use App\Config\Config;
+use Exception;
 use Footup\Http\Request;
 use Footup\Http\Response;
 use Footup\Http\Session;
+use Locale;
 
 class Controller
 {
@@ -62,6 +64,19 @@ class Controller
         $this->request  = $request;
         $this->response = is_null($response) ? $this->response : $response;
         $this->session  = is_null($session) ? $this->session : $session;
+
+        /**
+         * Default lang
+         */
+        if(function_exists("setlocale"))
+        {
+            \setlocale(LC_ALL, $this->request->getLang());
+        }
+        if(class_exists("Locale"))
+        {
+            Locale::setDefault($this->request->getLang());
+        }
+        
         return $this;
     }
 
@@ -79,6 +94,10 @@ class Controller
         extract($data);
         $path = trim($path, "/");
         $config = new Config();
+        if(!file_exists($config->view_path . $path . $config->view_ext))
+        {
+            throw new Exception(text("View.missedFile", [$path . $config->view_ext]));
+        }
         return include_once($config->view_path . $path . $config->view_ext);
     }
 

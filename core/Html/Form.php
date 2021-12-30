@@ -383,7 +383,7 @@ class Form
     {
         $this->output .= Html::{$name}($arguments);
 
-        throw new \Exception(__CLASS__ . ' not such method[' . $name . ']');
+        throw new \Exception(text("Core.classNoMethod", [__CLASS__, $name]));
     }
     
     public function __toString()

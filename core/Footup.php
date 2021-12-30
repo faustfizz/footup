@@ -55,11 +55,11 @@ class Footup
          */
         $method = $route->getMethod();
 
-        try {
-            $request = $this->router->request;
-            $response = new Response();
-            $session = new Session();
+        $request = $this->router->request;
+        $response = new Response();
+        $session = new Session();
 
+        try {
             /**
              * @var \Footup\Controller $controller
              */
@@ -68,10 +68,8 @@ class Footup
 
         } catch (Exception $exception) {
             // Erreur 500.
-            throw new Exception($exception);
+            throw new Exception(text("Http.error500"));
         }
-
-        return null;
     }
 
     /**

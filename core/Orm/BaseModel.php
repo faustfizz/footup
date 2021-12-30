@@ -309,7 +309,7 @@ class BaseModel
         $url = parse_url($connection);
 
         if (empty($url)) {
-            throw new Exception('Invalid connection string.');
+            throw new Exception(text('Db.urlInvalid'));
         }
 
         $cfg = array();
@@ -330,7 +330,7 @@ class BaseModel
     public function checkTable()
     {
         if (!$this->getTable()) {
-            throw new Exception('Table is not defined.');
+            throw new Exception(text("Db.undefinedTable"));
         }
     }
 
@@ -340,7 +340,7 @@ class BaseModel
     public function checkClass()
     {
         if (!$this->class) {
-            throw new Exception('Class is not defined.');
+            throw new Exception(text("Db.modelClassUndefined"));
         }
     }
 
@@ -397,11 +397,14 @@ class BaseModel
             'INNER',
             'LEFT OUTER',
             'RIGHT OUTER',
-            'FULL OUTER'
+            'FULL OUTER',
+            'LEFT',
+            'RIGHT',
+            'FULL'
         );
 
         if (!in_array($type, $joins)) {
-            throw new Exception('Invalid join type.');
+            throw new Exception(text("Db.invalidJoin", [$type]));
         }
 
         $this->joins .= ' ' . $type . ' JOIN ' . $table . ' ON ' .
@@ -861,7 +864,7 @@ class BaseModel
         }
         
         if (empty($this->where) && is_null($id) || is_null($this->where)) {
-            throw new Exception('Attention: N\'utilisez jamais une requête de type UPFATE sans une clause WHERE !');
+            throw new Exception(text("Db.dontUse", ["UPDATE"]));
         }
 
         $eventData = [
@@ -938,7 +941,7 @@ class BaseModel
         }
 
         if (is_null($where) || empty($this->where)) {
-            throw new Exception('Attention: N\'utilisez jamais une requête de type DELETE sans une clause WHERE !');
+            throw new Exception(text("Db.dontUse", ["DELETE"]));
         }
 
 		if ($this->tmp_callbacks)
@@ -1042,12 +1045,12 @@ class BaseModel
                 }
 
                 if (self::$db == null) {
-                    throw new Exception('Undefined database.');
+                    throw new Exception(text("Db.undefinedDb"));
                 }
             }
             // Connection object or resource
             else {
-                throw new Exception('Invalid database type.');
+                throw new Exception(text("Db.unsupportedType"));
             }
         } else {
             return self::$db;

@@ -174,7 +174,7 @@ class Html
             return "<{$name} {$attributes}  />";
         }
 
-        throw new \Exception(__CLASS__ . ' not such method[' . $name . ']');
+        throw new \Exception(text("Core.classNoMethod", [__CLASS__, $name]));
     }
 
     public static function attributes(array $attr)

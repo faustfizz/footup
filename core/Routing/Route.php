@@ -19,6 +19,13 @@ class Route
     public const CONTROLLER_DELIMITER = '@';
 
     /**
+     * Lang de l'url
+     * 
+     * @var string
+     */
+    protected $lang;
+
+    /**
      * Path de l'url
      *
      * @var string
@@ -95,17 +102,18 @@ class Route
      */
     public function loadHandler($handler): void
     {
+        $config = new Config;
         // If we received a callable, convert it into a controller
         if (is_callable($handler)) {
             $this->handler = $handler;
-            $this->method = (new Config)->config['default_method'];
+            $this->method = $config->config['default_method'];
 
             return;
         }
 
         // If we did receive neither a callable nor a string, this is just a wrong argument, so bail
         if (! is_string($handler)) {
-            throw new Exception("{$handler} doit être une fonction, class ou objet");
+            throw new Exception(text("Http.controllerBailed", [gettype($handler)]));
         }
 
         // Split the handler string at the delimiter character, so we receive class and method
@@ -113,11 +121,11 @@ class Route
         //die('CNT '.$method);
 
         // Set class name and method. If no method has been specified
-        $method = $method ?? (new Config)->config['default_method'];
+        $method = $method ?? $config->config['default_method'];
 
         // No such class - bail.
         if (! class_exists($controller)) {
-            throw new Exception("La class {$controller} n'éxiste pas");
+            throw new Exception(text("Http.controllerNotFound", [$controller]));
         }
 
         // Create a new instance of the controller
@@ -125,7 +133,7 @@ class Route
 
         // No such method - bail.
         if (! method_exists($controller, $method)) {
-            throw new Exception("La méthode '$method' n'éxiste pas dans le controlleur '$controller'");
+            throw new Exception(text("Http.methodNotFound", [$method, $controller]));
         }
 
         $this->handler = $controller;
@@ -152,4 +160,28 @@ class Route
         return $this->method;
     }
 
+
+    /**
+     * Get lang de l'url
+     *
+     * @return  string
+     */ 
+    public function getLang()
+    {
+        return $this->lang;
+    }
+
+    /**
+     * Set lang de l'url
+     *
+     * @param  string  $lang  Lang de l'url
+     *
+     * @return  self
+     */ 
+    public function setLang(string $lang)
+    {
+        $this->lang = $lang;
+
+        return $this;
+    }
 }

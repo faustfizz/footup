@@ -17,7 +17,6 @@ use ArrayObject;
 use DateTime;
 use Exception;
 use JsonSerializable;
-use UnexpectedValueException;
 
 class Response
 {
@@ -155,8 +154,8 @@ class Response
                 $data = $this->message[$status];
             }
             $this->body($data);
-        } catch (UnexpectedValueException $exception) {
-            throw $exception;
+        } catch (Exception $exception) {
+            throw new Exception(text("Http.invalidBodyType", [gettype($data)]));
         }
     }
 
@@ -259,9 +258,7 @@ class Response
     private function check($body)
     {
         if (! is_null($body) && ! is_string($body) && ! is_numeric($body) && ! is_callable([$body, '__toString'])) {
-            throw new UnexpectedValueException(
-                'le corps de la reponse doit être une chaine de caractère ou un object implementant la méthode __toString(). le type trouvé est ' . gettype($body)
-            );
+            throw new Exception(text("Http.invalidBodyType", [gettype($body)]));
         }
 
         if (is_object($body) && is_callable([$body, '__toString'])) {
@@ -305,10 +302,10 @@ class Response
             try {
                 $content = file_get_contents($filepath);
             } catch (Exception $exception) {
-                throw $exception;
+                throw new Exception(text("File.unreadable", [$filepath]));
             }
         }else{
-            throw new Exception("Fichier non trouvé !");
+            throw new Exception(text("File.fileNotFound", [$filepath]));
         }
 
         if (! $filename) {

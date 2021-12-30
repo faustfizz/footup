@@ -40,11 +40,11 @@ class DotEnv extends \ArrayObject
     public function setDir(string $dir){
         $this->_dir = $dir;
         if (!is_dir($this->_dir)){
-            throw new InvalidPathException("$this->_file is not an existing directory.");
+            throw new InvalidPathException(text("File.dirNotExist", [$this->_file]));
         }
         $this->_file = $dir . ".env";
         if (!file_exists($this->_file)){
-            throw new InvalidPathException("$this->_file is not an existing file.");
+            throw new InvalidPathException(text("File.fileNotExist", [$this->_file]));
         }
     }
 
@@ -52,7 +52,7 @@ class DotEnv extends \ArrayObject
         $this->_dir = dirname($file);
         $this->_file = $file;
         if (!file_exists($this->_file)){
-            throw new InvalidPathException("$this->_file is not an existing file.");
+            throw new InvalidPathException(text("File.fileNotExist", [$this->_file]));
         }
     }
 

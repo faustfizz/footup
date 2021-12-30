@@ -11,9 +11,18 @@
 namespace Footup\Config;
 
 use Footup\Config\DotEnv\DotEnv;
+use Locale;
 
 class Config
 {
+    /**
+     * @var array
+     */
+    public $locale = [
+        "lang"        =>  "fr",
+        "timezone"    => 'Africa/Nairobi'
+    ];
+
     /**
      * @var array
      */
@@ -88,13 +97,22 @@ class Config
         "db_type"   => "pdomysql"
     ];
 
-    public function __construct(?array $config = null, ?array $page_error = null)
+    public function __construct(?array $config = null, ?array $page_error = null, ?array $locale = null)
     {
         $env = new DotEnv();
-        if(!empty($config) || !empty($page_error) || isset($_ENV["config"]))
+
+        $this->config = !empty($config) ? array_merge($this->config, $config) : $this->config;
+        $this->page_error = !empty($page_error) ? array_merge($this->page_error, $page_error) : $this->page_error;
+        $this->locale = !empty($locale) ? array_merge($this->locale, $locale) : $this->locale;
+
+        if(isset($_ENV["config"]))
         {
-            $this->config = array_merge($this->config, $config, $_ENV["config"]);
-            $this->page_error = array_merge($this->page_error, $page_error);
+            $this->config = array_merge($this->config, $_ENV["config"]);
+        }
+
+        if(isset($_ENV["locale"]))
+        {
+            $this->locale = array_merge($this->locale, $_ENV["locale"]);
         }
         
         if(isset($this->config["environment"]) && $this->config["environment"] === "prod")
@@ -107,11 +125,30 @@ class Config
             ini_set("display_errors", "On");
             ini_set("display_startup_errors", "On");
         }
+
+        /**
+         * Default lang
+         */
+        if(function_exists("setlocale"))
+        {
+            \setlocale(LC_ALL, $this->locale["lang"]);
+        }
+        if(class_exists("Locale"))
+        {
+            Locale::setDefault($this->locale["lang"]);
+        }
     }
 
     public function __set($name, $val)
     {
-        $this->config[$name] = $val;
+        if(array_key_exists($name, $this->config))
+        {
+            $this->config[$name] = $val;
+        }
+        if(array_key_exists($name, $this->locale))
+        {
+            $this->locale[$name] = $val;
+        }
     }
 
     public function __get($name)
@@ -120,7 +157,16 @@ class Config
         {
             return $this->{$name};
         }
-        return $this->config[$name] ?? null;
+        
+        if(array_key_exists($name, $this->config))
+        {
+            return $this->config[$name];
+        }
+        if(array_key_exists($name, $this->locale))
+        {
+            return $this->locale[$name];
+        }
+        return null;
     }
 
 }

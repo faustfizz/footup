@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace CodeIgniter\I18n\Exceptions;
+namespace Footup\I18n\Exceptions;
 
 /**
  * I18nException

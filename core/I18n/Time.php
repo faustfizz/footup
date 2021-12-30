@@ -1,9 +1,9 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * This file is part of the Footup 4 framework.
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * (c) Footup Foundation <admin@Footup.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,7 +11,7 @@
 
 namespace Footup\I18n;
 
-use CodeIgniter\I18n\Exceptions\I18nException;
+use Footup\I18n\Exceptions\I18nException;
 use DateInterval;
 use DateTime;
 use DateTimeZone;
@@ -57,7 +57,7 @@ class Time extends DateTime
 	protected static $relativePattern = '/this|next|last|tomorrow|yesterday|midnight|today|[+-]|first|last|ago/i';
 
 	/**
-	 * @var \CodeIgniter\I18n\Time|DateTime|null
+	 * @var \Footup\I18n\Time|DateTime|null
 	 */
 	protected static $testNow;
 
@@ -74,7 +74,7 @@ class Time extends DateTime
 	 *
 	 * @throws Exception
 	 */
-	public function __construct(string $time = null, $timezone = null, string $locale = "fr")
+	public function __construct(string $time = null, $timezone = null, string $locale = null)
 	{
 		// If no locale was provided, grab it from Locale (set by IncomingRequest for web requests)
 		$this->locale = ! empty($locale) ? $locale : Locale::getDefault();
@@ -1160,43 +1160,48 @@ class Time extends DateTime
 
 		if ($years !== 0)
 		{
-			$phrase = abs($years).' an'.(abs($years) > 1 ? 's' : '');
+			$phrase = lang('Date.years', [abs($years)]);
 			$before = $years < 0;
 		}
 		elseif ($months !== 0)
 		{
-			$phrase = abs($months).' mois';
+			$phrase = lang('Date.months', [abs($months)]);
 			$before = $months < 0;
 		}
 		elseif ($days !== 0 && (abs($days) >= 7))
 		{
 			$weeks  = ceil($days / 7);
-			$phrase = abs($weeks).' semaine'.(abs($weeks) > 1 ? 's' : '');
+			$phrase = lang('Date.weeks', [abs($weeks)]);
 			$before = $days < 0;
 		}
 		elseif ($days !== 0)
 		{
-			$phrase = abs($days).' jour'.(abs($days) > 1 ? 's' : '');
 			$before = $days < 0;
+
+			// Yesterday/Tomorrow special cases
+			if (abs($days) === 1)
+			{
+				return $before ? lang('Date.yesterday') : lang('Date.tomorrow');
+			}
+
+			$phrase = lang('Date.days', [abs($days)]);
 		}
 		elseif ($hours !== 0)
 		{
-			$phrase = abs($hours).' heure'.(abs($years) > 1 ? 's' : '');
+			$phrase = lang('Date.hours', [abs($hours)]);
 			$before = $hours < 0;
 		}
 		elseif ($minutes !== 0)
 		{
-			$phrase = abs($minutes).' minute'.(abs($minutes) > 1 ? 's' : '');
+			$phrase = lang('Date.minutes', [abs($minutes)]);
 			$before = $minutes < 0;
 		}
 		else
 		{
-			return 'à l\'instant';
+			return lang('Date.now');
 		}
 
-		return $before
-			? 'il y a '.$phrase
-			: 'dans '.$phrase;
+		return $before ? lang('Date.ago', [$phrase]) : lang('Date.future', [$phrase]);
 	}
 
 	/**

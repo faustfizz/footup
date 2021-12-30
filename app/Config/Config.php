@@ -15,6 +15,14 @@ class Config extends \Footup\Config\Config
     /**
      * @var array
      */
+    public $locale = [
+        "lang"        =>  "fr",
+        "timezone"    => 'Africa/Nairobi'
+    ];
+
+    /**
+     * @var array
+     */
     public $page_error = [
         "300s"      =>  BASE_PATH."error/300.html",
         "4s"        =>  BASE_PATH."error/400.html",
@@ -85,18 +93,17 @@ class Config extends \Footup\Config\Config
          */
         "db_type"   => "pdomysql"
     ];
-    public function __construct(?array $config = null, ?array $page_error = null)
-    {
-        if(!empty($config)){
-            $this->config = array_merge($this->config, $config);
-            $this->page_error = array_merge($this->page_error, $page_error);
-        }
 
+    public function __construct(?array $config = null, ?array $page_error = null, ?array $locale = null)
+    {
+        $this->config = !empty($config) ? array_merge($this->config, $config) : $this->config;
+        $this->page_error = !empty($page_error) ? array_merge($this->page_error, $page_error) : $this->page_error;
+        $this->locale = !empty($locale) ? array_merge($this->locale, $locale) : $this->locale;
         
         /**
          * @todo NE TOUCHER JAMAIS CETTE LIGNE
          */
-        parent::__construct($this->config, $this->page_error);
+        parent::__construct($this->config, $this->page_error, $this->locale);
     }
 
 }

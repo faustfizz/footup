@@ -264,43 +264,48 @@ class TimeDifference
 
 		if ($years !== 0)
 		{
-			$phrase = abs($years).' an'.(abs($years) > 1 ? 's' : '');
+			$phrase = lang('Date.years', [abs($years)]);
 			$before = $years < 0;
 		}
 		elseif ($months !== 0)
 		{
-			$phrase = abs($months).' mois';
+			$phrase = lang('Date.months', [abs($months)]);
 			$before = $months < 0;
 		}
 		elseif ($days !== 0 && (abs($days) >= 7))
 		{
 			$weeks  = ceil($days / 7);
-			$phrase = abs($weeks).' semaine'.(abs($weeks) > 1 ? 's' : '');
+			$phrase = lang('Date.weeks', [abs($weeks)]);
 			$before = $days < 0;
 		}
 		elseif ($days !== 0)
 		{
-			$phrase = abs($days).' jour'.(abs($days) > 1 ? 's' : '');
 			$before = $days < 0;
+
+			// Yesterday/Tomorrow special cases
+			if (abs($days) === 1)
+			{
+				return $before ? lang('Date.yesterday') : lang('Date.tomorrow');
+			}
+
+			$phrase = lang('Date.days', [abs($days)]);
 		}
 		elseif ($hours !== 0)
 		{
-			$phrase = abs($hours).' heure'.(abs($years) > 1 ? 's' : '');
+			$phrase = lang('Date.hours', [abs($hours)]);
 			$before = $hours < 0;
 		}
 		elseif ($minutes !== 0)
 		{
-			$phrase = abs($minutes).' minute'.(abs($minutes) > 1 ? 's' : '');
+			$phrase = lang('Date.minutes', [abs($minutes)]);
 			$before = $minutes < 0;
 		}
 		else
 		{
-			return 'à l\'instant';
+			return lang('Date.now');
 		}
 
-		return $before
-			? 'il y a '.$phrase
-			: 'dans '.$phrase;
+		return $before ? lang('Date.ago', [$phrase]) : lang('Date.future', [$phrase]);
 	}
 
 	/**

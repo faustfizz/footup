@@ -192,7 +192,8 @@ class File extends SplFileInfo
             $this->moved = move_uploaded_file($this->file['tmp_name'], $destination);
             $this->moved == true && $this->moved_file = new SplFileInfo($destination);
         } catch (Exception $exception) {
-            throw $exception->getMessage();
+            //throw $exception->getMessage();
+            throw new Exception(text("File.cannotMove", [$this->name, $destination, $exception->getMessage()]));
         }
 
         return $this->moved;

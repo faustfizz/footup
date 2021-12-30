@@ -18,6 +18,7 @@ use Footup\Http\Response;
 use Footup\Http\Session;
 use App\Config\Config;
 use Footup\Config\Mime;
+use Footup\Lang\Lang;
 
 // Tableau de caractères à remplacer
 defined("STRTR") or define("STRTR", array(
@@ -450,6 +451,41 @@ if (! function_exists('path'))
 	function path(): string
 	{
         return request()->path();
+	}
+}
+
+//--------------------------------------------------------------------
+
+if (! function_exists('lang'))
+{
+    /**
+	 * Translation
+	 *
+	 * @param string $indice
+	 * @param array $params
+	 * @param string|null $locale
+	 * @return string
+	 */
+	function lang(string $indice, array $params = [], string $locale = null): string
+	{
+		$lang = new Lang($locale);
+        return $lang->getText($indice, $params);
+	}
+}
+if (! function_exists('text'))
+{
+    /**
+	 * Translation
+	 *
+	 * @param string $indice
+	 * @param array $params
+	 * @param string|null $locale
+	 * @return string
+	 */
+	function text(string $indice, array $params = [], string $locale = null): string
+	{
+		$lang = new Lang($locale);
+        return $lang->getText($indice, $params);
 	}
 }
 

@@ -58,7 +58,7 @@ class FileSystem
             return file_get_contents($path);
         }
 
-        throw new Exception("File does not exist at path {$path}");
+        throw new Exception(text("File.fileNotExist", [$path]));
     }
 
     /**

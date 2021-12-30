@@ -16,6 +16,18 @@
 # N'essayer pas d'ajouter des variables au hazard car ça pourra affecter l'application ou le framework en entier
 # Essayez juste de modifier ou de commenter mais pas en ajouter d'autres variables
 #
+[locale]
+
+#
+# Langue par défaut | default language
+#
+lang    =   fr
+
+#
+# Langue par défaut | default language
+#
+timezone    =   'Africa/Nairobi'
+
 [config]
 
 #

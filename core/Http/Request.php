@@ -12,11 +12,11 @@
 
 namespace Footup\Http;
 
-use Closure;
 use Footup\Files\File;
 
 class Request
 {
+    public $lang;
 
     protected $server = [];
 
@@ -501,4 +501,24 @@ class Request
         return "";
     }
 
+
+    /**
+     * Get the value of lang
+     */ 
+    public function getLang()
+    {
+        return $this->lang;
+    }
+
+    /**
+     * Set the value of lang
+     *
+     * @return  self
+     */ 
+    public function setLang($lang)
+    {
+        $this->lang = $lang;
+
+        return $this;
+    }
 }

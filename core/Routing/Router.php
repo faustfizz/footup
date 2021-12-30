@@ -57,7 +57,7 @@ class Router
 
     public const METHOD_PUT = 'PUT';
 
-    public static $auto_route = true;
+    public static $auto_route = false;
 
     protected $controllerName = "App\Controller\Home";
 
@@ -240,7 +240,14 @@ class Router
 
         // If the request method doesn't exist, something seems to be fucked up.
         if (! isset($this->routes[$requestMethod])) {
-            throw new Exception("La méthode n'éxiste pas dans les route définies {$requestMethod}");
+            if($this->autoRoute())
+            {
+                // if we use auto routing so
+                // Skip all these fucking logics
+                goto AUTO;
+            }
+            // Else throw a fucking Exception
+            throw new Exception(text("Http.routeMethodNotFound", [$requestMethod]));
         }
 
         // Merge the any-method-routes and those matching the current request method
@@ -334,6 +341,11 @@ class Router
                 // Assign the placeholder names to the matched values from the URI
                 $variables = array_combine($placeholderNames, $matches);
 
+                // Remove lang from parameters
+                $lang = strpos(trim($uri, "/"), "{lang}") !== false || strpos(trim($uri, "/"), "{locale}") !== false ? array_shift($variables) : config()->lang;
+                $route->setLang($lang);
+                $this->request->setLang($lang);
+
                 // Pass the variables to the route instance
                 $route = $route->withArgs($variables);
 
@@ -351,19 +363,69 @@ class Router
             }
         }
 
+        AUTO:
         if($this->autoRoute())
         {
-            $uri = explode('/', trim($this->request->path(), "/"));
+            $uri = explode('/', trim($requestUri, "/"));
             $uri = array_filter($uri);
+
+            $config = new Config;
             
-            [$class, $action] = count($uri) < 2 ? [$uri[0], null] : $uri;
-
-            if(ucfirst($class) === (new Config)->config['default_controller'] || $exist = file_exists(APP_PATH.'Controller/'.ucfirst($class).'.php'))
+            if(!empty($uri))
             {
-                $controller = "App\Controller\\".($exist ? ucfirst($class) : (new Config)->config['default_controller']);
-                $method = (!is_null($action) ? $action : (new Config)->config['default_method']);
+                [$class, $action] = count($uri) < 2 ? [$uri[0], null] : $uri;
+                $exist = file_exists(APP_PATH.'Controller/'.ucfirst($class).'.php');
 
-                $route = new Route($this->request->path().'/'.$method,  $controller.'@'.$method);
+                if(ucfirst($class) === $config->config['default_controller'] || $exist)
+                {
+                    $controller = "App\Controller\\".($exist ? ucfirst($class) : $config->config['default_controller']);
+                    $method = (!is_null($action) ? $action : $config->config['default_method']);
+
+                    $route = new Route($requestUri,  $controller.'@'.$method);
+                    
+                    // Add the URI arguments to the request
+                    foreach ($route->getArgs() as $key => $value) {
+                        # code...
+                        $this->request->{$key} = $value;
+                    }
+                    
+                    $this->request->controllerName = $route->getHandler();
+                    $this->request->controllerMethod = $route->getMethod();
+                    $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
+
+                    return $route;
+                }else{
+                    // discoery of a dir
+                    $dir = ucfirst($uri[0]);
+                    if(is_dir(APP_PATH.'Controller/'.$dir))
+                    {
+                        $controller = isset($uri[1]) && $uri[1] != "/" ? ucfirst($uri[0]).'\\'.ucfirst($uri[1]) : ucfirst($uri[0]).'\\'.$config->config['default_controller'];
+                        
+                        if(file_exists(APP_PATH.'Controller/'.strtr($controller, ["\\" => "/"]).'.php')){
+                            $controller = "App\Controller\\".$controller;
+                            $method = (isset($uri[2]) ? $uri[2] : $config->config['default_method']);
+            
+                            $route = new Route($requestUri,  $controller.'@'.$method);
+                            
+                            // Add the URI arguments to the request
+                            foreach ($route->getArgs() as $key => $value) {
+                                # code...
+                                $this->request->{$key} = $value;
+                            }
+                            
+                            $this->request->controllerName = $route->getHandler();
+                            $this->request->controllerMethod = $route->getMethod();
+                            $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
+            
+                            return $route;
+                        }
+                    }
+                }
+            }else{
+                $controller = "App\Controller\\".ucfirst($config->config['default_controller']);
+                $method = $config->config['default_method'];
+
+                $route = new Route("/",  $controller.'@'.$method);
                 
                 // Add the URI arguments to the request
                 foreach ($route->getArgs() as $key => $value) {
@@ -376,41 +438,10 @@ class Router
                 $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
 
                 return $route;
-            }else{
-                // discoery of a dir
-                $dir = ucfirst($uri[0]);
-                if(is_dir(APP_PATH.'Controller/'.$dir))
-                {
-                    $controller = isset($uri[1]) && $uri[1] != "/" ? ucfirst($uri[0]).'\\'.ucfirst($uri[1]) : ucfirst($uri[0]).'\\'.(new Config)->config['default_controller'];
-                    
-                    if(file_exists(APP_PATH.'Controller/'.strtr($controller, ["\\" => "/"]).'.php')){
-                        $controller = "App\Controller\\".$controller;
-                        $method = (isset($uri[2]) ? $uri[2] : (new Config)->config['default_method']);
-        
-                        $route = new Route($this->request->path().'/'.$method,  $controller.'@'.$method);
-                        
-                        // Add the URI arguments to the request
-                        foreach ($route->getArgs() as $key => $value) {
-                            # code...
-                            $this->request->{$key} = $value;
-                        }
-                        
-                        $this->request->controllerName = $route->getHandler();
-                        $this->request->controllerMethod = $route->getMethod();
-                        $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
-        
-                        return $route;
-                    }
-                }
-            }
-
-            if(is_null($class))
-            {
-                $this->die();
             }
         }
 
-        $this->die('404', "Page: Not Found !", "Erreur 404 : L'Url <code style='color: blue;background-color: #d3d3f43d;padding: 2px 6px;border: 1px solid #eff2f4;border-radius: 6px;'>{$requestUri}</code> ne correspond à aucune des routes définies");
+        $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
     }
 
     /**
@@ -418,8 +449,10 @@ class Router
      * @param string $message
      * @return void
      */
-    public function die($status = '404', $title = "404: Not Found !", $message = "")
+    public function die($status = '404', $title = null, $message = "")
     {
+        $status = $status ?? '404';
+        $title = $title ?? text("Http.pageNotFound");
         echo (new Response())->die($status, $title, $message);
         exit;
     }

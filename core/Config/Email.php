@@ -57,7 +57,7 @@ class Email
 	 *
 	 * @var string
 	 */
-	public $userAgent = 'CodeIgniter';
+	public $userAgent = 'FootUp';
 
 	/**
 	 * Path to the Sendmail binary.
@@ -706,15 +706,14 @@ class Email
 		{
 			if (strpos($file, '://') === false && ! is_file($file))
 			{
-				$this->setErrorMessage("Le fichier attachement $file est manquant !");
+				$this->setErrorMessage(lang('Email.attachmentMissing', [$file]));
 
 				return false;
 			}
 
 			if (! $fp = @fopen($file, 'rb'))
 			{
-				$this->setErrorMessage("Le fichier attachement $file n'est plus lisible !");
-
+				$this->setErrorMessage(lang('Email.attachmentUnreadable', [$file]));
 				return false;
 			}
 
@@ -1007,7 +1006,7 @@ class Email
 	{
 		if (! is_array($email))
 		{
-			$this->setErrorMessage("Email doit être un array !");
+			$this->setErrorMessage(lang('Email.mustBeArray'));
 
 			return false;
 		}
@@ -1016,7 +1015,7 @@ class Email
 		{
 			if (! $this->isValidEmail($val))
 			{
-				$this->setErrorMessage("Adresse email $val est invalide !");
+				$this->setErrorMessage(lang('Email.invalidAddress', [$val]));
 
 				return false;
 			}
@@ -1300,7 +1299,7 @@ class Email
 
 				if ($this->getProtocol() === 'mail')
 				{
-					  $this->headerStr .= $hdr;
+					$this->headerStr .= $hdr;
 				}
 				else
 				{
@@ -1721,7 +1720,7 @@ class Email
 
 		if (! isset($this->headers['From']))
 		{
-			$this->setErrorMessage("Veuillez spécifier le header 'From' car il est manquant !");
+			$this->setErrorMessage(lang('Email.noFrom'));
 
 			return false;
 		}
@@ -1733,7 +1732,7 @@ class Email
 
 		if (empty($this->recipients) && ! isset($this->headers['To']) && empty($this->BCCArray) && ! isset($this->headers['Bcc']) && ! isset($this->headers['Cc']))
 		{
-			$this->setErrorMessage("Veuillez entrer au moins une adresse email valide de destination !");
+			$this->setErrorMessage(lang('Email.noRecipients'));
 
 			return false;
 		}
@@ -1871,12 +1870,12 @@ class Email
 
 		if (! $success)
 		{
-			$this->setErrorMessage('Échec d\'envoie d\'email ' . ($protocol === 'mail' ? 'PHPMail' : ucfirst($protocol)));
+			$this->setErrorMessage(lang('Email.sendFailure' . ($protocol === 'mail' ? 'PHPMail' : ucfirst($protocol))));
 
 			return false;
 		}
 
-		$this->setErrorMessage("Email bien envoyé utilisant le protocol $protocol !");
+		$this->setErrorMessage(lang('Email.sent', [$protocol]));
 
 		return true;
 	}
@@ -1964,8 +1963,8 @@ class Email
 
 		if ($status !== 0)
 		{
-			$this->setErrorMessage("Email: status de sortie $status !");
-			$this->setErrorMessage("Aucun socket n'a été trouvé pour l'envoie de l'email !");
+			$this->setErrorMessage(lang('Email.exitStatus', [$status]));
+			$this->setErrorMessage(lang('Email.noSocket'));
 
 			return false;
 		}
@@ -1982,7 +1981,7 @@ class Email
 	{
 		if ($this->SMTPHost === '')
 		{
-			$this->setErrorMessage("Aucun nom de serveur n'a été spécifier pour l'envoie d'email !");
+			$this->setErrorMessage(lang('Email.noHostname'));
 
 			return false;
 		}
@@ -2045,7 +2044,7 @@ class Email
 
 		if (strpos($reply, '250') !== 0)
 		{
-			$this->setErrorMessage("Erreur SMPT, veuillez réssayer $reply !");
+			$this->setErrorMessage(lang('Email.SMTPError', [$reply]));
 
 			return false;
 		}
@@ -2096,7 +2095,7 @@ class Email
 
 		if (! is_resource($this->SMTPConnect))
 		{
-			$this->setErrorMessage("Erreur SMTP : $errno $errstr !");
+			$this->setErrorMessage(lang('Email.SMTPError', [$errno . ' ' . $errstr]));
 
 			return false;
 		}
@@ -2116,7 +2115,7 @@ class Email
 
 			if ($crypto !== true)
 			{
-				$this->setErrorMessage("Erreur SMPT ".$this->getSMTPData());
+				$this->setErrorMessage(lang('Email.SMTPError', [$this->getSMTPData()]));
 
 				return false;
 			}
@@ -2194,7 +2193,7 @@ class Email
 
 		if ((int) static::substr($reply, 0, 3) !== $resp) // @phpstan-ignore-line
 		{
-			$this->setErrorMessage("Erreur SMTP : $reply !");
+			$this->setErrorMessage(lang('Email.SMTPError', [$reply]));
 
 			return false;
 		}
@@ -2221,7 +2220,7 @@ class Email
 
 		if ($this->SMTPUser === '' && $this->SMTPPass === '')
 		{
-			$this->setErrorMessage("Erreur SMPT : Veuillez fournir vos identifiant pour le compte SMPT à utiliser car aucun n'a été fourni !");
+			$this->setErrorMessage(lang('Email.noSMTPAuth'));
 
 			return false;
 		}
@@ -2236,7 +2235,7 @@ class Email
 
 		if (strpos($reply, '334') !== 0)
 		{
-			$this->setErrorMessage("Échec de Connexion (login) au compte SMPT $reply !");
+			$this->setErrorMessage(lang('Email.failedSMTPLogin', [$reply]));
 
 			return false;
 		}
@@ -2246,7 +2245,7 @@ class Email
 
 		if (strpos($reply, '334') !== 0)
 		{
-			$this->setErrorMessage("Problème avec l'utilisateur SMTPAuthUsername $reply !");
+			$this->setErrorMessage(lang('Email.SMTPAuthUsername', [$reply]));
 
 			return false;
 		}
@@ -2256,7 +2255,7 @@ class Email
 
 		if (strpos($reply, '235') !== 0)
 		{
-			$this->setErrorMessage("Problème avec le mot de passe SMTPAuthPassword $reply !");
+			$this->setErrorMessage(lang('Email.SMTPAuthPassword', [$reply]));
 
 			return false;
 		}
@@ -2311,7 +2310,7 @@ class Email
 
 		if ($result === false) // @phpstan-ignore-line
 		{
-			$this->setErrorMessage("Échec de l'envoie des données SMTP : $data !");
+			$this->setErrorMessage(lang('Email.SMTPDataFailure', [$data]));
 
 			return false;
 		}
