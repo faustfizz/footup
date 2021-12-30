@@ -5553,7 +5553,7 @@ class Mime
     public static function getMime($ext)
     {
         $mimes_keys = array_keys(self::$mimes);
-        if(is_array($ext, $mimes_keys))
+        if(in_array($ext, $mimes_keys))
         {
             return self::$mimes[$ext];
         }
