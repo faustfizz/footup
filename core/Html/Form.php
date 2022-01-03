@@ -347,7 +347,13 @@ class Form
         $opt = "";
         foreach ($field->options as $key => $value) {
             # code...
-            $attr = array_filter(array("value" => $value, "selected" => (!$field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name] ? $data[$field->name] : $field->default))));
+            $attr = array("value" => $value);
+            if($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name]))
+            {
+                $attr['selected'] = true;
+            }
+
+            $attr = array_filter($attr);
 
             $opt .= Html::option(ucfirst($value), $attr);
         }
