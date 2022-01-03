@@ -392,6 +392,8 @@ class Router
                             $controller = "App\Controller\\".$controller;
                             $method = (isset($uri[2]) ? $uri[2] : $config->config['default_method']);
                         }
+                    }else{
+                        $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
                     }
                 }
             }else{

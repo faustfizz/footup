@@ -40,13 +40,13 @@ class BaseController extends Controller
      *                                                                 [ controllerMethod => \Footup\Routing\Middle ]
      *                                                                  ]
      * @example -
-     * protected $globalMiddles = [
+     * protected $middles = [
      *  '\App\Controller\Home'  =>  '\App\Middle\Maintenance'
      * ];
      * 
      * or
      * 
-     * protected $globalMiddles = [
+     * protected $middles = [
      *  \App\Controller\Home'  =>  [
      *                  'index' =>  '\App\Middle\Maintenance'
      *              ]

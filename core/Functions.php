@@ -735,11 +735,7 @@ if (! function_exists('url_is'))
 	 */
 	function url_is(string $path): bool
 	{
-		// Setup our regex to allow wildcards
-		$path        = '/' . trim(str_replace('*', '(\S)*', $path), '/ ');
-		$currentPath = '/' . trim(path(), '/ ');
-
-		return (bool) preg_match("|^{$path}$|", $currentPath, $matches);
+		return (bool) "/".trim($path, "/") === "/".trim(path(), "/");
 	}
 }
 

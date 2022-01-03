@@ -74,6 +74,48 @@ class Session
     }
 
     /**
+     * Set flash data
+     *
+     * @param mixed $key
+     * @param mixed $val
+     * @return $this
+     */
+    public function setFlash($key, $val = null)
+    {
+        if(is_array($key) && is_null($val)){
+            foreach($key as $k => $v){
+                $this->data["flash_".$k] = $v;
+            }
+        }else{
+            $this->data["flash_".$key] = $val;
+        }
+        return $this;
+    }
+
+    /**
+     * Get flash data
+     *
+     * @param mixed $key
+     * @param mixed $default
+     * @param boolean $clear_after
+     * @return mixed
+     */
+    public function flash($key, $default = null, $clear_after = true)
+    {
+        # code...
+        if ($key && $this->has("flash_".$key)) {
+            $flashdata = $this->data["flash_".$key];
+            if($clear_after)
+            {
+                unset($_SESSION["flash_".$key]);
+            }
+            return $flashdata;
+        }else{
+            return $default;
+        }
+    }
+
+    /**
      * Set Cookie
      *
      * @param string $name_key
@@ -102,8 +144,8 @@ class Session
     {
         if ($key && $this->has($key)) {
             return $this->data[$key];
-        } else {
-            return $default;
+        }else{
+            return $this->flash($key, $default);
         }
     }
 
