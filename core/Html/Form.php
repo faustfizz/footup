@@ -88,27 +88,27 @@ class Form
         ],
         'date'      =>  [
             "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline date datepicker my-3",
+            "form_group"    =>  "input-group input-group-outline my-3",
             "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg"
+            "input"         =>  "form-control form-control-lg date datepicker"
         ],
         'datetime'      =>  [
             "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline datetime datetimepicker my-3",
+            "form_group"    =>  "input-group input-group-outline my-3",
             "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg"
+            "input"         =>  "form-control form-control-lg datetime datetimepicker"
         ],
         'time'      =>  [
             "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline time timepicker my-3",
+            "form_group"    =>  "input-group input-group-outline my-3",
             "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg"
+            "input"         =>  "form-control form-control-lg time timepicker"
         ],
         'month'      =>  [
             "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline date datepicker my-3",
+            "form_group"    =>  "input-group input-group-outline my-3",
             "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg"
+            "input"         =>  "form-control form-control-lg date datepicker"
         ],
         'file'       =>  [
             "wrapper"       =>  "",
