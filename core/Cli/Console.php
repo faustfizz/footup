@@ -38,16 +38,22 @@ class Console extends CLI
         $options->registerCommand('make:controller', 'Generate Controller for your app');
         $options->registerCommand('make:model', 'Generate Model for your app');
         $options->registerCommand('make:middle', 'Generate Middle for your app');
+        $options->registerCommand('make:view', 'Generate View file for your app');
+        $options->registerCommand('make:assets', 'Generate Assets files for your app');
 
         $options->registerOption('scaffold', 'Generate Controller, Model, Middle, View and Assets for your app with one command', 's', 'name', "make");
         $options->registerOption('controller', 'Generate Controller for your app', 'c', 'name', "make");
         $options->registerOption('model', 'Generate Model for your app', 'm', 'name', "make");
         $options->registerOption('middle', 'Generate Middle for your app', 'w', 'name', "make");
+        $options->registerOption('view', 'Generate View file for your app', 'v', 'name', "make");
+        $options->registerOption('assets', 'Generate Assets files for your app', 'a', 'name', "make");
 
         $options->registerArgument('name', 'The name of the controller', true, 'make:controller');
         $options->registerArgument('name', 'The name of the model', true, 'make:model');
         $options->registerArgument('name', 'The name of the middle', true, 'make:middle');
-        $options->registerArgument('name', 'The name of the middle', true, 'make:scaffold');
+        $options->registerArgument('name', 'The name of the view file', true, 'make:view');
+        $options->registerArgument('name', 'The name of the css, js files', true, 'make:assets');
+        $options->registerArgument('name', 'The name of the scaffolded class', true, 'make:scaffold');
 
         $options->registerCommand('compact', 'Display the help text in a more compact manner');
     }
@@ -96,6 +102,20 @@ class Console extends CLI
                     $class = $options->getOpt("middle");
                     $generator = new Generator($class);
                     $log = array_merge($log, $generator->genMiddle());
+                }
+
+                if($options->getOpt("view"))
+                {
+                    $class = $options->getOpt("view");
+                    $generator = new Generator($class);
+                    $log = array_merge($log, $generator->genView());
+                }
+
+                if($options->getOpt("assets"))
+                {
+                    $class = $options->getOpt("assets");
+                    $generator = new Generator($class);
+                    $log = array_merge($log, $generator->genAssets());
                 }
 
                 if($options->getOpt("scaffold"))
