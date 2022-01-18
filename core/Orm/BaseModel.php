@@ -861,6 +861,8 @@ class BaseModel
         {
             $this->{$pk} = $id = isset($data[$pk]) ? $data[$pk] : null;
             $this->where($pk ? ($pk . " = " . $id) : null);
+        }else{
+            $this->where($pk . " = " . $id);
         }
         
         if (empty($this->where) && is_null($id) || is_null($this->where)) {
@@ -1076,7 +1078,7 @@ class BaseModel
      */
     public function execute(array $params = [])
     {
-        if (!self::$db) {
+        if (!self::$db && !$this->setDb()) {
             throw new Exception('Database is not defined.');
         }
 

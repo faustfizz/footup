@@ -18,6 +18,7 @@ use Footup\Http\Response;
 use Footup\Http\Session;
 use App\Config\Config;
 use Footup\Config\Mime;
+use Footup\I18n\Time;
 use Footup\Lang\Lang;
 
 // Tableau de caractères à remplacer
@@ -753,5 +754,19 @@ if(! function_exists("json"))
     function json(array $data, $echo = false)
     {
         return response()->json($data, 200, ["Content-Type" => 'application/json; charset=UTF-8'], 0, $echo);
+    }
+}
+
+if(! function_exists("dtime"))
+{
+    /**
+     * DateTime function
+     *
+     * @param string $datetime
+     * @return Time
+     */
+    function dtime($datetime = null)
+    {
+        return !is_null($datetime) ? new Time($datetime) : Time::now();
     }
 }

@@ -125,6 +125,8 @@ class Config
             ini_set("display_errors", "On");
             ini_set("display_startup_errors", "On");
         }
+        
+        @date_default_timezone_set($this->locale['timezone']);
 
         /**
          * Default lang
