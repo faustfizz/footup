@@ -230,6 +230,57 @@ class Console extends CLI
                     exit;
                 }
                 $this->error('You must specify a name of the class to generate !');
+                exit;    
+            case 'make:view':
+                if(count($options->getArgs()) >= 1)
+                {
+                    $log = array();
+
+                    $n = trim($options->getArgs()[0]);
+
+                    if(!empty($n)){
+                        $generator = new Generator($n);
+                        $log = array_merge($log, $generator->genView());
+                    }else{
+                        $this->error("You can't call the command make:view without specifying a name");
+                        exit;
+                    }
+
+                    $this->info("All generations :");
+                    foreach (array_filter($log) as $value) {
+                        # code...
+                        $this->success($value);
+                    }
+
+                    exit;
+                }
+                $this->error('You must specify a name of the class to generate !');
+                exit;
+               
+            case 'make:assets':
+                if(count($options->getArgs()) >= 1)
+                {
+                    $log = array();
+
+                    $n = trim($options->getArgs()[0]);
+
+                    if(!empty($n)){
+                        $generator = new Generator($n);
+                        $log = array_merge($log, $generator->genAssets());
+                    }else{
+                        $this->error("You can't call the command make:assets without specifying a name");
+                        exit;
+                    }
+
+                    $this->info("All generations :");
+                    foreach (array_filter($log) as $value) {
+                        # code...
+                        $this->success($value);
+                    }
+
+                    exit;
+                }
+                $this->error('You must specify a name of the class to generate !');
                 exit;
             case 'compact':
                 $options->useCompactHelp();
