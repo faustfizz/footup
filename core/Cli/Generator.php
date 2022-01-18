@@ -166,24 +166,24 @@ class Generator
         {
             $expo = explode("/", $this->classname);
             $file = array_pop($expo);
-            $dir = implode("/", array_map(function($v){ return ucfirst($v); }, $expo));
+            $dir = implode("/", array_map(function($v){ return strtolower($v); }, $expo));
             
-            if(!is_dir(VIEW_PATH."/".ucfirst($dir)))
+            if(!is_dir(VIEW_PATH."/".strtolower($dir)))
             {
-                @mkdir(VIEW_PATH."/".ucfirst($dir), 0777, true);
+                @mkdir(VIEW_PATH."/".strtolower($dir), 0777, true);
             }
             
             @file_put_contents(
-                VIEW_PATH."/".ucfirst($dir).DIRECTORY_SEPARATOR.strtolower($file).'.php',
+                VIEW_PATH."/".strtolower($dir).DIRECTORY_SEPARATOR.strtolower($file).'.php',
                 $this->genReplace([
                     "{name_space}" => '\\'.strtr($dir, "/" , "\\"),
-                    "{class_name}" => ucfirst($file),
+                    "{class_name}" => strtolower($file),
                     "{_class_name}" => strtolower($file)
                 ])->parse_file_content(__DIR__."/Tpl/View.tpl")
             );
             
             return [
-                end($expl)."/".ucfirst($dir).DIRECTORY_SEPARATOR.strtolower($file).'.php'
+                end($expl)."/".strtolower($dir).DIRECTORY_SEPARATOR.strtolower($file).'.php'
             ];
         }else{
             @file_put_contents(
