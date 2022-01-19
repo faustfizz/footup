@@ -1151,15 +1151,10 @@ class BaseModel
 		{
 			$eventData = $this->trigger('beforeFind', [
                 'data'      => [],
-                'where'     => $where,
-				'limit'     => $limit,
-				'offset'    => $offset
+                'where'     => $where ?? $this->where ?? null,
+				'limit'     => $limit ?? $this->limit ?? null,
+				'offset'    => $offset ?? $this->offset ?? null
 			]);
-
-            if(!empty($eventData['data']))
-            {
-                $select = $eventData['data'];
-            }
 		}
 
         if (!is_null($eventData['where'])) {
