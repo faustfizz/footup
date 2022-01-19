@@ -158,6 +158,11 @@ class Form
             $class = isset($this->class[$field->attributes["type"]]) ? $this->class[$field->attributes["type"]] : $this->class["default"];
             $field->attributes["class"] = isset($field->attributes["class"]) && !empty($field->attributes["class"]) ? $field->attributes["class"]." ".$class["input"] : $class["input"];
 
+            if(in_array($field->attributes["type"], ['date', 'datetime', 'month']) )
+            {
+                $field->attributes["type"] = "text";
+            }
+
             $this->output .= 
             $field->attributes["type"] != "hidden" ? Html::div(
                 Html::div(
@@ -244,7 +249,7 @@ class Form
         
                 if($field->isPrimaryKey && (empty(array_values($data)) || empty($data) || !empty($data) && !isset($data[$field->name]))) continue;
         
-                if($field->isPrimaryKey && isset($data[$field->name]))
+                if($field->isPrimaryKey && isset($data[$field->name]) || strtolower($field->name) === "slug")
                 {
                     $field->crudType = $field->type = "hidden";
                 }
