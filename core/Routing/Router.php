@@ -373,7 +373,7 @@ class Router
             
             if(!empty($uri))
             {
-                [$class, $action] = count($uri) < 2 ? [$uri[0], null] : $uri;
+                [$class, $action] = count($uri) < 2 ? [array_shift($uri), null] : [array_shift($uri), array_shift($uri)];
                 $exist = file_exists(APP_PATH.'Controller/'.ucfirst($class).'.php');
 
                 if(ucfirst($class) === $config->config['default_controller'] || $exist)
@@ -383,14 +383,16 @@ class Router
 
                 }else{
                     // discoery of a dir
-                    $dir = ucfirst($uri[0]);
+                    $dir = ucfirst($class);
                     if(is_dir(APP_PATH.'Controller/'.$dir))
                     {
-                        $controller = isset($uri[1]) && $uri[1] != "/" ? ucfirst($uri[0]).'\\'.ucfirst($uri[1]) : ucfirst($uri[0]).'\\'.$config->config['default_controller'];
+                        $controller = isset($uri[0]) && $uri[0] != "/" ? ucfirst($class).'\\'.ucfirst($uri[0]) : ucfirst($class).'\\'.$config->config['default_controller'];
                         
+                        array_shift($uri);
+
                         if(file_exists(APP_PATH.'Controller/'.strtr($controller, ["\\" => "/"]).'.php')){
                             $controller = "App\Controller\\".$controller;
-                            $method = (isset($uri[2]) ? $uri[2] : $config->config['default_method']);
+                            $method = (isset($uri[0]) ? array_shift($uri) : $config->config['default_method']);
                         }
                     }else{
                         $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
@@ -402,7 +404,9 @@ class Router
             }
 
             $route = new Route($requestUri,  $controller.'@'.$method);
-                        
+            
+            $route->withArgs($uri ?? []);
+
             // Add the URI arguments to the request
             foreach ($route->getArgs() as $key => $value) {
                 # code...
