@@ -133,7 +133,7 @@ class Form
      * @param array|null $data
      * @param [bool] ...$config
      */
-    public function __construct(string $action = "#", array $fields, array $data = null, ...$config) {
+    public function __construct(string $action = "#", array $fields, array $data = [], ...$config) {
         $this->config = array_merge($this->config, $config);
         $this->class = array_merge($this->class, ConfigForm::$class);
         $this->action = $action;
@@ -150,7 +150,7 @@ class Form
     {
         if($this->config['open'] === true)
         {
-            $this->output .= $this->open($this->action);
+            $this->output .= $this->open($this->action)."<div class='row'>";
         }
 
         foreach ($this->fields as $key => $field) {
@@ -176,7 +176,7 @@ class Form
             ) : Html::{$field->name}(null, $field->attributes);
         }
 
-        $this->output .= $this->selectPart." ". $this->submitBtn();
+        $this->output .= $this->selectPart." </div>". $this->submitBtn();
 
         if($this->config['close'] === true)
         {
@@ -237,7 +237,7 @@ class Form
         return $field;
     }
 
-    private function prepareFields(array $fields, $data = array())
+    public function prepareFields(array $fields, $data = array())
     {
         if($this->config['from_db'] === true)
         {
@@ -345,22 +345,36 @@ class Form
         );
     }
 
-    private function dropdown(object $field, $data)
+    public function dropdown(object $field, $data)
     {
         $class = $this->class["select"];
 
         $opt = "";
         foreach ($field->options as $key => $value) {
             # code...
-            $attr = array("value" => $value);
-            if($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name]))
+            if(is_array($value))
             {
-                $attr['selected'] = true;
+                $attr = array("value" => $value['value']);
+
+                if($field->default && strtolower($field->default) == strtolower($value['value']) || (isset($data[$field->name]) && $value == $data[$field->name]))
+                {
+                    $attr['selected'] = true;
+                }
+
+                $attr = array_filter($attr);
+
+                $opt .= Html::option(ucfirst($value['label']), $attr);
+            }else{
+                $attr = array("value" => $value);
+                if($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name]))
+                {
+                    $attr['selected'] = true;
+                }
+    
+                $attr = array_filter($attr);
+    
+                $opt .= Html::option(ucfirst($value), $attr);
             }
-
-            $attr = array_filter($attr);
-
-            $opt .= Html::option(ucfirst($value), $attr);
         }
         $this->selectPart .= 
         Html::div(
@@ -371,7 +385,7 @@ class Form
                 ).
                 Html::select(
                     $opt,
-                    array_filter(["class" => $class['input'], "name" =>  $field->name, "id" =>  $field->name, "required" => !$field->null, "maxLength" => $field->maxLength])
+                    array_filter(["class" => $class['input'], "name" =>  $field->name, "id" =>  $field->name, "required" => !$field->null, "multiple" => isset($field->multiple) && $field->multiple === true])
                 )
             ,
                 ["class" => $class[ "form_group"]]
