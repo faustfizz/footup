@@ -834,6 +834,7 @@ class BaseModel
 		{
             $data[$this->getPrimaryKey()] = $eventData["id"];
             $eventData["data"] = $data;
+            $this->fill($data);
 			$this->trigger('afterInsert', $eventData);
 		}
 
@@ -905,8 +906,10 @@ class BaseModel
 			'result' => $execute,
 		];
 
+        
 		if ($this->tmp_callbacks && $execute)
 		{
+            $this->fill($data);
 			$this->trigger('afterUpdate', $eventData);
 		}
 
