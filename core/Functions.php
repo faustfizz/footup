@@ -736,7 +736,21 @@ if (! function_exists('url_is'))
 	 */
 	function url_is(string $path): bool
 	{
-		return (bool) "/".trim($path, "/") === "/".trim(path(), "/");
+		return "/".trim($path, "/") === "/".trim(path(), "/");
+	}
+}
+
+if (! function_exists('in_url'))
+{
+	/**
+	 * Determines si le path d'url a le path donné en parametre
+	 *
+	 * @param string $path
+	 * @return boolean
+	 */
+	function in_url(string $path): bool
+	{
+		return stripos("/".trim(path(), "/"), "/".trim($path, "/")) !== false;
 	}
 }
 
