@@ -29,23 +29,83 @@ class {class_name} extends Model
      *
      * Use with arrays:
      *
+     *      protected $hasOne = [
+     *           'properties1' => [
+     *                              'model' => 'Other_Model_1',
+     *                              'foreign_key' => 'foreign_field',
+     *                              'local_key' => 'local_field'
+     *                             ]
+     *          ....................
+     *      ];
+     */
+    protected $hasOne        = [];
+
+    /**
+     * FRelationships
+     *
+     * Use with arrays:
+     * 
      *      protected $hasMany = [
      *           'properties1' => [
      *                              'model' => 'Other_Model_1',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field'
-     *                             ],
-     *           'properties2' => [
-     *                              'model' => 'Other_Model_2',
+     *                             ]
+     *          ....................
+     *      ];
+     */
+    protected $hasMany       = [];
+
+    /**
+     * FRelationships
+     *
+     * Use with arrays:
+     *
+     *      protected $manyMany = [
+     *           'properties1' => [
+     *                              'model' => 'Other_Model_1',
+     *                              'pivot' => 'Pivot_Model',
      *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field'
-     *                             ],
+     *                              'local_key' => 'local_field',
+     *                              'pivot_foreign_key' => 'modelKey_in_pivot_table',
+     *                              'pivot_local_key' => 'localKey_in_pivot_table',
+     *                             ]
+     *          ....................
      *      ];
      *
      */
-    protected $hasOne        = [];
-    protected $hasMany       = [];
+    protected $manyMany      = [];
+
+    /**
+     * FRelationships
+     *
+     * Use with arrays:
+     *
+     *     protected $belongsTo = [
+     *           'properties1' => [
+     *                              'model' => 'Other_Model_1',
+     *                              'foreign_key' => 'foreign_field',
+     *                              'local_key' => 'local_field'
+     *                             ]
+     *          ....................
+     *      ];
+     */
     protected $belongsTo     = [];
+
+    /**
+     * FRelationships
+     *
+     * Use with arrays:
+     * 
+     *      protected $belongsToMany = [
+     *           'properties1' => [
+     *                              'model' => 'Other_Model_1',
+     *                              'foreign_key' => 'foreign_field',
+     *                              'local_key' => 'local_field'
+     *                             ]
+     *          ....................
+     *      ];
+     */
     protected $belongsToMany = [];
 
     protected $allow_callbacks = true;
