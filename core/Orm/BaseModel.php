@@ -219,8 +219,16 @@ class BaseModel
      * Use with arrays:
      *
      *      protected $hasMany = [
-     *           'properties1' => 'Other_Model_1',
-     *           'properties2' => 'Other_Model_2',
+     *           'properties1' => [
+     *                              'model' => 'Other_Model_1',
+     *                              'foreign_key' => 'foreign_field',
+     *                              'local_key' => 'local_field'
+     *                             ],
+     *           'properties2' => [
+     *                              'model' => 'Other_Model_2',
+     *                              'foreign_key' => 'foreign_field',
+     *                              'local_key' => 'local_field'
+     *                             ],
      *      ];
      *
      */
@@ -238,7 +246,7 @@ class BaseModel
         $this->getTable();
         $this->getPrimaryKey();
         // charger les relations
-        $this->loadRelations();
+        // $this->loadRelations();
 
 
         if(!empty($data))
@@ -1517,6 +1525,15 @@ class BaseModel
         return $this->primaryKey;
     }
 
+    public function __get($name)
+    { 
+        if(in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->belongsTo, $this->belongsToMany))))
+        {
+            $this->loadRelations();
+            return $this->{$name};
+        }
+    }
+
     public function __set($property, $val)
     {
         return $this->{$property} = $val;
@@ -1824,85 +1841,37 @@ class BaseModel
     {
         if (count($this->hasOne)) {
             foreach ($this->hasOne as $property => $class) {
-                $this->{$property} = $this->hasOne($class);
+                $this->{$property} = $this->hasOne($class['model'], $class['foreign_key'], $class['local_key']);
             }
         }
 
         if (count($this->hasMany)) {
             foreach ($this->hasMany as $property => $class) {
-                $this->{$property} = $this->hasMany($class);
+                $this->{$property} = $this->hasMany($class['model'], $class['foreign_key'], $class['local_key']);
             }
         }
 
         if (count($this->belongsTo)) {
             foreach ($this->belongsTo as $property => $class) {
                 // exclude vica-versa relations, to avoid infinity loop
-                if ((isset((new $class)->hasOne) && in_array($this->class, (new $class)->hasOne)) || (isset((new $class)->hasMany)  && in_array($this->class, (new $class)->hasMany))) {
+                $model = new $class['model']();
+                if ((isset($model->hasOne) && in_array(get_class(), $model->hasOne)) || (isset($model->hasMany)  && in_array(get_class(), $model->hasMany))) {
                     continue;
                 }
-                $this->{$property} = $this->belongsTo($class);
+                $this->{$property} = $this->belongsTo($class['model'], $class['foreign_key'], $class['local_key']);
             }
         }
 
         if (count($this->belongsToMany)) {
             foreach ($this->belongsToMany as $property => $class) {
                 // exclude vica-versa relations, to avoid infinity loop
-                if ((isset((new $class)->hasOne) && in_array($this->class, (new $class)->hasOne)) || (isset((new $class)->hasMany)  && in_array($this->class, (new $class)->hasMany))) {
+                $model = new $class['model']();
+                if ((isset($model->hasOne) && in_array(get_class(), $model->hasOne)) || (isset($model->hasMany)  && in_array(get_class(), $model->hasMany))) {
                     continue;
                 }
-                $this->{$property} = $this->belongsToMany($class);
+                $this->{$property} = $this->belongsToMany($class['model'], $class['foreign_key'], $class['local_key']);
             }
         }
-    }
-
-
-    /**
-     * Helper for matching relationship keys and values.
-     * Used for:
-     *  - hasOne()
-     *  - hasMany()
-     *  - belongsToMany()
-     *
-     * @param string $foreign_key
-     * @param string $local_key
-     * @return array
-     */
-    private function hasRelationship($foreign_key = null, $local_key = null)
-    {
-        if (!$foreign_key) {
-            $foreign_key = 'id_' . preg_replace('/^(\\%s)(.*)(\\%s)$/', '$2', $this->getTable());
-        }
-        if (!$local_key) {
-            $local_key = $this->getPrimaryKey();
-        }
-        return [
-            'field' => $foreign_key,
-            'value' => $this->{$local_key}
-        ];
-    }
-
-
-    /**
-     * Helper for matching relationship keys and values.
-     * Used for:
-     *  - belongsTo()
-     *
-     * @param string $foreign_key
-     * @param string $local_key
-     * @return array
-     */
-    private function belongsRelationship($class, $foreign_key = null, $local_key = null)
-    {
-        if (!$foreign_key) {
-            $foreign_key = 'id';
-        }
-        if (!$local_key) {
-            $local_key = 'id_' . preg_replace('/^(\\%s)(.*)(\\%s)$/', '$2', (new $class)->_self('_table'));
-        }
-        return [
-            'field' => $foreign_key,
-            'value' => $this->{$local_key}
-        ];
     }
 
 
@@ -1914,10 +1883,9 @@ class BaseModel
      * @param string $local_key
      * @return object Model instance
      */
-    public function hasOne($class, $foreign_key = null, $local_key = null)
+    public function hasOne($class, $foreign_key, $local_key)
     {
-        $relation = $this->hasRelationship($foreign_key, $local_key);
-        $object = (new $class)->find($relation['value'], $relation['field']);
+        $object = (new $class)->where($foreign_key, $this->{$local_key})->one();
         return $object;
     }
 
@@ -1930,10 +1898,9 @@ class BaseModel
      * @param string $local_key
      * @return array of Models
      */
-    public function hasMany($class, $foreign_key = null, $local_key = null)
+    public function hasMany($class, $foreign_key, $local_key, $limit = null, $offset = null)
     {
-        $relation = $this->hasRelationship($foreign_key, $local_key);
-        $objects = (new $class)->where([$relation['field'] => $relation['value']]);
+        $objects = (new $class)->get("*", [$foreign_key => $this->{$local_key}], $limit ?? $this->per_page, $offset ?? 0);
         return $objects;
     }
 
@@ -1946,10 +1913,9 @@ class BaseModel
      * @param string $local_key
      * @return object Model instance
      */
-    public function belongsTo($class, $foreign_key = null, $local_key = null)
+    public function belongsTo($class, $foreign_key, $local_key)
     {
-        $relation = $this->belongsRelationship($class, $foreign_key, $local_key);
-        $object = (new $class)->find($relation['value'], $relation['field']);
+        $object = (new $class)->find($this->{$local_key}, $foreign_key);
         return $object;
     }
 
@@ -1962,10 +1928,9 @@ class BaseModel
      * @param string $local_key
      * @return array of Models
      */
-    public function belongsToMany($class, $foreign_key = null, $local_key = null)
+    public function belongsToMany($class, $foreign_key, $local_key, $limit = null, $offset = null)
     {
-        $relation = $this->hasRelationship($foreign_key, $local_key);
-        $objects = (new $class)->where([$relation['field'] => $relation['value']]);
+        $objects = (new $class)->get("*", [$foreign_key => $this->{$local_key}], $limit ?? $this->per_page, $offset ?? 0);
         return $objects;
     }
 

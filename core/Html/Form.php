@@ -221,6 +221,7 @@ class Form
             case 'couleur':
             case 'tint':
                 $type = "color";
+                break;
             case 'telephone':
             case 'phone':
             case 'phone_number':
@@ -380,12 +381,12 @@ class Form
         Html::div(
             Html::div(
                 Html::label(
-                    ucwords(strtr($field->name, ["_" => " "])),
+                    ucwords(strtr($field->name, ["_" => " ", "[" => "", "]" => ""])),
                     ["class"    =>  $class["label"]]
                 ).
                 Html::select(
                     $opt,
-                    array_filter(["class" => $class['input'], "name" =>  $field->name, "id" =>  $field->name, "required" => !$field->null, "multiple" => isset($field->multiple) && $field->multiple === true])
+                    array_filter(["class" => $class['input'], "name" =>  $field->name, "id" =>  isset($field->id) ? $field->id : $field->name, "required" => !$field->null, "multiple" => isset($field->multiple) && $field->multiple === true])
                 )
             ,
                 ["class" => $class[ "form_group"]]

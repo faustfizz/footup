@@ -8,7 +8,15 @@ namespace App\Model{name_space};
 
 use Footup\Model;
 
-class {class_name} extends Model{
+class {class_name} extends Model
+{
+    /**
+     * Table name
+     *
+     * @var string
+     */
+    protected $table = '{table}';
+    
     /**
      * PrimaryKey
      *
@@ -17,11 +25,28 @@ class {class_name} extends Model{
     protected $primaryKey = 'id{append_table}';
 
     /**
-     * Table name
+     * FRelationships
      *
-     * @var string
+     * Use with arrays:
+     *
+     *      protected $hasMany = [
+     *           'properties1' => [
+     *                              'model' => 'Other_Model_1',
+     *                              'foreign_key' => 'foreign_field',
+     *                              'local_key' => 'local_field'
+     *                             ],
+     *           'properties2' => [
+     *                              'model' => 'Other_Model_2',
+     *                              'foreign_key' => 'foreign_field',
+     *                              'local_key' => 'local_field'
+     *                             ],
+     *      ];
+     *
      */
-    protected $table = '{table}';
+    protected $hasOne        = [];
+    protected $hasMany       = [];
+    protected $belongsTo     = [];
+    protected $belongsToMany = [];
 
     protected $allow_callbacks = true;
 
