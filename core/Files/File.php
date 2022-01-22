@@ -112,6 +112,18 @@ class File extends SplFileInfo
     }
 
     /**
+     * @param string $format
+     * @return int
+     */
+    public function counted_size($format = 'MB') : int
+    {
+        $sizes = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+        $flip = array_flip($sizes);
+        $i = isset($flip[$format]) ? $flip[$format] : floor(log($this->size()) / log(1024));
+        return $this->size() / pow(1024, $i);
+    }
+
+    /**
      * Retrouve l'extension
      *
      * @return string
@@ -129,6 +141,13 @@ class File extends SplFileInfo
     public function getExtension(): string
     {
         return pathinfo($this->name(), PATHINFO_EXTENSION);
+    }
+    
+    public function rename(string $name)
+    {
+        $ext = $this->ext();
+        $name = strtr($name, [".$ext" => ""]);
+        return $this->name = (preg_replace('/[^\00-\255]+/u', '', $name).'.'.$ext);
     }
     
     public function random_name($len = 20)
@@ -181,6 +200,11 @@ class File extends SplFileInfo
         if (is_null($destination)) {
             $this->name = $this->random_name();
             $destination = STORE_DIR.$this->name();
+        }
+
+        if(stripos($destination, '/') === false)
+        {
+            $destination = STORE_DIR.$this->rename($destination);
         }
 
         if (! $replace && file_exists($destination)) {

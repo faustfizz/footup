@@ -1279,7 +1279,7 @@ class BaseModel
     /**
      * Fetch a single row from a select query.
      *
-     * @return object|array Row
+     * @return object|null Row
      */
     public function one($field = null)
     {
@@ -1289,7 +1289,7 @@ class BaseModel
 
         $data = $this->get();
 
-        $row = (!empty($data)) ? $data[0] : array();
+        $row = (!empty($data)) ? $data[0] : null;
 
         return $row;
     }
@@ -1297,7 +1297,7 @@ class BaseModel
     /**
      * Fetch a single row from a select query.
      *
-     * @return array Row
+     * @return object|null Row
      */
     public function first($field = null)
     {
@@ -1307,7 +1307,7 @@ class BaseModel
     /**
      * Fetch a single row from a select query.
      *
-     * @return array Row
+     * @return object|null Row
      */
     public function last($field = null)
     {
@@ -1315,11 +1315,7 @@ class BaseModel
             $this->limit(1)->desc($field ?? $this->getPrimaryKey())->select();
         }
 
-        $data = $this->get();
-
-        $row = (!empty($data)) ? $data[0] : array();
-
-        return $row;
+        return $this->one();
     }
 
     /**
@@ -1462,8 +1458,8 @@ class BaseModel
      * Finds and populates an object.
      *
      * @param int|string|array Search value
-     * @param string Search value
-     * @return object Populated object
+     * @param string $field Search value
+     * @return object|array|null Populated object
      */
     public function find($value = null, $field = null)
     {
@@ -1475,7 +1471,7 @@ class BaseModel
             if ((is_int($value) || is_string($value)) && property_exists($this, $field)) {
                 $this->where($field, $value);
             } else if (is_array($value)) {
-                $this->where($value);
+                $this->whereIn($field, $value);
             }
         }
 
@@ -1483,9 +1479,7 @@ class BaseModel
             $this->select();
         }
 
-        $data = $this->get();
-
-        return $field == $this->getPrimaryKey() ? (is_array($data) && isset($data[0]) ? $data[0] : []) : $data;
+        return $field == $this->getPrimaryKey() && is_array($value) ? $this->get() : $this->one($field);
     }
 
     /**
@@ -1665,7 +1659,7 @@ class BaseModel
             $type = explode("(", $field->Type);
             
             $_type = $type[0];
-
+            
             if (isset($type[1])) {
                 if (substr($type[1], -1) == ')') {
                     $length = substr($type[1], 0, -1);
@@ -1683,6 +1677,7 @@ class BaseModel
             }
 
             $fields[$field->Field]['maxLength'] = (int)$length;
+            $fields[$field->Field]['label'] = ucwords(strtr($field->Field, ["_" => " "]));
             $fields[$field->Field]['name'] = $field->Field;
             $fields[$field->Field]['id'] = $field->Field;
             $fields[$field->Field]['isPrimaryKey'] = $field->Key == "PRI" ? true : false;
@@ -1692,14 +1687,14 @@ class BaseModel
             $fields[$field->Field]['default'] = $field->Default;
             $fields[$field->Field]['crudType'] = $this->getCrudType($_type, $length);
         }
-
         $results = $this->getTableInfo();
+        $flds = array();
         foreach ($results as $num => $row) {
             $row = (array)$row;
-            $results[$num] = (object)(array_merge($row, $fields[$row['Field']]));
+            $flds[$row['Field']] = (object)(array_merge($row, $fields[$row['Field']]));
         }
 
-        return $results;
+        return $flds;
     }
 
     /**

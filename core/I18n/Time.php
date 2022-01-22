@@ -1201,6 +1201,7 @@ class Time extends DateTime
 			return lang('Date.now');
 		}
 
+
 		return $before ? lang('Date.ago', [$phrase]) : lang('Date.future', [$phrase]);
 	}
 

@@ -76,15 +76,15 @@ class Form
         ],
         'checkbox'   =>  [
             "wrapper"       =>  "",
-            "form_group"    =>  "form-check form-switch my-3",
-            "label"         =>  "form-check-label",
-            "input"         =>  "form-check-input"
+            "form_group"    =>  "form-check form-switch d-flex align-items-center my-3",
+            "label"         =>  "form-check-label mb-0 ms-2 order-1",
+            "input"         =>  "form-check-input order-0"
         ],
         'radio'   =>  [
             "wrapper"       =>  "",
             "form_group"    =>  "form-check my-3",
             "label"         =>  "form-label",
-            "input"         =>  "form-check-input"
+            "input"         =>  "form-check-input order-0"
         ],
         'date'      =>  [
             "wrapper"       =>  "",
@@ -142,7 +142,7 @@ class Form
 
     public function add($name, array $attributes)
     {
-        $this->fields[] = (object) ['name' => $name, "attributes" => $attributes];
+        $this->fields[$attributes['name']] = (object) ['name' => $name, "attributes" => $attributes];
         return $this;
     }
 
@@ -163,12 +163,36 @@ class Form
                 $field->attributes["type"] = "text";
             }
 
+            if($field->attributes["type"] == "file" && in_array($field->attributes["name"], ['picture', 'cover', 'image', 'photo']))
+            {
+                $field->attributes["accept"] = ".jpeg,.png,.jpg";
+            }
+
+            if(in_array($field->attributes["type"], ['radio', 'checkbox']))
+            {
+                if(isset($field->attributes["required"]))
+                    unset($field->attributes["required"]);
+
+                if(isset($field->attributes["value"]) && !empty($field->attributes["value"]) && $field->attributes["value"] != 0)
+                {
+                    $field->attributes["checked"] = "true";
+                }
+            }
+
+            if(isset($field->attributes["label"]))
+            {
+                $label = $field->attributes["label"];
+                unset($field->attributes["label"]);
+            }else{
+                $label = $field->attributes["name"];
+            }
+
             $this->output .= 
             $field->attributes["type"] != "hidden" ? Html::div(
                 Html::div(
                     Html::label(
-                        ucwords(strtr($field->attributes["name"], ["_" => " "])),
-                        ["class"    =>  $class["label"]]
+                        ucwords(strtr($label, ["_" => " ", "[" => "", "]" => ""])),
+                        ["class"    =>  $class["label"], "for"  =>  $field->attributes["id"]]
                     ).
                     Html::{$field->name}(null, $field->attributes),
                     ["class" => $class[ "form_group"]]
@@ -197,7 +221,7 @@ class Form
 
     private function submitBtn()
     {
-        return Html::button($this->submitText, ["type" => "submit", "class" => $this->class['submit']]);
+        return Html::button($this->submitText, ["type" => "submit", "class" => "mt-5 ".$this->class['submit']]);
     }
 
     private function switchType(object $field)
@@ -212,6 +236,7 @@ class Form
                 $type = "file";
                 break;
             case 'password':
+            case 'cpassword':
             case 'hash':
             case 'pass':
                 $type = "password";
@@ -242,7 +267,7 @@ class Form
     {
         if($this->config['from_db'] === true)
         {
-            foreach($fields as $field)
+            foreach($fields as $key => $field)
             {
                 $field = (object) $field;
                 $field->type = $field->crudType;
@@ -275,8 +300,9 @@ class Form
                         $this->add(
                             "input",
                             array_filter([
-                                "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
+                                "value"     =>  isset($data[$field->name]) && !in_array($field->name, ['password', 'pass', 'hash']) ? $data[$field->name] : $field->default,
                                 "name"      =>  $field->name,
+                                "label"     =>  isset($field->label) ? $field->label : $field->name,
                                 "id"        =>  $field->name,
                                 "required"  =>  !$field->null,
                                 "type"      =>  $field->crudType,
@@ -286,7 +312,7 @@ class Form
                 }
             }
         }else{
-            foreach($fields as $field)
+            foreach($fields as $key => $field)
             {
                 $field = (object) $field;
                 $field->crudType = $field->type;
@@ -332,8 +358,8 @@ class Form
         Html::div(
             Html::div(
                 Html::label(
-                    ucwords(strtr($field->name, ["_" => " "])),
-                    ["class"    =>  $class["label"]]
+                    ucwords(strtr(isset($field->label) ? $field->label : $field->name, ["_" => " ", "[" => "", "]" => ""])),
+                    ["class"    =>  $class["label"], "for"  =>  $field->name]
                 ).
                 Html::textarea(
                     isset($data[$field->name]) ? $data[$field->name] : $field->default,
@@ -381,8 +407,8 @@ class Form
         Html::div(
             Html::div(
                 Html::label(
-                    ucwords(strtr($field->name, ["_" => " ", "[" => "", "]" => ""])),
-                    ["class"    =>  $class["label"]]
+                    ucwords(strtr(isset($field->label) ? $field->label : $field->name, ["_" => " ", "[" => "", "]" => ""])),
+                    ["class"    =>  $class["label"], "for"  =>  $field->name]
                 ).
                 Html::select(
                     $opt,

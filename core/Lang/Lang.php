@@ -79,29 +79,29 @@ class Lang
 	//--------------------------------------------------------------------
 
 	/**
-	 * @param string $line Line.
+	 * @param string $linea Line.
 	 * @param array  $args Arguments.
 	 * @return string|string[] Returns line.
 	 */
-	public function getText(string $line, array $args = [])
+	public function getText(string $linea, array $args = [])
 	{
 		// if no file is given, just parse the line
-		if (strpos($line, '.') === false)
+		if (strpos($linea, '.') === false)
 		{
-			return $this->formatMessage($line, $args);
+			return $this->formatMessage($linea, $args);
 		}
 
 		// Parse out the file name and the actual alias.
 		// Will load the langs file and strings.
-		list($file, $line) = $this->parseLine($line, $this->locale);
+		list($file, $line) = $this->parseLine($linea, $this->locale);
 
 		$output = $this->getOutput($this->locale, $file, $line);
-
+		
 		if ($output === null && strpos($this->locale, '_'))
 		{
 			list($locale) = explode('_', $this->locale, 2);
-
-			list($file, $line) = $this->parseLine($line, $locale);
+			
+			list($file, $line) = $this->parseLine($linea, $locale);
 
 			$output = $this->getOutput($locale, $file, $line);
 		}
@@ -109,7 +109,7 @@ class Lang
 		// if still not found, try English
 		if ($output === null)
 		{
-			list($file, $line) = $this->parseLine($line, 'fr');
+			list($file, $line) = $this->parseLine($linea, 'fr');
 
 			$output = $this->getOutput('fr', $file, $line);
 		}
@@ -168,8 +168,7 @@ class Lang
 	 */
 	protected function parseLine(string $line, string $locale): array
 	{
-		$file = substr($line, 0, strpos($line, '.'));
-		$line = substr($line, strlen($file) + 1);
+		list($file, $line) = explode(".", $line, 2);
 
 		if (! isset($this->langs[$locale][$file]) || ! array_key_exists($line, $this->langs[$locale][$file]))
 		{
@@ -268,6 +267,7 @@ class Lang
         $path = file_exists(APP_PATH.$path) ? APP_PATH.$path : SYS_PATH.$path;
         
 		$strings = require $path;
+
 
 		return $strings;
 	}
