@@ -863,6 +863,8 @@ class BaseModel
 
         if (empty($data)) return false;
 
+        $data = array_filter($data);
+
         $eventData = ['data' => $data];
 
 		if ($this->tmp_callbacks)
@@ -1268,9 +1270,9 @@ class BaseModel
 
 		// Store it in the Pager library so it can be
 		// paginated in the views.
+		$perPage     = is_null($perPage) ? $this->per_page : $perPage;
 		$this->page_count = $total / $perPage;
 		$this->current_page = $page;
-		$perPage     = is_null($perPage) ? $this->per_page : $perPage;
 		$offset      = ($page - 1) * $perPage;
 
         return $this->get("*", null, $perPage, $offset);
@@ -1468,7 +1470,7 @@ class BaseModel
         $this->from($this->table ?? $this->getTable(), false);
 
         if ($value !== null) {
-            if ((is_int($value) || is_string($value)) && property_exists($this, $field)) {
+            if ((is_int($value) || is_string($value)) && ($this->getPrimaryKey() == $field || property_exists($this, $field))) {
                 $this->where($field, $value);
             } else if (is_array($value)) {
                 $this->whereIn($field, $value);
@@ -1478,6 +1480,7 @@ class BaseModel
         if (empty($this->sql)) {
             $this->select();
         }
+
 
         return $field == $this->getPrimaryKey() && is_array($value) ? $this->get() : $this->one($field);
     }
@@ -1510,9 +1513,8 @@ class BaseModel
                 $keys = array_flip($fields);
                 $data = array_intersect_key($data, $keys);
             }
-
             return $this->where($pk, $id)
-                ->update($data);
+                ->update(array_filter($data));
         }
 
         return false;

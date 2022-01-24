@@ -383,7 +383,7 @@ class Form
             {
                 $attr = array("value" => $value['value']);
 
-                if($field->default && strtolower($field->default) == strtolower($value['value']) || (isset($data[$field->name]) && $value == $data[$field->name]))
+                if($field->default && strtolower($field->default) == strtolower($value['value']) || (isset($data[$field->name]) && $value['value'] == $data[$field->name]))
                 {
                     $attr['selected'] = true;
                 }

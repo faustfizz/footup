@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.3 - 11.2021
+ * FOOTUP - 0.1.4 - 01.2022
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -9,14 +9,18 @@
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
+
 use App\Config\Config;
 use Footup\Http\Request;
 use Footup\Routing\Router;
 
+// Directory Separator
+defined("DS") or define("DS", DIRECTORY_SEPARATOR);
+
 /**
  * Le dossier système
  */
-defined('SYS_PATH') or define('SYS_PATH', realpath(__DIR__.DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR);
+defined('SYS_PATH') or define('SYS_PATH', realpath(__DIR__.DS).DS);
 
 /**
  * Chargement des classes de configuration
@@ -50,9 +54,9 @@ $config = new Config();
  * - chemin vers le dossier des vues (app/view)
  * - chemin vers le dossier de téléversement
  */
-defined('VIEW_PATH') or define('VIEW_PATH', realpath($config->view_path).DIRECTORY_SEPARATOR);
-defined('STORE_DIR') or define('STORE_DIR', realpath($config->store_dir).DIRECTORY_SEPARATOR);
-defined('ASSETS_DIR') or define('ASSETS_DIR', realpath($config->assets_dir).DIRECTORY_SEPARATOR);
+defined('VIEW_PATH') or define('VIEW_PATH', realpath($config->view_path).DS);
+defined('STORE_DIR') or define('STORE_DIR', realpath($config->store_dir).DS);
+defined('ASSETS_DIR') or define('ASSETS_DIR', realpath($config->assets_dir).DS);
 
 /**
  * Insertion des routeurs définies par l'utilisateur

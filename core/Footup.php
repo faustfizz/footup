@@ -1,11 +1,11 @@
 <?php
 /**
- * FOOTUP - 0.1.3 - 11.2021
+ * FOOTUP - 0.1.4 - 01.2022
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1.3
+ * @version 0.1.4
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
@@ -68,7 +68,7 @@ class Footup
 
         } catch (Exception $exception) {
             // Erreur 500.
-            throw new Exception(text("Http.error500"));
+            throw new Exception(text("Http.error500", [$exception->getMessage()]));
         }
     }
 

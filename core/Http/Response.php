@@ -208,7 +208,7 @@ class Response
         }
 
         if (is_array($data) || $data instanceof ArrayObject || $data instanceof JsonSerializable) {
-            return $this->json($data, $status, $header);
+            return $this->json($data, false, $status, $header);
         }
 
         foreach ($header as $key => $value) {
@@ -276,7 +276,7 @@ class Response
      * @param boolean $echo
      * @return Response|void
      */
-    public function json(array $data = [], int $status = 200, array $header = [], int $option = 0, $echo = false)
+    public function json(array $data = [], $echo = false, int $status = 200, array $header = [], int $option = 0)
     {
         $this->status($status);
         $this->header($header);

@@ -767,7 +767,7 @@ if(! function_exists("json"))
      */
     function json(array $data, $echo = false)
     {
-        return response()->json($data, 200, ["Content-Type" => 'application/json; charset=UTF-8'], 0, $echo);
+        return response()->json($data, $echo, 200, ["Content-Type" => 'application/json; charset=UTF-8'], 0);
     }
 }
 

@@ -56,10 +56,10 @@ class Autoload{
         $str = "";
         for($r = 0; $r < count($c)-1; $r++){
             if(isset($this->psr4[$c[$r]])){
-                $rn = rtrim($this->psr4[$c[$r]], "/");
-                $str .= strtr($rn.DIRECTORY_SEPARATOR, [ROOT_PATH => ""]);
+                $rn = rtrim($this->psr4[$c[$r]], DS);
+                $str .= strtr($rn.DS, [ROOT_PATH => ""]);
             }else{
-                $str .= $r === 0 ? strtolower($c[$r]).DIRECTORY_SEPARATOR : ucfirst($c[$r]).DIRECTORY_SEPARATOR;
+                $str .= $r === 0 ? strtolower($c[$r]).DS : ucfirst($c[$r]).DS;
             }
         }
         require_once(ROOT_PATH.$str.ucfirst(end($c)).'.php');

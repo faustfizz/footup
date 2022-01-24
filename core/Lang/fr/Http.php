@@ -6,7 +6,7 @@ return [
 
 	// RedirectResponse
 	'invalidRoute' 	=> '{0} n\'est pas une route valide.',
-	'error500' 		=> 'Erreur de configuration, impossible de démarrer FOOTUP Framework !',
+	'error500' 		=> 'Erreur de configuration, impossible de démarrer FOOTUP Framework ! Raison : {0}',
 
 	// Page Not Found
 	'pageNotFound'       => 'Page non trouvée',

@@ -15,7 +15,7 @@ class DotEnv extends \ArrayObject
 
     public function __construct($path = ROOT_PATH, bool $setEnvironmentVariables = true, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED)
     {
-        if(file_exists(rtrim($path, "/")."/.env"))
+        if(file_exists(rtrim($path, DS).DS.".env"))
         {
             $this->setPath($path);
             $data = self::parseFile($this->_file, $processSections, $scannerMode);
@@ -28,7 +28,7 @@ class DotEnv extends \ArrayObject
 
     public function setPath($path){
         if (is_dir($path)){
-            $path = rtrim($path, '/') . '/';
+            $path = rtrim($path, DS) . DS;
             $this->_path = $path;
             $this->setDir($this->_path);
         } else if (file_exists($path)){
@@ -101,7 +101,7 @@ class DotEnv extends \ArrayObject
     }
 
     public static function parseFile(string $file, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED):array{
-        $newFile = fopen(substr($file, 0, strrpos($file, "/")).'/footup.ini', "w");
+        $newFile = fopen(substr($file, 0, strrpos($file, DS)).'/footup.ini', "w");
         foreach (file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
             # code...
             $line = trim($line);
@@ -112,8 +112,8 @@ class DotEnv extends \ArrayObject
             fwrite($newFile, $line."\n");
         }
         fclose($newFile);
-        $data = parse_ini_file(substr($file, 0, strrpos($file, "/")).'/footup.ini', $processSections, $scannerMode);
-        @unlink(substr($file, 0, strrpos($file, "/")).'/footup.ini');
+        $data = parse_ini_file(substr($file, 0, strrpos($file, DS)).'/footup.ini', $processSections, $scannerMode);
+        @unlink(substr($file, 0, strrpos($file, DS)).'/footup.ini');
         return $data;
     }
 
