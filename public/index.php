@@ -10,7 +10,7 @@
  */
 
 // Valid PHP Version?
-$minPHPVersion = '7.3';
+$minPHPVersion = '7.1';
 if (version_compare(PHP_VERSION, $minPHPVersion, '<'))
 {
 	die("Your PHP version must be {$minPHPVersion} or higher to run FootUp. Current version: " . PHP_VERSION);
@@ -21,6 +21,9 @@ unset($minPHPVersion);
  * On se positionne dans le dossier public
  */
 chdir(__DIR__);
+
+// Directory Separator
+defined("DS") or define("DS", DIRECTORY_SEPARATOR);
 
 /**
  * Le Dossier ROOT du projet

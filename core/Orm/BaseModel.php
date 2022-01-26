@@ -1987,7 +1987,7 @@ class BaseModel
         /**
          * @var BaseModel
          */
-        $class = $relationConfig['model']();
+        $class = new $relationConfig['model']();
         $foreign_key = $relationConfig['foreign_key'];
         $local_key = $relationConfig['local_key'];
 
@@ -2006,11 +2006,11 @@ class BaseModel
         /**
          * @var BaseModel
          */
-        $class = $relationConfig['model']();
+        $class = new $relationConfig['model']();
         $foreign_key = $relationConfig['foreign_key'];
         $local_key = $relationConfig['local_key'];
 
-        $object = (new $class)->where($foreign_key, $this->{$local_key})->one();
+        $object = $class->where($foreign_key, $this->{$local_key})->one();
         return $object;
     }
 
@@ -2026,7 +2026,7 @@ class BaseModel
         /**
          * @var BaseModel
          */
-        $class = $relationConfig['model']();
+        $class = new $relationConfig['model']();
         $foreign_key = $relationConfig['foreign_key'];
         $local_key = $relationConfig['local_key'];
 
