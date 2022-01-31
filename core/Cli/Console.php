@@ -75,7 +75,7 @@ class Console extends CLI
 
         switch ($options->getCmd()) {
             case 'make':
-                if(!$options->getOpt("controller") && !$options->getOpt("model") && !$options->getOpt("middle") && !$options->getOpt("scaffold"))
+                if(!$options->getOpt("controller") && !$options->getOpt("model") && !$options->getOpt("middle") && !$options->getOpt("scaffold") && !$options->getOpt("view"))
                 {
                     $this->error("You can't call the make command without option !");
                     exit;
