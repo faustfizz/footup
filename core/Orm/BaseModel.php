@@ -863,8 +863,6 @@ class BaseModel
 
         if (empty($data)) return false;
 
-        $data = array_filter($data);
-
         $eventData = ['data' => $data];
 
 		if ($this->tmp_callbacks)
@@ -1504,7 +1502,8 @@ class BaseModel
         $data = $object->getAttributes();
 
         if (is_null($id)) {
-            if ($bool = $this->insert($data)) {
+            if ($bool = $this->insert(array_filter($data, function($v, $k) {
+                return  trim($v) !== ""; }, ARRAY_FILTER_USE_BOTH))) {
                 $object->{$pk} = $this->insert_id;
             }
             return $bool;
@@ -1513,8 +1512,10 @@ class BaseModel
                 $keys = array_flip($fields);
                 $data = array_intersect_key($data, $keys);
             }
+            
             return $this->where($pk, $id)
-                ->update(array_filter($data));
+                ->update(array_filter($data, function($v, $k) {
+                    return trim($v) !== ""; }, ARRAY_FILTER_USE_BOTH));
         }
 
         return false;
@@ -1758,7 +1759,7 @@ class BaseModel
             case 'mediumint':
             case 'int':
             case 'bigint':
-                $type = $length == 1 ? "checkbox" : "number";
+                $type = $length == 1 ? "radio" : "number";
                 break;
             case 'enum':
             case 'set':

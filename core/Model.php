@@ -11,6 +11,7 @@
 namespace Footup;
 use Footup\Orm\BaseModel;
 
-class Model extends BaseModel{
+class Model extends BaseModel
+{
     
 }

@@ -282,6 +282,13 @@ class Form
 
                 switch($field->crudType)
                 {
+                    case "radio":
+                        $this->radio((object)array_merge([
+                            "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
+                            "name"      =>  $field->name,
+                            "id"        =>  $field->id
+                        ], (array)$field ), $data);
+                        break;
                     case "select":
                         $this->dropdown((object)array_merge([
                             "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
@@ -320,6 +327,13 @@ class Form
 
                 switch($field->crudType)
                 {
+                    case "radio":
+                        $this->radio((object)array_merge([
+                            "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
+                            "name"      =>  $field->name,
+                            "id"        =>  $field->id
+                        ], (array)$field ), $data);
+                        break;
                     case "select":
                         $this->dropdown((object)array_merge([
                             "value"     =>  isset($data[$field->name]) ? $data[$field->name] : $field->default,
@@ -416,6 +430,53 @@ class Form
                 )
             ,
                 ["class" => $class[ "form_group"]]
+            ),
+            ["class" => $class[ "wrapper"]]
+        );
+    }
+
+    public function radio(object $field, $data)
+    {
+        $class = $this->class["checkbox"];
+        
+        $attr = ["class" => $class['input'], "name" =>  $field->name, "id" =>  isset($field->id) ? $field->id.'_inactive' : $field->name.'_inactive', "required" => !$field->null, "type" => "radio", "value" => 0];
+
+        $this->selectPart .= 
+        Html::div(
+            Html::h6(
+                ucwords(strtr(isset($field->label) ? $field->label : $field->name, ["_" => " ", "[" => "", "]" => ""])),
+                ["class"    =>  "text-uppercase text-body text-xs font-weight-bolder mt-3"]
+            ).
+            Html::div(
+                Html::ul(
+                    Html::li(
+                        Html::div(
+                            Html::input(
+                                "",
+                                array_merge($attr, array_filter(["id" =>  isset($field->id) ? $field->id.'_active' : $field->name.'_active', "value" => 1, "checked" => 1 == $field->value ? true : false]))
+                            ).
+                            Html::label("Oui",
+                                ["class"    =>  $class["label"], "for"  =>  $field->name.'_active']
+                            ),
+                            ['class' => "form-check form-switch ps-0"]
+                        ),
+                        ['class' => "list-group-item border-0 px-0"]
+                    ).Html::li(
+                        Html::div(
+                            Html::input(
+                                "",
+                                array_merge($attr, array_filter(["value" => 0, "checked" => 0 == $field->value ? true : false]))
+                            ).
+                            Html::label("Non",
+                                ["class"    =>  $class["label"], "for"  =>  $field->name.'_inactive']
+                            ),
+                            ['class' => "form-check form-switch ps-0"]
+                        ),
+                        ['class' => "list-group-item border-0 px-0"]
+                    ),
+                    ['class' => 'list-group']
+                ),
+                ["class" => "ps-5"]
             ),
             ["class" => $class[ "wrapper"]]
         );
