@@ -319,7 +319,7 @@ class BaseModel
 
     /**
      * @param array $data
-     * @return $this
+     * @return BaseModel
      */
     public function fill(array $data) 
     {
@@ -394,6 +394,7 @@ class BaseModel
 
     /**
      * Checks whether the table property has been set.
+     * @throws Exception
      */
     public function checkTable()
     {
@@ -404,6 +405,7 @@ class BaseModel
 
     /**
      * Checks whether the class property has been set.
+     * @throws Exception
      */
     public function checkClass()
     {
@@ -415,7 +417,7 @@ class BaseModel
     /**
      * Resets class properties.
      * 
-     * @return self
+     * @return BaseModel
      */
     public function reset()
     {
@@ -439,7 +441,7 @@ class BaseModel
      *
      * @param string $table Table name
      * @param boolean $reset Reset class properties
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function from($table, $reset = true)
     {
@@ -456,7 +458,7 @@ class BaseModel
      * @param string $table Table to join to
      * @param array|string $fields Fields to join on
      * @param string $type Type of join
-     * @return $this Self reference
+     * @return BaseModel Self reference
      * @throws Exception For invalid join type
      */
     public function join($table, $fields, $type = 'INNER', $operator = '=')
@@ -492,7 +494,7 @@ class BaseModel
      *
      * @param string $table Table to join to
      * @param array|string $fields Fields to join on
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function leftJoin($table, $fields, $operator = '=')
     {
@@ -504,7 +506,7 @@ class BaseModel
      *
      * @param string $table Table to join to
      * @param array|string $fields Fields to join on
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function rightJoin($table, $fields, $operator = '=')
     {
@@ -516,7 +518,7 @@ class BaseModel
      *
      * @param string $table Table to join to
      * @param array $fields Fields to join on
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function fullJoin($table, $fields, $operator = '=')
     {
@@ -528,7 +530,7 @@ class BaseModel
      * @param string|array $val
      * @param string $operator
      * @param string $link
-     * @return $this
+     * @return BaseModel
      */
     public function where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
     {
@@ -565,19 +567,19 @@ class BaseModel
 
     /**
      * @param string|array $key
-     * @param null $operator
-     * @param null $val
-     * @return $this
+     * @param array|string $val
+     * @param string $operator
+     * @return BaseModel
      */
-    public function whereOr($key, $val = null, $operator = null, $escape = true)
+    public function whereOr(array|string $key, $val = null, $operator = null, $escape = true)
     {
         return $this->where($key, $val, $operator, ' OR ', $escape);
     }
 
     /**
-     * @param $key
-     * @param array $val
-     * @return $this
+     * @param array|string $key
+     * @param array|string $val
+     * @return BaseModel
      */
     public function whereIn($key, array $val, $escape = true)
     {
@@ -587,7 +589,7 @@ class BaseModel
     /**
      * @param $key
      * @param array $val
-     * @return $this
+     * @return BaseModel
      */
     public function whereNotIn($key, array $val, $escape = true)
     {
@@ -598,7 +600,7 @@ class BaseModel
      * @param $str
      * @param array|null $build_data
      * @param string $link
-     * @return $this
+     * @return BaseModel
      */
     public function whereRaw($str)
     {
@@ -607,7 +609,7 @@ class BaseModel
 
     /**
      * @param $key
-     * @return $this
+     * @return BaseModel
      */
     public function whereNotNull($key)
     {
@@ -616,7 +618,7 @@ class BaseModel
 
     /**
      * @param $key
-     * @return $this
+     * @return BaseModel
      */
     public function whereNull($key)
     {
@@ -626,21 +628,21 @@ class BaseModel
     // where OR
 
     /**
-     * @param $key
-     * @param array $val
-     * @return $this
+     * @param array|string $key
+     * @param array|string $val
+     * @return BaseModel
      */
-    public function whereOrIn($key, array $val, $escape = true)
+    public function whereOrIn(array|string $key, array $val, $escape = true)
     {
         return $this->whereOr($key, $val, ' IN ', $escape);
     }
 
     /**
-     * @param $key
+     * @param array|string $key
      * @param array $val
-     * @return $this
+     * @return BaseModel
      */
-    public function whereOrNotIn($key, array $val, $escape = true)
+    public function whereOrNotIn(array|string $key, array $val, $escape = true)
     {
         return $this->whereOr($key, $val, ' NOT IN ', $escape);
     }
@@ -649,7 +651,7 @@ class BaseModel
      * @param $str
      * @param array|null $build_data
      * @param string $link
-     * @return $this
+     * @return BaseModel
      */
     public function whereOrRaw($str)
     {
@@ -658,7 +660,7 @@ class BaseModel
 
     /**
      * @param $key
-     * @return $this
+     * @return BaseModel
      */
     public function whereOrNotNull($key)
     {
@@ -667,7 +669,7 @@ class BaseModel
 
     /**
      * @param $key
-     * @return $this
+     * @return BaseModel
      */
     public function whereOrNull($key)
     {
@@ -678,7 +680,7 @@ class BaseModel
      * Adds an ascending sort for a field.
      *
      * @param string $field Field name
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function asc($field)
     {
@@ -689,7 +691,7 @@ class BaseModel
      * Adds an descending sort for a field.
      *
      * @param string $field Field name
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function desc($field)
     {
@@ -701,7 +703,7 @@ class BaseModel
      *
      * @param string $field Field name
      * @param string $direction Sort direction
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function orderBy($field, $direction = 'ASC')
     {
@@ -726,7 +728,7 @@ class BaseModel
      * Adds fields to group by.
      *
      * @param string|array $field Field name or array of field names
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function groupBy($field)
     {
@@ -743,7 +745,7 @@ class BaseModel
      *
      * @param string|array $field A field name or an array of fields and values.
      * @param string $value A field value to compare to
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function having($field, $value = null)
     {
@@ -758,7 +760,7 @@ class BaseModel
      *
      * @param int $limit Number of rows to limit
      * @param int $offset Number of rows to offset
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function limit($limit = null, $offset = null)
     {
@@ -777,7 +779,7 @@ class BaseModel
      *
      * @param int $offset Number of rows to offset
      * @param int $limit Number of rows to limit
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function offset($offset, $limit = null)
     {
@@ -793,6 +795,9 @@ class BaseModel
 
     /**
      * Sets the distinct keyword for a query.
+     * 
+     * @param bool $value
+     * @return BaseModel
      */
     public function distinct($value = true)
     {
@@ -807,7 +812,7 @@ class BaseModel
      * @param string $field Database field
      * @param string $value1 First value
      * @param string $value2 Second value
-     * @return self
+     * @return BaseModel
      */
     public function between($field, $value1, $value2)
     {
@@ -826,7 +831,7 @@ class BaseModel
      * @param array|string $fields Array of field names to select
      * @param int $limit Limit condition
      * @param int $offset Offset condition
-     * @return object Self reference
+     * @return BaseModel Self reference
      */
     public function select($fields = '*', $limit = null, $offset = null)
     {
@@ -1044,7 +1049,7 @@ class BaseModel
      * Gets or sets the SQL statement.
      *
      * @param string|array SQL statement
-     * @return self|string SQL statement
+     * @return BaseModel|string SQL statement
      */
     public function sql($sql = null)
     {
@@ -1093,12 +1098,8 @@ class BaseModel
 
                         return self::$db = new PDO($dsn);
 
-                        break;
-
                     case 'pdosqlite':
                         return self::$db = new PDO('sqlite:/' . $Config['db_name']);
-
-                        break;
 
                     case 'pdomysql':
                     default:
@@ -1109,8 +1110,6 @@ class BaseModel
                             $Config['db_name']
                         );
                         return self::$db = new PDO($dsn, $Config['db_user'], $Config['db_pass']);
-
-                        break;
                 }
 
                 if (self::$db == null) {
@@ -1207,7 +1206,7 @@ class BaseModel
      * @param array|string $where
      * @param int $limit
      * @param int $offset
-     * @return array
+     * @return BaseModel[]
      */
     public function get($select = "*", $where = null, $limit = null, $offset = null)
     {
@@ -1238,6 +1237,9 @@ class BaseModel
          */
         $result = $execute->result;
 
+        /**
+         * @var BaseModel[]
+         */
         $data = $result->fetchAll(PDO::FETCH_CLASS, get_class($this));
 
 		if ($this->tmp_callbacks && $execute->ok)
@@ -1257,7 +1259,7 @@ class BaseModel
      *
      * @param integer|null $perPage
      * @param integer $page
-     * @return array
+     * @return BaseModel[]
      */
     public function paginate(int $perPage = null, int $page = 0)
 	{
@@ -1284,7 +1286,7 @@ class BaseModel
     public function one($field = null)
     {
         if (empty($this->sql)) {
-            $this->limit(1)->asc($field ?? $this->getPrimaryKey())->select();
+            $this->limit(1)->select();
         }
 
         $data = $this->get();
@@ -1301,7 +1303,7 @@ class BaseModel
      */
     public function first($field = null)
     {
-        return $this->one($field);
+        return $this->asc($field ?? $this->getPrimaryKey())->one($field);
     }
 
     /**
@@ -1488,7 +1490,7 @@ class BaseModel
      *
      * @param \Footup\Orm\BaseModel $object Class instance
      * @param array $fields Select database fields to save
-     * @return mixed
+     * @return bool
      */
     public function save($object = null, array $fields = null)
     {
@@ -1502,8 +1504,14 @@ class BaseModel
         $data = $object->getAttributes();
 
         if (is_null($id)) {
-            if ($bool = $this->insert(array_filter($data, function($v, $k) {
-                return  trim($v) !== ""; }, ARRAY_FILTER_USE_BOTH))) {
+            if ($bool = $this->insert(
+                    array_filter($data, 
+                        function($v, $k) {
+                            return  trim($v) !== "";
+                        }, ARRAY_FILTER_USE_BOTH
+                    )
+                )
+            ) {
                 $object->{$pk} = $this->insert_id;
             }
             return $bool;
@@ -1514,11 +1522,14 @@ class BaseModel
             }
             
             return $this->where($pk, $id)
-                ->update(array_filter($data, function($v, $k) {
-                    return trim($v) !== ""; }, ARRAY_FILTER_USE_BOTH));
+                ->update(
+                    array_filter($data, 
+                        function($v, $k) {
+                            return trim($v) !== "";
+                        }, ARRAY_FILTER_USE_BOTH
+                    )
+                );
         }
-
-        return false;
     }
 
     /**
@@ -1594,7 +1605,7 @@ class BaseModel
     /**
      * @param string $name
      * @param array $arguments
-     * @return mixed|$this
+     * @return mixed
      */
     public function __call($name, $arguments)
     {
@@ -1637,7 +1648,7 @@ class BaseModel
             return $this->loadRelations($name, (isset($arguments[0]) ? $arguments[0] : $this->per_page), (isset($arguments[1]) ? $arguments[1] : 0));
         }
 
-        throw new \Exception(__CLASS__ . ' not such method [' . $name . ']');
+        throw new Exception(__CLASS__ . ' not such method [' . $name . ']');
     }
 
     /**
@@ -1650,7 +1661,7 @@ class BaseModel
                 "SHOW COLUMNS FROM " . $this->getTable() . ";"
             );
             $stmt->execute();
-            $this->tableInfo = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $this->tableInfo = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         return $this->tableInfo;
     }
@@ -1738,7 +1749,7 @@ class BaseModel
      *
      * @param string $type
      * @param int|string $length
-     * @return void
+     * @return string
      */
     protected function getCrudType($type, $length)
     {
@@ -1845,7 +1856,7 @@ class BaseModel
      * Create new data row.
      *
      * @param array $properties
-     * @return object Model instance
+     * 
      * @return bool
      */
     public function create(array $properties)
@@ -1859,8 +1870,8 @@ class BaseModel
      * or create if not exists.
      *
      * @param array $properties
-     * @return object Model instance
-     * @return bool|array
+     * 
+     * @return BaseModel[]|bool|array
      */
     public function findOrCreate(array $properties = null)
     {
@@ -1871,7 +1882,6 @@ class BaseModel
         } else {
             return $object;
         }
-        return false;
     }
 
 
@@ -1882,11 +1892,14 @@ class BaseModel
      * @param mixed $where
      * @param int $limit
      * @param int $offset
-     * @return object|array|null
+     * @return BaseModel[]
      */
     public static function all($select = "*", $where = null, $limit = null, $offset = null)
     {
         // search for models
+        /**
+         * @var BaseModel
+         */
         $model = (new ReflectionClass(\get_called_class()))->newInstance();
         return $model->get($select, $where, $limit, $offset);
     }
@@ -1895,9 +1908,8 @@ class BaseModel
      * Load the defined relation models
      * and add them as property of this model.
      *
-     * @return (void)
+     * @return BaseModel|BaseModel[]|null
      *
-     * @todo define and use foreign and local keys for relationships
      * @todo infinity loop avoiding still exists in some relationship cases (belongTo-belongsToMany)
      */
     public function loadRelations($for, $limit = null, $offset = null)
@@ -1934,7 +1946,7 @@ class BaseModel
      * Get object in relationship with.
      *
      * @param array $relationConfig
-     * @return object Model instance
+     * @return BaseModel Model instance
      */
     public function hasOne($relationConfig)
     {
@@ -1953,7 +1965,7 @@ class BaseModel
      * Get all objects in relationship with.
      *
      * @param array $relationConfig
-     * @return array of Models
+     * @return BaseModel[] Models
      */
     public function manyMany($relationConfig, $limit = null, $offset = null)
     {
@@ -1981,7 +1993,7 @@ class BaseModel
      * Get all objects in relationship with.
      *
      * @param array $relationConfig
-     * @return array of Models
+     * @return BaseModel[] Models
      */
     public function hasMany($relationConfig, $limit = null, $offset = null)
     {
@@ -2000,7 +2012,7 @@ class BaseModel
      * Get object in relationship with.
      *
      * @param array $relationConfig
-     * @return object Model instance
+     * @return BaseModel Model instance
      */
     public function belongsTo($relationConfig)
     {
@@ -2020,7 +2032,7 @@ class BaseModel
      * Get all objects in relationship with.
      *
      * @param array $relationConfig
-     * @return array of Models
+     * @return BaseModel[] Models
      */
     public function belongsToMany($relationConfig, $limit = null, $offset = null)
     {
