@@ -1884,7 +1884,6 @@ class BaseModel
         }
     }
 
-
     /**
      * Find all model in the database.
      *
