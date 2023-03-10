@@ -461,6 +461,7 @@ if (! function_exists('lang'))
 {
     /**
 	 * Translation
+	 * get language entry
 	 *
 	 * @param string $indice
 	 * @param array $params
@@ -477,6 +478,7 @@ if (! function_exists('text'))
 {
     /**
 	 * Translation
+	 * get language entry
 	 *
 	 * @param string $indice
 	 * @param array $params
@@ -487,6 +489,91 @@ if (! function_exists('text'))
 	{
 		$lang = new Lang($locale);
         return $lang->getText($indice, $params);
+	}
+}
+
+//--------------------------------------------------------------------
+
+if (! function_exists('setLang'))
+{
+    /**
+	 * Translation
+	 * set language entry
+	 *
+	 * @param string|array $indice
+	 * @param string $value or  filename if $indice is an array
+	 * @param string|null $locale
+	 * @return string|bool
+	 */
+	function setLang(string|array $indice, string $value, string $locale = null): string
+	{
+		$lang = new Lang($locale);
+		if(is_array($indice))
+		{
+			return $lang->setInput($value, $indice);
+		}else{
+			return $lang->setText($indice, $value);
+		}
+	}
+}
+if (! function_exists('setText'))
+{
+    /**
+	 * Translation
+	 * set language entry
+	 *
+	 * @param string|array $indice
+	 * @param string $value or  filename if $indice is an array
+	 * @param string|null $locale
+	 * @return string|bool
+	 */
+	function setText(string|array $indice, string $value, string $locale = null): string
+	{
+		$lang = new Lang($locale);
+		if(is_array($indice))
+		{
+			return $lang->setInput($value, $indice);
+		}else{
+			return $lang->setText($indice, $value);
+		}
+	}
+}
+
+//--------------------------------------------------------------------
+
+if (! function_exists('unsetLang'))
+{
+    /**
+	 * Translation
+	 * unset language entry
+	 *
+	 * @param string $file string or dot string
+	 * @param string|array $key
+	 * @param string|null $locale
+	 * @return string|bool
+	 */
+	function unsetLang(string $file, string|array $key = null, string $locale = null): string
+	{
+		$lang = new Lang($locale);
+		return $lang->removeLine($file, $key);
+	}
+}
+if (! function_exists('unsetText'))
+{
+    
+    /**
+	 * Translation
+	 * unset language entry
+	 *
+	 * @param string $file string or dot string
+	 * @param string|array $key
+	 * @param string|null $locale
+	 * @return string|bool
+	 */
+	function unsetText(string $file, string|array $key = null, string $locale = null): string
+	{
+		$lang = new Lang($locale);
+		return $lang->removeLine($file, $key);
 	}
 }
 

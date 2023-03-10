@@ -42,7 +42,6 @@ class Generator
         }else{
             $this->replacements[$key] = $value;
         }
-        $this->replacements[$key] = $value;
         return $this;
     }
 

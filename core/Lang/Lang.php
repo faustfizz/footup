@@ -106,7 +106,7 @@ class Lang
 			$output = $this->getOutput($locale, $file, $line);
 		}
 
-		// if still not found, try English
+		// if still not found, try French
 		if ($output === null)
 		{
 			list($file, $line) = $this->parseLine($linea, 'fr');
@@ -126,6 +126,8 @@ class Lang
 	 */
 	private function getOutput(string $locale, string $file, string $parsedLine)
 	{
+		$file = strtolower($file);
+
 		$output = $this->langs[$locale][$file][$parsedLine] ?? null;
 		if ($output !== null)
 		{
@@ -157,6 +159,49 @@ class Lang
 		return $this->langs[$locale][$file][$row][$key] ?? null;
 	}
 
+	//--------------------------------------------------------------------
+
+	/**
+	 * Add or edit a line 
+	 *
+	 * @param string $fileAndKey ex: File.key or Menu.home
+	 * @param mixed $value
+	 * @param string|null $locale
+	 * @return bool|string
+	 */
+	public function setText(string $fileAndKey, mixed $value = null, string $locale = null)
+	{
+		if (strpos($fileAndKey, '.'))
+		{
+			list($file, $key) = explode('.', $fileAndKey, 2);
+		}else{
+			$file = $fileAndKey;
+		}
+		
+		return $this->write(($locale ?? $this->locale), $file, $key, $value);
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * Write into file with given key and value
+	 *
+	 * @param string $file
+	 * @param string|array $key
+	 * @param mixed $value
+	 * @param string $locale
+	 * @return bool|string
+	 */
+	public function setInput(string $file, string|array $key, mixed $value = null, string $locale = null, )
+	{
+		if(!is_array($key) && is_null($value))
+		{
+			return false;
+		}
+
+		return $this->write(($locale ?? $this->locale), $file, $key, $value);
+	}
+
 	/**
 	 * Parses the langs string which should include the
 	 * filename as the first segment (separated by period).
@@ -179,6 +224,24 @@ class Lang
 			$file,
 			$line,
 		];
+	}
+
+
+	/**
+	 * Get Locale directory
+	 *
+	 * @param string|null $locale
+	 * @return string
+	 */
+	private function getLocaleDirname(string $locale = null): string
+	{
+		if ($locale ?? strpos($this->locale, '_'))
+		{
+			list($dirname) = explode('_', $this->locale, 2);
+
+			return $dirname;
+		}
+		return $locale ?? $this->locale;
 	}
 
 	//--------------------------------------------------------------------
@@ -224,6 +287,9 @@ class Lang
 	 */
 	protected function load(string $file, string $locale, bool $return = false)
 	{
+		$file = strtolower($file);
+
+
         $this->loadedFiles[$locale] = !array_key_exists($locale, $this->loadedFiles) ? [] : $this->loadedFiles[$locale];
 
 		if (in_array($file, $this->loadedFiles[$locale], true))
@@ -236,9 +302,10 @@ class Lang
 
         $this->langs[$locale][$file] = !array_key_exists($file, $this->langs[$locale]) ? [] : $this->langs[$locale][$file];
 
-		$path = "Lang/{$locale}/{$file}.php";
+		$path = "Lang/{$this->getLocaleDirname($locale)}/{$file}.json";
 
 		$lang = $this->require($path);
+		$lang = $lang ? json_decode($lang, true) : [];
 
 		if ($return)
 		{
@@ -254,10 +321,155 @@ class Lang
 	//--------------------------------------------------------------------
 
 	/**
-	 * @param string $path
-	 * @return array
+	 * Write into file
+	 *
+	 * @param string $locale
+	 * @param string $file
+	 * @param string|array $key
+	 * @param mixed $value
+	 * @return bool|string
 	 */
-	protected function require(string $path): array
+	protected function write(string $locale, string $file, string|array $key, mixed $value = null)
+	{
+		$file = strtolower($file);
+
+
+        $this->loadedFiles[$locale] = !array_key_exists($locale, $this->loadedFiles) ? [] : $this->loadedFiles[$locale];
+
+		if (!in_array($file, $this->loadedFiles[$locale], true))
+		{
+			// load it more.
+			$this->loadedFiles[$locale][] = $file;
+		}
+
+		$path = "Lang/{$this->getLocaleDirname($locale)}/{$file}.json";
+
+		if(isset($this->langs[$locale][$file]))
+		{
+			$lang = $this->langs[$locale][$file];
+		}else{
+			$lang = $this->require($path);
+	
+			$lang = $lang ? json_decode($lang, true) : [];
+		}
+
+		if(is_array($key))
+		{
+			foreach($key as $k => $v)
+			{
+				$lang[$k] = $v;
+			}
+		}else{
+			$lang[$key] = $value;
+		}
+
+
+		$json = json_encode($lang, JSON_PRETTY_PRINT);
+
+		try{
+			if(!is_dir(APP_PATH."Lang/{$this->getLocaleDirname($locale)}"))
+			{
+				@mkdir(APP_PATH."Lang/{$this->getLocaleDirname($locale)}", 0777, true);
+			}
+
+			if(!file_exists(APP_PATH.$path) && !file_exists(SYS_PATH.$path))
+			{
+				file_put_contents(APP_PATH.$path, $json);
+			}
+			file_put_contents(APP_PATH.$path, $json);
+		}catch(\Exception $e){
+			return $e->getMessage();
+		}
+
+		
+		// Merge our string
+		$this->langs[$locale][$file] = $lang;
+
+		return true;
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * Write into file
+	 *
+	 * @param string $locale
+	 * @param string $file
+	 * @param string|array $key
+	 * @param mixed $value
+	 * @return bool|string
+	 */
+	public function removeLine(string $file, string|array $key = null, string $locale = null)
+	{
+		if (strpos($file, '.'))
+		{
+			list($file, $key) = explode('.', $file, 2);
+		}
+
+		$file = strtolower($file);
+
+
+        $this->loadedFiles[$locale] = !array_key_exists($locale, $this->loadedFiles) ? [] : $this->loadedFiles[$locale];
+
+		if (!in_array($file, $this->loadedFiles[$locale], true))
+		{
+			// load it more.
+			$this->loadedFiles[$locale][] = $file;
+		}
+
+		$path = "Lang/{$this->getLocaleDirname($locale)}/{$file}.json";
+
+		if(isset($this->langs[$locale][$file]))
+		{
+			$lang = $this->langs[$locale][$file];
+		}else{
+			$lang = $this->require($path);
+	
+			$lang = $lang ? json_decode($lang, true) : [];
+		}
+
+		if(is_array($key))
+		{
+			foreach($key as $k)
+			{
+				unset($lang[$k]);
+			}
+		}else{
+			unset($lang[$key]);
+		}
+
+
+		$json = json_encode($lang ?? [], JSON_PRETTY_PRINT);
+
+		try{
+			if(!is_dir(APP_PATH."Lang/{$this->getLocaleDirname($locale)}"))
+			{
+				@mkdir(APP_PATH."Lang/{$this->getLocaleDirname($locale)}", 0777, true);
+			}
+
+			if(!file_exists(APP_PATH.$path) && !file_exists(SYS_PATH.$path))
+			{
+				file_put_contents(APP_PATH.$path, $json);
+			}
+			file_put_contents(APP_PATH.$path, $json);
+		}catch(\Exception $e){
+			return $e->getMessage();
+		}
+
+		
+		// Merge our string
+		$this->langs[$locale][$file] = $lang;
+
+		return true;
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * @param string $path
+	 * @return mixed
+	 */
+	protected function require(string $path): mixed
 	{
         if(!file_exists(APP_PATH.$path) && !file_exists(SYS_PATH.$path))
         {
@@ -266,7 +478,7 @@ class Lang
 
         $path = file_exists(APP_PATH.$path) ? APP_PATH.$path : SYS_PATH.$path;
         
-		$strings = require $path;
+		$strings = file_get_contents($path);
 
 
 		return $strings;

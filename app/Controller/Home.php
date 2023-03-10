@@ -15,9 +15,11 @@ class Home extends BaseController
             // $image->save();
             echo $image->name;
         }
+        // unsetText("core.classNotFound", null, "en_US");
+        // echo text("Core.home", ["Home"], "en_US");
 
         return $this->view("accueil", [
-            "titre" => "Accueil"
+            "titre" => text("Core.classNotFound", ["Home"])
         ]);
     }
     
