@@ -84,5 +84,4 @@ chdir(BASE_PATH);
 /**
  * Démarre le console
  */
-$cli = new Footup\Cli\Console();
-$cli->run();
+(new Footup\Cli\Console())->run();
