@@ -39,6 +39,22 @@ class File extends SplFileInfo
         parent::__construct($file['tmp_name']);
     }
 
+    /**
+     * Alias of rename
+     *
+     * @param string $name
+     * @return File
+     */
+    public function setName(string $name)
+    {
+        return $this->rename($name);
+    }
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
     public function __call($name, $arguments)
     {
         if(method_exists($this, 'get'.ucfirst($name)))
@@ -61,6 +77,11 @@ class File extends SplFileInfo
         if(property_exists($this, $name))
         {
             return $this->{$name};
+        }
+
+        if($name === "random_name")
+        {
+            return $this->random_name()->name();
         }
 
         return null;
@@ -113,24 +134,26 @@ class File extends SplFileInfo
 
     /**
      * @param string $format
-     * @return int
+     * @param bool $return_string true to return as string representation
+     * @return int|string
      */
-    public function counted_size($format = 'MB') : int
+    public function counted_size($format = 'MB', $return_string = false) : int
     {
         $sizes = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
         $flip = array_flip($sizes);
         $i = isset($flip[$format]) ? $flip[$format] : floor(log($this->size()) / log(1024));
-        return $this->size() / pow(1024, $i);
+        $size = $this->size() / pow(1024, $i);
+        return $return_string ? $this->file_size($format) : $size;
     }
 
     /**
-     * Retrouve l'extension
+     * Alias of getExtension()
      *
      * @return string
      */
     public function ext()
     {
-        return pathinfo($this->name(), PATHINFO_EXTENSION);
+        return $this->getExtension();
     }
 
     /**
@@ -147,13 +170,20 @@ class File extends SplFileInfo
     {
         $ext = $this->ext();
         $name = strtr($name, [".$ext" => ""]);
-        return $this->name = (preg_replace('/[^\00-\255]+/u', '', $name).'.'.$ext);
+        $this->name = (preg_replace('/[^\00-\255]+/u', '', $name).'.'.$ext);
+        return $this;
     }
     
+    /**
+     * set a random name to the file
+     *
+     * @param integer $len
+     * @return File
+     */
     public function random_name($len = 20)
     {
-        $shuffle = time().'-'.sha1(time());
-        return substr($shuffle, 0, $len).'.'.$this->ext();
+        $this->name = substr(uniqid(date("His"), true), 0, $len).'.'.$this->ext();
+        return $this;
     }
 
     /**
