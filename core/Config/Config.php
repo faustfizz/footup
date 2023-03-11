@@ -16,6 +16,11 @@ use Locale;
 class Config
 {
     /**
+     * @var string
+     */
+    public $base_url = "http://localhost";
+
+    /**
      * @var array
      */
     public $locale = [
@@ -139,10 +144,20 @@ class Config
         {
             Locale::setDefault($this->locale["lang"]);
         }
+
+        if(isset($this->config['base_url']))
+        {
+            $this->base_url = $this->config['base_url'];
+            unset($this->config['base_url']);
+        }
     }
 
     public function __set($name, $val)
     {
+        if(property_exists($this, $name))
+        {
+            return $this->{$name} = $val;
+        }
         if(array_key_exists($name, $this->config))
         {
             $this->config[$name] = $val;

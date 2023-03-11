@@ -90,6 +90,7 @@ class DotEnv extends \ArrayObject
             }
             $array[$property] = $value;
         }
+        return $array;
     }
 
     public function loadString(string $string, bool $setEnvironmentVariables = true, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED){

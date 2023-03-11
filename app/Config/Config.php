@@ -13,6 +13,11 @@ namespace App\Config;
 class Config extends \Footup\Config\Config
 {
     /**
+     * @var string
+     */
+    public $base_url = "http://localhost";
+
+    /**
      * @var array
      */
     public $locale = [
