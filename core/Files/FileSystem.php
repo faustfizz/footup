@@ -132,7 +132,7 @@ class FileSystem
     /**
      * @param  string $path
      * @param  bool   $preserve
-     * @return bool
+     * @return bool|void
      */
     public function delete(string $path, bool $preserve = false)
     {
@@ -230,7 +230,7 @@ class FileSystem
     /**
      * @param  string $path
      * @param  int    $flag
-     * @return RecursiveIteratorIterator
+     * @return RecursiveIteratorIterator|array
      */
     public function iterator(string $path, int $flag = null)
     {
