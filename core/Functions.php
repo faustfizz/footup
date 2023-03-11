@@ -382,11 +382,18 @@ if (! function_exists('base_url'))
      */
 	function base_url($uri = '', bool $withQuery = false, string $protocol = null): string
 	{
+		$base_url = isset($_ENV["base_url"]) ? $_ENV["base_url"] : config("base_url");
+
+		if($protocol)
+		{
+			$protocol = strtr($protocol, ["://" => ""]);
+			$url = parse_url($base_url);
+			$base_url = $protocol."://".$url["host"];
+		}
+		
         if(empty($uri) || $uri == '/')
         {
-            return is_null($protocol) ? request()->scheme(true).rtrim(request()->domain(), "/")."/" : strtr(request()->scheme(true).rtrim(request()->domain(), "/"), [
-                request()->scheme(true) =>  strtr($protocol, ["://" => ""])."://"
-            ])."/";
+            return trim((string) $base_url, " \n\r\t\v\x00\/")."/";
         }
 
         // convert segment array to string
@@ -394,11 +401,9 @@ if (! function_exists('base_url'))
 
 		$uri = !empty($query) && $withQuery ? $uri."?".http_build_query($query, "_key", "&") : $uri;
             
-        $uri = is_null($protocol) ? request()->scheme(true).rtrim(request()->domain(), "/")."/".$uri : strtr(request()->scheme(true).rtrim(request()->domain(), "/"), [
-            request()->scheme(true) =>  strtr($protocol, ["://" => ""])."://"
-        ])."/".$uri;
+        $url = trim((string) $base_url, " \n\r\t\v\x00\/")."/".$uri;
 
-        return rtrim((string) $uri, '/');
+        return $url;
     }
 }
 
