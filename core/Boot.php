@@ -14,9 +14,6 @@ use App\Config\Config;
 use Footup\Http\Request;
 use Footup\Routing\Router;
 
-// Directory Separator
-defined("DS") or define("DS", DIRECTORY_SEPARATOR);
-
 /**
  * Le dossier système
  */
