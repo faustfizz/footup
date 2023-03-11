@@ -133,7 +133,7 @@ class Form
      * @param array|null $data
      * @param [bool] ...$config
      */
-    public function __construct(string $action = "#", array $fields, array $data = [], ...$config) {
+    public function __construct(string $action = "#", array $fields = [], array $data = [], ...$config) {
         $this->config = array_merge($this->config, $config);
         $this->class = array_merge($this->class, ConfigForm::$class);
         $this->action = $action;
@@ -263,8 +263,19 @@ class Form
         return $field;
     }
 
-    public function prepareFields(array $fields, $data = array())
+    /**
+     * Undocumented function
+     *
+     * @param array $fields
+     * @param array $data
+     * @return Form
+     */
+    public function prepareFields(array $fields = array(), $data = array())
     {
+        if(empty($fields))
+            return $this;
+
+
         if($this->config['from_db'] === true)
         {
             foreach($fields as $key => $field)
