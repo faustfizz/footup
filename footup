@@ -22,23 +22,23 @@ if (substr(php_sapi_name(), 0, 3) === 'cgi')
 defined("DS") or define("DS", DIRECTORY_SEPARATOR);
 
 // Path to the front controller
-define('BASE_PATH', __DIR__ . '/public' . DIRECTORY_SEPARATOR);
+define('BASE_PATH', __DIR__ . '/public' . DS);
 
 /**
  * Le dossier système
  */
-defined('SYS_PATH') or define('SYS_PATH', realpath(__DIR__.DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR."core/");
+defined('SYS_PATH') or define('SYS_PATH', realpath(__DIR__.DS).DS."core/");
 
 /**
  * Le Dossier ROOT du projet
  */
-defined('ROOT_PATH') or define('ROOT_PATH', __DIR__.DIRECTORY_SEPARATOR);
+defined('ROOT_PATH') or define('ROOT_PATH', __DIR__.DS);
 
 /**
  * @todo Configure ceci pour pointer au dossier contenant vos fichier de configuration
  */
-defined('CONFIG_PATH') or define('CONFIG_PATH', __DIR__.DIRECTORY_SEPARATOR.'app/Config'.DIRECTORY_SEPARATOR);
-defined('APP_PATH') or define('APP_PATH', CONFIG_PATH."..".DIRECTORY_SEPARATOR);
+defined('CONFIG_PATH') or define('CONFIG_PATH', __DIR__.DS.'app/Config'.DS);
+defined('APP_PATH') or define('APP_PATH', CONFIG_PATH."..".DS);
 
 /**
  * Chargement des classes de configuration
@@ -72,9 +72,9 @@ $config = new \App\Config\Config();
  * - chemin vers le dossier des vues (app/view)
  * - chemin vers le dossier de téléversement
  */
-defined('VIEW_PATH') or define('VIEW_PATH', realpath($config->view_path).DIRECTORY_SEPARATOR);
-defined('STORE_DIR') or define('STORE_DIR', realpath($config->store_dir).DIRECTORY_SEPARATOR);
-defined('ASSETS_DIR') or define('ASSETS_DIR', realpath($config->assets_dir).DIRECTORY_SEPARATOR);
+defined('VIEW_PATH') or define('VIEW_PATH', realpath($config->view_path).DS);
+defined('STORE_DIR') or define('STORE_DIR', realpath($config->store_dir).DS);
+defined('ASSETS_DIR') or define('ASSETS_DIR', realpath($config->assets_dir).DS);
 
 /**
  * On se positionne dans le dossier public
