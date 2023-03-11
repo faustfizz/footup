@@ -66,7 +66,7 @@ include_once CONFIG_PATH.'Routes.php';
 /**
  * Recupère l'objet variable $router
  */
-$Router = ($router ?? (new Router(new Request()))->setAutoRoute(true));
+$Router = ($router ?? (new Router(new Request())) )->addDefaultRoute();
 
 /**
  * Chargement des function globales
