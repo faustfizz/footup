@@ -27,7 +27,7 @@ class {class_name} extends Model
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * @example # Use with arrays:
      *
      *      protected $hasOne = [
      *           'properties1' => [
@@ -43,7 +43,7 @@ class {class_name} extends Model
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * @example # Use with arrays:
      * 
      *      protected $hasMany = [
      *           'properties1' => [
@@ -59,7 +59,7 @@ class {class_name} extends Model
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * @example # Use with arrays:
      *
      *      protected $manyMany = [
      *           'properties1' => [
@@ -79,7 +79,7 @@ class {class_name} extends Model
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * @example # Use with arrays:
      *
      *     protected $belongsTo = [
      *           'properties1' => [
@@ -95,13 +95,16 @@ class {class_name} extends Model
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * @example # Use with arrays:
      * 
      *      protected $belongsToMany = [
      *           'properties1' => [
      *                              'model' => 'Other_Model_1',
+     *                              'pivot' => 'Pivot_Model',
      *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field'
+     *                              'local_key' => 'local_field',
+     *                              'pivot_foreign_key' => 'modelKey_in_pivot_table',
+     *                              'pivot_local_key' => 'localKey_in_pivot_table',
      *                             ]
      *          ....................
      *      ];
