@@ -179,7 +179,7 @@ class Contact extends Model{
   # you can also use 
   $contact->setEmail("fuck@you.yh");
 
-  // Generating form *******
+  // Generating form ******
   $contact->getForm();
 
   var_dump($c->firstByEmail('faus@fizz.io'));
