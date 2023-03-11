@@ -16,7 +16,7 @@ use Footup\Routing\Router;
 $router = new Router(new Request());
 
 /**
- * Default route is $router->get('/', "App\Controller\Home@index") is autoroute is enabled
+ * Default route is $router->get('/', "App\Controller\Home@index") if autoroute is enabled
  * if we delete all codes in this file, this code $router->setAutoRoute(true)->get('/', "App\Controller\Home@index") will be executed
  * 
  * for using language file by specifying in the uri use the placeholder {lang} or {locale} but in the beginning eg:

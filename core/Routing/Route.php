@@ -57,7 +57,7 @@ class Route
      * Contructeur
      *
      * @param string $uri
-     * @param string|collable $handler
+     * @param string|\Closure|\callable $handler
      */
     public function __construct(string $uri, $handler)
     {
@@ -143,7 +143,7 @@ class Route
     /**
      * Recupere l'Instance du controlleur
      *
-     * @return \Footup\Controller
+     * @return \Footup\Controller|callable
      */
     public function getHandler()
     {

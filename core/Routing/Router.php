@@ -98,6 +98,26 @@ class Router
     }
 
     /**
+     * Activate auto-routing if no route defined
+     * 
+     * @param boolean $active
+     * @return self
+     */
+    public function addDefaultRoute(bool $active = true)
+    {
+        if (! isset($this->routes[static::METHOD_GET]))
+        {
+            $config = new Config;
+            $controller = "App\Controller\\".ucfirst($config->config['default_controller']);
+            $method = $config->config['default_method'];
+            $this->get('/', "$controller@$method");
+
+            return $this->setAutoRoute($active);
+        }
+        return $this;
+    }
+
+    /**
      * Activer l'auto-routing
      * 
      * @param boolean $active
@@ -157,7 +177,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|colable|\Footup\Controller $handler
+     * @param string|collable|\Footup\Controller $handler
      * @return self
      */
     public function any(string $uri, $handler): self
@@ -167,7 +187,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|colable|\Footup\Controller $handler
+     * @param string|collable|\Footup\Controller $handler
      * @return self
      */
     public function get(string $uri, $handler): self
@@ -177,7 +197,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|colable|\Footup\Controller $handler
+     * @param string|collable|\Footup\Controller $handler
      * @return self
      */
     public function post(string $uri, $handler): self
@@ -187,7 +207,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|colable|\Footup\Controller $handler
+     * @param string|collable|\Footup\Controller $handler
      * @return self
      */
     public function put(string $uri, $handler): self
@@ -197,7 +217,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|colable|\Footup\Controller $handler
+     * @param string|collable|\Footup\Controller $handler
      * @return self
      */
     public function delete(string $uri, $handler): self
@@ -207,7 +227,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|colable|\Footup\Controller $handler
+     * @param string|collable|\Footup\Controller $handler
      * @return self
      */
     public function patch(string $uri, $handler): self
@@ -217,7 +237,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|colable|\Footup\Controller $handler
+     * @param string|collable|\Footup\Controller $handler
      * @return self
      */
     public function head(string $uri, $handler): self
@@ -228,8 +248,6 @@ class Router
     /**
      * Recherche de correspondantes de routes
      * 
-     * @todo Au lieu de renvoyer une Exeception, nous devons définir une route qui affichera la page 404
-     *
      * @return \Footup\Routing\Route
      * @throws \Exception
      */
@@ -240,7 +258,7 @@ class Router
 
         // If the request method doesn't exist, something seems to be fucked up.
         if (! isset($this->routes[$requestMethod])) {
-            if($this->autoRoute())
+            if($this->autoRoute() === true)
             {
                 // if we use auto routing so
                 // Skip all these fucking logics
@@ -255,11 +273,12 @@ class Router
             $this->routes[static::METHOD_ANY] ?? [],
             $this->routes[$requestMethod] ?? []
         );
-
+        
+        
         // Check for direct matches
         if (isset($this->routes[$requestMethod][$requestUri])) {
             $route = $this->routes[$requestMethod][$requestUri];
-
+            
             return $route;
         }
 
@@ -364,7 +383,7 @@ class Router
         }
 
         AUTO:
-        if($this->autoRoute())
+        if($this->autoRoute() === true)
         {
             $uri = explode('/', trim($requestUri, "/"));
             $uri = array_filter($uri);
