@@ -12,11 +12,14 @@
 
 namespace Footup\Http;
 
+use Footup\Config\Config;
 use Footup\Files\File;
 
 class Request
 {
     public $lang;
+    public $controllerName;
+    public $controllerMethod;
 
     protected $server = [];
 
@@ -73,8 +76,19 @@ class Request
         if (isset($this->server[$kname]) || isset($this->server[$name])) {
             return $this->server[$kname] ?? $this->server[$name];
         }
-        $kname = strtolower($kname);
-        $name = strtolower($name);
+        $kname = str_replace('_', '-', $kname);
+        $name = str_replace('_', '-', $name);
+        if (isset($this->server[$kname]) || isset($this->server[$name])) {
+            return $this->server[$kname] ?? $this->server[$name];
+        }
+        $kname = str_replace('-', '_', $kname);
+        $name = str_replace('-', '_', $name);
+        if (isset($this->server[$kname]) || isset($this->server[$name])) {
+            return $this->server[$kname] ?? $this->server[$name];
+        }
+
+        $kname = mb_strtolower($kname);
+        $name = mb_strtolower($name);
         if (isset($this->server[$kname]) || isset($this->server[$name])) {
             return $this->server[$kname] ?? $this->server[$name];
         }
@@ -216,8 +230,6 @@ class Request
                 return $item;
             }, $files) : false;
         }
-
-        return false;
     }
 
     /**
@@ -232,7 +244,6 @@ class Request
             $k = array_keys($this->files);
             return isset($k[0]) ? new File($this->files[$k[0]]) : false;
         }
-        return false;
     }
 
     /**
@@ -292,16 +303,34 @@ class Request
      */
     public function uri(): string
     {
-        return preg_replace('/\+/', '/', $this->server('REQUEST_URI'));
+        $url = parse_url($this->url(false, true));
+
+        $uri = $this->server('REQUEST_URI');
+
+        if(isset($url['path']))
+        {
+            $uri = strtr($this->server('REQUEST_URI'), [rtrim($url['path'], '/') => ""]);
+        }
+
+        return rtrim(preg_replace('/\/+/', '/', $uri), '/') ?: '/';
     }
 
     /**
      * @param bool $withQuery
+     * @param bool $base to return just base_url
      * @return string
      */
-    public function url($withQuery = true): string
+    public function url($withQuery = true, $base = false): string
     {
-        return $this->scheme(true) . $this->domain() . ($withQuery === true ? $this->uri() : $this->path());
+        $base_url = isset($_ENV["base_url"]) ? $_ENV["base_url"] : (new Config())->base_url;
+        $base_url = trim((string) $base_url, " \n\r\t\v\x00\/");
+
+        if($base === true)
+        {
+            return $base_url;
+        }
+
+		return $withQuery && !empty($this->query()) ? $base_url. $this->path() ."?".http_build_query($this->query(), "_key", "&") : $base_url. $this->path();
     }
 
     /**
@@ -309,11 +338,7 @@ class Request
      */
     public function path(): string
     {
-        $root = explode('/', $this->server('PHP_SELF'));
-        array_pop($root);
-        $root = implode('/', $root);
-
-        return rtrim(preg_replace('/\?.*/', '', preg_replace('/\/+/', '/', str_replace($root, '', $this->server('REQUEST_URI')))), '/') ?: '/';
+        return rtrim(preg_replace('/\?.*/', '', $this->uri()), '/') ?: '/';
     }
 
     /**
@@ -390,7 +415,16 @@ class Request
         if (isset($this->server[$kname])) {
             return $this->server[$kname];
         }
-        $kname = strtolower($kname);
+        $kname = str_replace('-', '_', $kname);
+        if (isset($this->server[$kname])) {
+            return $this->server[$kname];
+        }
+        $kname = str_replace('_', '-', $kname);
+        if (isset($this->server[$kname])) {
+            return $this->server[$kname];
+        }
+
+        $kname = mb_strtolower($kname);
         if (isset($this->server[$kname])) {
             return $this->server[$kname];
         }
