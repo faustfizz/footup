@@ -216,7 +216,7 @@ class BaseModel
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * @example # Use with arrays:
      *
      *      protected $hasOne = [
      *           'properties1' => [
@@ -232,7 +232,7 @@ class BaseModel
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * @example # Use with arrays:
      * 
      *      protected $hasMany = [
      *           'properties1' => [
@@ -248,7 +248,7 @@ class BaseModel
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * @example # Use with arrays:
      *
      *      protected $manyMany = [
      *           'properties1' => [
@@ -268,7 +268,7 @@ class BaseModel
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * @example # Use with arrays:
      *
      *     protected $belongsTo = [
      *           'properties1' => [
@@ -289,8 +289,11 @@ class BaseModel
      *      protected $belongsToMany = [
      *           'properties1' => [
      *                              'model' => 'Other_Model_1',
+     *                              'pivot' => 'Pivot_Model',
      *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field'
+     *                              'local_key' => 'local_field',
+     *                              'pivot_foreign_key' => 'modelKey_in_pivot_table',
+     *                              'pivot_local_key' => 'localKey_in_pivot_table',
      *                             ]
      *          ....................
      *      ];
@@ -1280,16 +1283,19 @@ class BaseModel
 
     /**
      * Fetch a single row from a select query.
+     * 
+     * @param string $fields
+     * @param string|array $where
      *
-     * @return object|null Row
+     * @return BaseModel|null Row
      */
-    public function one($field = null)
+    public function one($fields = null, $where = null)
     {
         if (empty($this->sql)) {
             $this->limit(1)->select();
         }
 
-        $data = $this->get();
+        $data = $this->get($fields ?? "*");
 
         $row = (!empty($data)) ? $data[0] : null;
 
@@ -1299,25 +1305,31 @@ class BaseModel
     /**
      * Fetch a single row from a select query.
      *
-     * @return object|null Row
+     * @param string $field
+     * @param string|array $where
+     *
+     * @return BaseModel|null Row
      */
-    public function first($field = null)
+    public function first($field = null, $where = null)
     {
-        return $this->asc($field ?? $this->getPrimaryKey())->one($field);
+        return $this->asc($field ?? $this->getPrimaryKey())->one(null, $where);
     }
 
     /**
      * Fetch a single row from a select query.
      *
-     * @return object|null Row
+     * @param string $field
+     * @param string|array $where
+     *
+     * @return BaseModel|null Row
      */
-    public function last($field = null)
+    public function last($field = null, $where = null)
     {
         if (empty($this->sql)) {
-            $this->limit(1)->desc($field ?? $this->getPrimaryKey())->select();
+            $this->desc($field ?? $this->getPrimaryKey());
         }
 
-        return $this->one();
+        return $this->one(null, $where);
     }
 
     /**
@@ -1339,7 +1351,7 @@ class BaseModel
      * Gets the min value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Self reference
+     * @return mixed Row value
      */
     public function min($field, $key = null, $expire = 0)
     {
@@ -1354,7 +1366,7 @@ class BaseModel
      * Gets the max value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Self reference
+     * @return mixed Row value
      */
     public function max($field, $key = null, $expire = 0)
     {
@@ -1369,7 +1381,7 @@ class BaseModel
      * Gets the sum value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Self reference
+     * @return mixed Row value
      */
     public function sum($field, $key = null, $expire = 0)
     {
@@ -1384,7 +1396,7 @@ class BaseModel
      * Gets the average value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Self reference
+     * @return mixed Row value
      */
     public function avg($field, $key = null, $expire = 0)
     {
@@ -1400,7 +1412,7 @@ class BaseModel
      * Gets a count of records for a table.
      *
      * @param string $field Field name
-     * @return mixed Self reference
+     * @return mixed Row value
      */
     public function count($field = '*')
     {
@@ -1908,8 +1920,6 @@ class BaseModel
      * and add them as property of this model.
      *
      * @return BaseModel|BaseModel[]|null
-     *
-     * @todo infinity loop avoiding still exists in some relationship cases (belongTo-belongsToMany)
      */
     public function loadRelations($for, $limit = null, $offset = null)
     {
@@ -1972,6 +1982,7 @@ class BaseModel
          * @var BaseModel
          */
         $class = new $relationConfig['model']();
+
         /**
          * @var BaseModel
          */
@@ -2038,11 +2049,21 @@ class BaseModel
         /**
          * @var BaseModel
          */
-        $class = new $relationConfig['model']();
+        $model = new $relationConfig['model']();
+        
+        /**
+         * @var BaseModel
+         */
+        $pivot = new $relationConfig['pivot']();
         $foreign_key = $relationConfig['foreign_key'];
         $local_key = $relationConfig['local_key'];
+        $pivot_foreign_key = $relationConfig['pivot_foreign_key'];
+        $pivot_local_key = $relationConfig['pivot_local_key'];
 
-        $objects = $class->get("*", [$foreign_key => $this->{$local_key}], $limit, $offset);
+        $objects = $model->join($pivot->getTable()." pivot", "pivot.$pivot_foreign_key = ".$model->getTable().".$foreign_key")
+                        ->join($this->table, $this->table.".$local_key = pivot.$pivot_local_key")
+                        ->get($model->getTable().".*, pivot.*", "pivot.$pivot_local_key = ".$this->{$local_key}, $limit, $offset);
+
         return $objects;
     }
 
