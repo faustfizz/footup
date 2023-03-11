@@ -26,6 +26,7 @@ Un mini framework MVC PHP qui comporte :
 │   │   ├── Config.php
 │   │   ├── Constants.php
 │   │   ├── Email.php
+│   │   ├── Paginator.php
 │   │   ├── Form.php
 │   │   └── Routes.php
 │   ├── Controller
@@ -69,6 +70,14 @@ Un mini framework MVC PHP qui comporte :
 │   ├── Files
 │   │   ├── File.php
 │   │   └── FileSystem.php
+│   ├── Paginator
+│   │   ├── AbstractPaginator.php
+│   │   ├── Page.php
+│   │   ├── PaginatorException.php
+│   │   ├── Paginator.php
+│   │   ├── Views
+│   │   │   └── default.php
+│   │   └── Paginator.php
 │   ├── Footup.php
 │   ├── Functions.php
 │   ├── Html
