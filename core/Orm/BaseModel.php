@@ -15,6 +15,7 @@ namespace Footup\Orm;
 use App\Config\Config;
 use Exception;
 use Footup\Html\Form;
+use Footup\Paginator\Paginator;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -299,6 +300,21 @@ class BaseModel
      *      ];
      */
     protected $belongsToMany = [];
+
+    /**
+     * @var \App\Config\Paginator
+     */
+    public $paginatorConfig;
+
+    /**
+     * @var \Footup\Paginator\Paginator
+     */
+
+    public $paginator;
+    /**
+     * @var \Footup\Paginator\Paginator
+     */
+    public $pager;
 
     /**
      * Class constructor.
@@ -1261,12 +1277,26 @@ class BaseModel
      * Fonction de pagination | paginate function
      *
      * @param integer|null $perPage
+     * @param string $pageName
      * @param integer $page
      * @return BaseModel[]
      */
-    public function paginate(int $perPage = null, int $page = 0)
+    public function paginate(int $perPage = null, string $pageName = 'page', int $page = 0)
 	{
-        $page = (int)request()->get('page', $page);
+        $this->paginatorConfig = new \App\Config\Paginator();
+
+        if(!$perPage)
+        {
+            $perPage = $this->paginatorConfig->perPage;
+        }
+
+        if($pageName)
+        {
+            $this->paginatorConfig->pageName = $pageName;
+        }
+
+
+        $page = (int)request()->get($this->paginatorConfig->pageName, $page);
 		$page  = $page >= 1 ? $page : 1;
 
 		$total = (int)$this->count();
@@ -1276,7 +1306,10 @@ class BaseModel
 		$perPage     = is_null($perPage) ? $this->per_page : $perPage;
 		$this->page_count = $total / $perPage;
 		$this->current_page = $page;
+
 		$offset      = ($page - 1) * $perPage;
+
+        $this->paginator = $this->pager = new Paginator($total, $perPage, $page, request()->url(), $this->paginatorConfig);
 
         return $this->get("*", null, $perPage, $offset);
 	}
