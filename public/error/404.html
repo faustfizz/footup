@@ -23,7 +23,8 @@
 
       main #errorText {
          font-size: 22px;
-         margin: 14px 0;
+         text-align: center;
+         margin: 34px 0;
       }
 
       main #errorLink {
@@ -46,6 +47,11 @@
          transform-origin: 85px 4px;
          -webkit-animation: an1 12s 0.5s infinite ease-out;
          animation: an1 12s 0.5s infinite ease-out;
+      }
+
+      main #rect5419 {
+         -webkit-animation: culor 8s 0.5s infinite ease-out;
+         animation: culor 8s 0.5s infinite ease-out;
       }
 
       @-webkit-keyframes an1 {
@@ -145,6 +151,106 @@
 
          100% {
             transform: rotate(0);
+         }
+      }
+
+      @-webkit-keyframes culor {
+         0% {
+            fill: dodgerblue;
+         }
+
+         5% {
+            fill: red;
+         }
+
+         15% {
+            fill: dodgerblue;
+         }
+
+         25% {
+            fill: red;
+         }
+
+         35% {
+            fill: black;
+         }
+
+         45% {
+            fill: black;
+         }
+
+         55% {
+            fill: black;
+         }
+
+         65% {
+            fill: black;
+         }
+
+         75% {
+            fill: red;
+         }
+
+         85% {
+            fill: dodgerblue;
+         }
+
+         95% {
+            fill: red;
+         }
+
+         100% {
+            fill: dodgerblue;
+         }
+      }
+
+      @keyframes culor {
+         0% {
+            fill: dodgerblue;
+         }
+
+         5% {
+            fill: red;
+         }
+
+         15% {
+            fill: dodgerblue;
+         }
+
+         25% {
+            fill: red;
+         }
+
+         35% {
+            fill: black;
+         }
+
+         45% {
+            fill: black;
+         }
+
+         55% {
+            fill: black;
+         }
+
+         65% {
+            fill: black;
+         }
+
+         75% {
+            fill: red;
+         }
+
+         85% {
+            fill: dodgerblue;
+         }
+
+         95% {
+            fill: red;
+         }
+
+         100% {
+            fill: dodgerblue;
          }
       }
    </style>
@@ -265,7 +371,7 @@
       </svg>
 
       <p id="errorText">Ooops ! {message}</p>
-      <a id="errorLink" href="/">Revenir à l'accueil</a>
+      <a id="errorLink" href="{link}">Revenir à l'accueil</a>
    </main>
    <!-- partial -->
 

@@ -462,14 +462,14 @@ class Response
         if(isset($config->page_error[$status."s"]))
         {
             $content = file_exists($config->page_error[$status."s"]) ? file_get_contents($config->page_error[$status."s"]) : $message;
-            $content = strtr($content, ["{status}" => $status, "{title}" => $title, "{message}" => $message]);
+            $content = strtr($content, ["{status}" => $status, "{title}" => $title, "{message}" => $message, "{link}" =>  '/']);
             return $this->{"call{$status}"}($content, ['Content-Type' => 'text/html; charset=UTF-8']);
         }
 
         if(isset($config->page_error[$short."s"]))
         {
             $content = file_exists($config->page_error[$short."s"]) ? file_get_contents($config->page_error[$short."s"]) : $message;
-            $content = strtr($content, ["{status}" => $status, "{title}" => $title, "{message}" => $message]);
+            $content = strtr($content, ["{status}" => $status, "{title}" => $title, "{message}" => $message, "{link}" =>  '/']);
             return $this->{"call{$status}"}($content, ['Content-Type' => 'text/html; charset=UTF-8']);
         }
     }
