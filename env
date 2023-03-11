@@ -33,6 +33,11 @@ timezone    =   'Africa/Nairobi'
 #
 # Controleur par défaut
 #
+base_url = http://footup_dev.io/
+
+#
+# Controleur par défaut
+#
 default_controller = Home
 
 #

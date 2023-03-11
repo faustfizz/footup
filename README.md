@@ -85,13 +85,13 @@ Un mini framework MVC PHP qui comporte :
 │   │   └── Time.php
 │   ├── Lang
 │   │   ├── fr
-│   │   │   ├── Core.php
-│   │   │   ├── Date.php
-│   │   │   ├── Db.php
-│   │   │   ├── Email.php
-│   │   │   ├── File.php
-│   │   │   ├── Http.php
-│   │   │   └── View.php
+│   │   │   ├── core.json
+│   │   │   ├── date.json
+│   │   │   ├── db.json
+│   │   │   ├── email.json
+│   │   │   ├── file.json
+│   │   │   ├── http.json
+│   │   │   └── view.json
 │   │   └── Lang.php
 │   ├── Model.php
 │   ├── Orm
@@ -112,7 +112,7 @@ Un mini framework MVC PHP qui comporte :
 │   ├── index.php
 │   └── uploads
 ├── env
-├── foot
+├── footup
 ├── LICENSE
 └── README.md
 ```
@@ -133,7 +133,7 @@ Ce framework a tout ce qu'il faut pour vous aider à developper vite votre appli
 ## Exemple d'Utilisation du CLI
 
 ```bash
-nuka@hacker_pc:~$ php foot 
+nuka@hacker_pc:~$ php footup 
 ```
 
 ## Exemple de Model
@@ -178,6 +178,9 @@ class Contact extends Model{
   
   # you can also use 
   $contact->setEmail("fuck@you.yh");
+
+  **// Generating form**
+  $contact->getForm();
 
   var_dump($c->firstByEmail('faus@fizz.io'));
   ..........................
