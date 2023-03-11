@@ -181,6 +181,103 @@ defined("STRTR") or define("STRTR", array(
 
 ////////////#--------------------------#///////////
 
+if (! function_exists('directory_map')) {
+    /**
+     * Create a Directory Map
+     *
+     * Reads the specified directory and builds an array
+     * representation of it. Sub-folders contained with the
+     * directory will be mapped as well.
+	 * 
+	 * @copyright CodeIgniter 4 FileSystem Helper
+     *
+     * @param string $sourceDir      Path to source
+     * @param int    $directoryDepth Depth of directories to traverse
+     *                               (0 = fully recursive, 1 = current dir, etc)
+     * @param bool   $hidden         Whether to show hidden files
+     */
+    function directory_map(string $sourceDir, int $directoryDepth = 0, bool $hidden = false): array
+    {
+        try {
+            $fp = opendir($sourceDir);
+
+            $fileData  = [];
+            $newDepth  = $directoryDepth - 1;
+            $sourceDir = rtrim($sourceDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+            while (false !== ($file = readdir($fp))) {
+                // Remove '.', '..', and hidden files [optional]
+                if ($file === '.' || $file === '..' || ($hidden === false && $file[0] === '.')) {
+                    continue;
+                }
+
+                if (is_dir($sourceDir . $file)) {
+                    $file .= DIRECTORY_SEPARATOR;
+                }
+
+                if (($directoryDepth < 1 || $newDepth > 0) && is_dir($sourceDir . $file)) {
+                    $fileData[$file] = directory_map($sourceDir . $file, $newDepth, $hidden);
+                } else {
+                    $fileData[] = $file;
+                }
+            }
+
+            closedir($fp);
+
+            return $fileData;
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+}
+
+if (! function_exists('directory_mirror')) {
+    /**
+     * Recursively copies the files and directories of the origin directory
+     * into the target directory, i.e. "mirror" its contents.
+	 * 
+	 * @copyright CodeIgniter 4 FileSystem Helper
+     *
+     * @param string $originDir orignal directory (source)
+     * @param string $targetDir destination directory (target)
+	 * 
+     * @param bool $overwrite Whether individual files overwrite on collision
+     *
+     * @throws InvalidArgumentException
+     */
+    function directory_mirror(string $originDir, string $targetDir, bool $overwrite = true): void
+    {
+        if (! is_dir($originDir = rtrim($originDir, '\\/'))) {
+            throw new InvalidArgumentException(sprintf('The origin directory "%s" was not found.', $originDir));
+        }
+
+        if (! is_dir($targetDir = rtrim($targetDir, '\\/'))) {
+            @mkdir($targetDir, 0755, true);
+        }
+
+        $dirLen = strlen($originDir);
+
+        /**
+         * @var SplFileInfo $file
+         */
+        foreach (new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($originDir, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        ) as $file) {
+            $origin = $file->getPathname();
+            $target = $targetDir . substr($origin, $dirLen);
+
+            if ($file->isDir()) {
+                if (! is_dir($target)) {
+                    mkdir($target, 0755);
+                }
+            } elseif (! is_file($target) || ($overwrite && is_file($target))) {
+                copy($origin, $target);
+            }
+        }
+    }
+}
+
 if(!function_exists("request"))
 {
     /**
@@ -672,10 +769,10 @@ if (! function_exists('slugify'))
 		$qSeparator = preg_quote($separator, '#');
 
 		$trans = [
-			'&.+?;'                  => '',
-			'[^\w\d\pL\pM _-]'       => '',
 			'\s+'                    => $separator,
 			'(' . $qSeparator . ')+' => $separator,
+			'&.+?;'                  => '',
+			'[^\w\d\pL\pM _-]'       => ''
 		];
 
         $str = preg_replace(array_keys(STRTR), array_values(STRTR), $str);
@@ -690,7 +787,7 @@ if (! function_exists('slugify'))
 			$str = strtolower($str);
 		}
 
-		return trim(trim($str, $separator));
+		return trim($str);
 	}
 }
 
