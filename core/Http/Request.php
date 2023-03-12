@@ -14,12 +14,44 @@ namespace Footup\Http;
 
 use Footup\Config\Config;
 use Footup\Files\File;
+use Footup\Utils\Validator\Validator;
 
 class Request
 {
+    /**
+     * Locale
+     *
+     * @var string
+     */
     public $lang;
+
+    /**
+     * Current Controller
+     *
+     * @var string
+     */
     public $controllerName;
+
+    /**
+     * Current called controller method
+     *
+     * @var string
+     */
     public $controllerMethod;
+
+    /**
+     * Validator
+     *
+     * @var \Footup\Utils\Validator\Validator
+     */
+    public $validator;
+
+    /**
+     * Data to validate
+     *
+     * @var array
+     */
+    protected $data = [];
 
     protected $server = [];
 
@@ -44,7 +76,111 @@ class Request
         $this->post    = &$_POST;
         $this->files   = &$_FILES;
         $this->request = &$_REQUEST;
+
+        $this->validator = new Validator();
     }
+
+    /**
+     * Function to interact with the validator
+     *
+     * @param array|null|object|null $values
+     * @param array|null $ruleSet
+     * @param string|null $prefix
+     * @return Validator|bool
+     */
+    private function validator(array|null|object $values = [], array $ruleSet = [], string $prefix = null)
+    {
+        if(empty($values) && empty($ruleSet))
+        {
+            return $this->validator;
+        }
+
+        return $this->validator->validate($values, $ruleSet, $prefix);
+    }
+
+    /**
+     * Get the Validator class
+     *
+     * @return Validator
+     */
+    public function getValidator()
+    {
+        return $this->validator();
+    }
+
+    /**
+     * Choose the GET data to validate
+     *
+     * @param mixed $key
+     * @param mixed $default
+     * @return Request
+     */
+    public function withGetInput(mixed $key = null, mixed $default = null)
+    {
+        $this->data = array_merge($this->get($key, $default), $this->json($key, false));
+
+        return $this;
+    }
+
+    /**
+     * Choose the POST data to validate
+     *
+     * @param mixed $key
+     * @param mixed $default
+     * @return Request
+     */
+    public function withPostInput(mixed $key = null, mixed $default = null)
+    {
+        $this->data = array_merge($this->post($key, $default), $this->json($key, false));
+
+        return $this;
+    }
+
+    /**
+     * Grab the GET, POST data to validate
+     *
+     * @param mixed $key
+     * @param mixed $default
+     * @return Request
+     */
+    public function withInput(mixed $key = null, mixed $default = null)
+    {
+        $this->data = array_merge($this->get($key, $default), $this->post($key, $default), $this->json($key, false));
+
+        return $this;
+    }
+
+    /**
+     * $data as data to validate
+     *
+     * @param array $data
+     * 
+     * @return Request
+     */
+    public function with(array $data)
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    /**
+     * Choose the GET data to validate
+     *
+     * @param mixed $key
+     * @param mixed $default
+     * @return bool true if everything is ok
+     */
+    public function validate(array $ruleSet, array|null|object $values = [], string $prefix = null)
+    {
+        if(empty($values) && !empty($this->data))
+        {
+            $values = $this->data;
+        }
+
+        return $this->validator->validate($values, $ruleSet, $prefix);
+    }
+
 
     /**
      * @return string|null
