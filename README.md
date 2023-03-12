@@ -6,9 +6,9 @@ Un mini framework MVC PHP qui comporte :
 * Translation support
 * Config using PHP File or .env (Rename env to .env)
 * Gestion de Requête (Request)
+* Gestion de Reponse (Response)
 * Validator (Form Validation - Not validating UploadedFile)
 * Pagination (Pagination and Pagination View)
-* Gestion de Reponse (Response)
 * Session
 * Email
 * Routing
