@@ -12,7 +12,6 @@
 
 namespace Footup\Orm;
 
-use App\Config\Config;
 use Exception;
 use Footup\Html\Form;
 use Footup\Paginator\Paginator;
@@ -319,9 +318,10 @@ class BaseModel
     /**
      * Class constructor.
      */
-    public function __construct($data = [], $init = true, $config = null)
+    public function __construct($data = [], $config = null, $init = true)
     {
-        self::setDb($init, $config);
+        $this->setDb($config, $init);
+
         $this->getTable();
         $this->getPrimaryKey();
         // charger les relations
@@ -382,33 +382,6 @@ class BaseModel
     public function build($sql, $input)
     {
         return (strlen($input) > 0) ? ($sql . ' ' . $input) : $sql;
-    }
-
-    /**
-     * Annalyse d'un url et convert à un objet.
-     *
-     * @param string $connection Connection string
-     * @return array Connection information
-     * @throws Exception For invalid connection string
-     */
-    public static function parseConnection($connection)
-    {
-        $url = parse_url($connection);
-
-        if (empty($url)) {
-            throw new Exception(text('Db.urlInvalid'));
-        }
-
-        $cfg = array();
-
-        $cfg['db_type'] = isset($url['scheme']) ? $url['scheme'] : $url['path'];
-        $cfg['db_host'] = isset($url['host']) ? $url['host'] : null;
-        $cfg['db_name'] = isset($url['path']) ? substr($url['path'], 1) : null;
-        $cfg['db_user'] = isset($url['user']) ? $url['user'] : null;
-        $cfg['db_pass'] = isset($url['pass']) ? $url['pass'] : null;
-        $cfg['db_port'] = isset($url['port']) ? $url['db_port'] : null;
-
-        return $cfg;
     }
 
     /**
@@ -1090,58 +1063,15 @@ class BaseModel
     /**
      * Sets the database connection.
      *
-     * @param string|array|object $db Database connection string, array or object
+     * @param \PDO|DbConnection|string|array $config
+     * @param boolean $init
      * @throws Exception For connection error
+     * @return BaseModel
      */
-    public static function setDb($init = true, $config = null)
+    public function setDb($config = null, $init = true)
     {
-        if ($init && self::$db == null) {
-            // Connection string
-            if (is_string($config)) {
-                return self::setDb(self::parseConnection($config));
-            }
-            // Connection information
-            else if (is_array($config) || is_null($config)) {
-                $Config = (new Config($config))->config;
-
-                switch ($Config['db_type']) {
-                    case 'pdopgsql':
-                        $dsn = sprintf(
-                            'pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s',
-                            $Config['db_host'],
-                            isset($Config['db_port']) ? $Config['db_port'] : 5432,
-                            $Config['db_name'],
-                            $Config['db_user'],
-                            $Config['db_pass']
-                        );
-
-                        return self::$db = new PDO($dsn);
-
-                    case 'pdosqlite':
-                        return self::$db = new PDO('sqlite:/' . $Config['db_name']);
-
-                    case 'pdomysql':
-                    default:
-                        $dsn = sprintf(
-                            'mysql:host=%s;port=%d;dbname=%s',
-                            $Config['db_host'],
-                            isset($Config['db_port']) ? $Config['db_port'] : 3306,
-                            $Config['db_name']
-                        );
-                        return self::$db = new PDO($dsn, $Config['db_user'], $Config['db_pass']);
-                }
-
-                if (self::$db == null) {
-                    throw new Exception(text("Db.undefinedDb"));
-                }
-            }
-            // Connection object or resource
-            else {
-                throw new Exception(text("Db.unsupportedType"));
-            }
-        } else {
-            return self::$db;
-        }
+        self::$db = DbConnection::setDb($config, $init);
+        return $this;
     }
 
     /**
@@ -1607,7 +1537,7 @@ class BaseModel
      */
     public function getTable()
     {
-        $class = new \ReflectionClass($this);
+        $class = new ReflectionClass($this);
         $classVar = $class->getDefaultProperties();
         
         if (isset($classVar['table']))
@@ -1714,7 +1644,7 @@ class BaseModel
     public function fieldTypes()
     {
         $fields = array();
-        foreach (self::$db->query("SHOW COLUMNS FROM `{$this->getTable()}`")->fetchAll(\PDO::FETCH_OBJ) as $field) {
+        foreach (self::$db->query("SHOW COLUMNS FROM `{$this->getTable()}`")->fetchAll(PDO::FETCH_OBJ) as $field) {
             $type = explode("(", $field->Type);
             
             $_type = $type[0];
