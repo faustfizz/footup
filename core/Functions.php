@@ -20,6 +20,7 @@ use App\Config\Config;
 use Footup\Config\Mime;
 use Footup\I18n\Time;
 use Footup\Lang\Lang;
+use Footup\Utils\Validator\Validator;
 
 // Tableau de caractères à remplacer
 defined("STRTR") or define("STRTR", array(
@@ -303,6 +304,35 @@ if(!function_exists("request"))
         }else{
             return $req;
         }
+    }
+}
+
+if(!function_exists("validator"))
+{
+    /**
+     * Une fonction pour exposer l'objet Validator
+     *
+     * @return Footup\Utils\Validator\Validator
+     */
+    function validator()
+    {
+		return request()->getValidator();
+    }
+}
+
+if(!function_exists("validate"))
+{
+    /**
+     * Une fonction pour exposer l'objet Validator
+     *
+     * @param array|object $dataToValidate like ["name" => "Said Ali"]
+     * @param array $ruleSet like ["name" => "present|min-str-len:3"]
+     * @param string $prefixOfAllFields like if you have user[name] it should be user as prefix
+     * @return bool
+     */
+    function validate($dataToValidate, array $ruleSet, string $prefixOfAllFields = null)
+    {
+		return validator()->validate($dataToValidate, $ruleSet, $prefixOfAllFields);
     }
 }
 
@@ -825,16 +855,13 @@ if(!function_exists("assets"))
 		switch (pathinfo($file, PATHINFO_EXTENSION)) {
 			case "css":
 				return css($file);
-				break;
 			case "png":
 			case "jpg":
 			case "jpeg":
 			case "gif":
 				return img($file);
-				break;
 			case "js":
 				return js($file);
-				break;
 			default:
 				return "";
 		}
