@@ -114,6 +114,7 @@ Un mini framework MVC PHP qui comporte :
 │   │   │   ├── date.json
 │   │   │   ├── db.json
 │   │   │   ├── email.json
+│   │   │   ├── validator.json
 │   │   │   ├── file.json
 │   │   │   ├── http.json
 │   │   │   └── view.json
