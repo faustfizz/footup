@@ -6,16 +6,21 @@ Un mini framework MVC PHP qui comporte :
 * Translation support
 * Config using PHP File or .env (Rename env to .env)
 * Gestion de Requête (Request)
+* Validator (Form Validation - Not validating UploadedFile)
+* Pagination (Pagination and Pagination View)
 * Gestion de Reponse (Response)
 * Session
 * Email
 * Routing
-* Controller Middleware
+* Controller AND Middleware
 * Model RelationShips ($hasOne, $hasMany, $belongsTo, $belongsToMany)
 * Model QueryBuilder
 * Model Events CallBacks
 * Fichiers (Upload File)
 * Extensible (You can integrate any library you want and you can add (news folders and class) in the App Directory in condition you use psr4)
+
+## ReadMe should be updated -- (Soon i'll create the docs website for FootUp PHP MVC Framework)
+------------------
 
 ## Directories tree
 ```
@@ -78,6 +83,17 @@ Un mini framework MVC PHP qui comporte :
 │   │   ├── Views
 │   │   │   └── default.php
 │   │   └── Paginator.php
+│   ├── Utils
+│   │   ├── Arrays
+│   │   │   ├── Arr.php
+│   │   │   ├── Arrayable.php
+│   │   │   ├── ArrDots.php
+│   │   │   ├── Collection.php
+│   │   │   └── Dots.php
+│   │   ├── Validator
+│   │   │   ├── Validate.php
+│   │   │   └── Validator.php
+│   │   └── Str.php
 │   ├── Footup.php
 │   ├── Functions.php
 │   ├── Html
@@ -625,6 +641,11 @@ class Home extends BaseController{
 }
   
 ```
+
+## **Credits Libraries**
+**Paginator** [iranianpep/paginator](https://github/iranianpep/paginator)
+**Form Validator** [pdscopes/php-form-validator](https://github.com/pdscopes/php-form-validator)
+**PHP Arrays** [pdscopes/php-arrays](https://github.com/pdscopes/php-arrays)
 
 ## **License**
 
