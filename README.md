@@ -7,10 +7,10 @@ Un mini framework MVC PHP qui comporte :
 * Config using PHP File or .env (Rename env to .env)
 * Gestion de Requête (Request)
 * Gestion de Reponse (Response)
-* Validator (Form Validation - Not validating UploadedFile)
-* Pagination (Pagination and Pagination View)
+* Validator (Form Validation - Not validating UploadedFile) Thanks to [pdscopes/php-form-validator](https://github.com/pdscopes/php-form-validator)
+* Pagination (Pagination and Pagination View) Thanks to [iranianpep/paginator](https://github/iranianpep/paginator)
 * Session
-* Email
+* Email (CodeIgniter 4 Email Class)
 * Routing
 * Controller AND Middleware
 * Model RelationShips ($hasOne, $hasMany, $belongsTo, $belongsToMany)
@@ -680,6 +680,8 @@ class Home extends BaseController{
 **Form Validator** [pdscopes/php-form-validator](https://github.com/pdscopes/php-form-validator)
 
 **PHP Arrays** [pdscopes/php-arrays](https://github.com/pdscopes/php-arrays)
+
+**PHP CLI by Adhocore** [adhocore/php-cli](https://github.com/adhocore/php-cli)
 
 ## **License**
 
