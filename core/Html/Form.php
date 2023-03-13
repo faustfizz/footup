@@ -133,8 +133,9 @@ class Form
      * @param array|null $data
      * @param [bool] ...$config
      */
-    public function __construct(string $action = "#", array $fields = [], array $data = [], ...$config) {
-        $this->config = array_merge($this->config, $config);
+    public function __construct(string $action = "#", array $fields = [], array $data = []) {
+        $this->config = array_merge($this->config, ConfigForm::$config);
+        $this->submitText = trim(ConfigForm::$submitText);
         $this->class = array_merge($this->class, ConfigForm::$class);
         $this->action = $action;
         $this->prepareFields($fields, $data);

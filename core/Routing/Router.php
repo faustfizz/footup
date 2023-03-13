@@ -12,7 +12,7 @@
 
 namespace Footup\Routing;
 
-use App\Config\Config;
+use Footup\Config\Config;
 use Exception;
 use Footup\Http\Request;
 use Footup\Http\Response;

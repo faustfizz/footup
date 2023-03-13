@@ -13,18 +13,16 @@ namespace Footup\Config;
 class Autoload{
 
     protected $classmap = [];
-    protected $psr4 = [];
+    protected $psr4 = [
+        "Footup"    =>  SYS_PATH,
+        "App"       =>  APP_PATH,
+    ];
 
-    public function __construct($psr4, $classmap)
+    public function __construct()
     {
-        /**
-         * @todo DON'T EDIT | NE TOUCHER JAMAIS CETTE LIGNE
-         */
-        $this->psr4['Footup'] = SYS_PATH;
-        $this->psr4['App'] = APP_PATH;
-        $this->psr4 = array_merge($this->psr4, $psr4);
-        $this->classmap = array_merge($this->classmap, $classmap);
+        $this->register();
     }
+
     /**
      * @return self
      */
@@ -37,9 +35,17 @@ class Autoload{
 			{
 				return false;
 			}
-
-			include_once $this->classmap[$class];
+            if(file_exists($this->classmap[$class]))
+            {
+                include_once $this->classmap[$class];
+            }
 		}, true, true);
+
+        /**
+         * @todo DON'T EDIT | NE TOUCHER JAMAIS CETTE LIGNE
+         */
+        $this->psr4 = array_merge($this->psr4, \App\Config\Autoload::$psr4);
+        $this->classmap = array_merge($this->classmap, \App\Config\Autoload::$classmap);
 
         return $this;
     }
@@ -62,7 +68,10 @@ class Autoload{
                 $str .= $r === 0 ? strtolower($c[$r]).DS : ucfirst($c[$r]).DS;
             }
         }
-        require_once(ROOT_PATH.$str.ucfirst(end($c)).'.php');
+        if(file_exists(ROOT_PATH.$str.ucfirst(end($c)).'.php'))
+        {
+            return require_once(ROOT_PATH.$str.ucfirst(end($c)).'.php');
+        }
     }
 
 }

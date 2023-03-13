@@ -9,7 +9,8 @@
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
-use App\Config\Config;
+
+use Footup\Config\Config;
 use Exception;
 use Footup\Http\Request;
 use Footup\Http\Response;
@@ -89,16 +90,16 @@ class Controller
         return json_encode($data);
     }
 
-    function view( $path , $data = null )
+    function view( $path , $data = null, $ext = null )
     {
         extract($data);
         $path = trim($path, "/");
         $config = new Config();
-        if(!file_exists($config->view_path . $path . $config->view_ext))
+        if(!file_exists($config->view_path . $path . ($ext ?? $config->view_ext)))
         {
-            throw new Exception(text("View.missedFile", [$path . $config->view_ext]));
+            throw new Exception(text("View.missedFile", [$path . ($ext ?? $config->view_ext)]));
         }
-        return include_once($config->view_path . $path . $config->view_ext);
+        return include_once($config->view_path . $path . ($ext ?? $config->view_ext));
     }
 
 

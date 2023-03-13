@@ -38,8 +38,8 @@ defined('BASE_PATH') or define('BASE_PATH', __DIR__ .DS);
 /**
  * @todo Configure ceci pour pointer au dossier contenant vos fichier de configuration
  */
-defined('CONFIG_PATH') or define('CONFIG_PATH', realpath(__DIR__.DS.'/../app/Config').DS);
-defined('APP_PATH') or define('APP_PATH', realpath(CONFIG_PATH."..").DS);
+defined('CONFIG_PATH') or define('CONFIG_PATH', realpath(ROOT_PATH.'app/Config').DS);
+defined('APP_PATH') or define('APP_PATH', realpath(ROOT_PATH."app").DS);
 
 /**
  * C'est ici que je charge vos contantes donc ne faites pas de vos constates une partie très importante

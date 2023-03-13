@@ -391,12 +391,11 @@ class Email
 	 *
 	 * @param array|null $config
 	 */
-	public function __construct($config = null)
+	public function __construct($config = [])
 	{
-		if(is_null($config))
+		if(empty($config))
 		{
-			$FlyConfig = isset($_ENV['email']) ? new EmailConfig(array_filter($_ENV['email']), false) : get_object_vars(new EmailConfig(null, false));
-			$config = !is_null($config) ? $config : $FlyConfig;
+			$config = isset($_ENV['email']) && !empty($_ENV['email']) ? new EmailConfig(array_filter($_ENV['email'])) : new EmailConfig();
 		}
 
 		$this->initialize($config);
@@ -414,24 +413,24 @@ class Email
 	{
 		$this->clear();
 
-		if ($config instanceof \App\Config\Email)
+		if ($config instanceof EmailConfig)
 		{
-			$config = get_object_vars($config);
+			$config = (array)($config);
 		}
 
-		foreach (get_class_vars(get_class($this)) as $key => $value)
+		foreach ($config as $key => $value)
 		{
-			if (property_exists($this, $key) && isset($config[$key]))
+			if (property_exists($this, $key) && !empty($value))
 			{
 				$method = 'set' . ucfirst($key);
 
 				if (method_exists($this, $method))
 				{
-					$this->$method($config[$key]);
+					$this->$method($value);
 				}
 				else
 				{
-					$this->$key = $config[$key];
+					$this->$key = $value;
 				}
 			}
 		}

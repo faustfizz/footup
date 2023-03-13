@@ -10,7 +10,8 @@
  */
 namespace App\Config;
 
-class Autoload extends \Footup\Config\Autoload{
+class Autoload
+{
 
     /**
      * Les classmap sont les fichier qu'on souhaite ajouter sans namespace
@@ -23,7 +24,7 @@ class Autoload extends \Footup\Config\Autoload{
      *
      * @var array
      */ 
-    protected $classmap = [];
+    public static $classmap = [];
 
     /**
      * Pour le namedspace
@@ -35,28 +36,6 @@ class Autoload extends \Footup\Config\Autoload{
      *
      * @var array
      */ 
-    protected $psr4 = [ ];
-
-    /**
-     * NE Modifier Pas | Don't Edit
-     */
-    public function __construct()
-    {
-        /**
-         * @todo DON'T EDIT | À NE PAS EDITER
-         */
-        parent::__construct($this->psr4, $this->classmap);
-    }
-
-    /**
-     * NE Modifier Pas | Don't Edit
-     */
-    public function register()
-    {
-        /**
-         * @todo DON'T EDIT | À NE PAS EDITER
-         */
-        parent::register();
-    }
+    public static $psr4 = [ ];
 
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+use Footup\Config\Config;
 
 /**
  * FOOTUP - 0.1.4 - 12.2021
@@ -37,33 +38,23 @@ defined('ROOT_PATH') or define('ROOT_PATH', __DIR__.DS);
 /**
  * @todo Configure ceci pour pointer au dossier contenant vos fichier de configuration
  */
-defined('CONFIG_PATH') or define('CONFIG_PATH', __DIR__.DS.'app/Config'.DS);
-defined('APP_PATH') or define('APP_PATH', CONFIG_PATH."..".DS);
-
-/**
- * Chargement des classes de configuration
- * =======================================
- * - config système
- * - config utilisateur
- */
-include_once SYS_PATH.'Config/Config.php';
-include_once CONFIG_PATH.'Config.php';
+defined('CONFIG_PATH') or define('CONFIG_PATH', realpath(ROOT_PATH.'app/Config').DS);
+defined('APP_PATH') or define('APP_PATH', realpath(ROOT_PATH."app").DS);
 
 /**
  * Chargement des chargeurs de classes
  */
 include_once SYS_PATH.'Config/Autoload.php';
-include_once CONFIG_PATH.'Autoload.php';
 
 /**
  * Démarrer le chargeur de classes
  */
-(new \App\Config\Autoload())->register();
+new \Footup\Config\Autoload();
 
 /**
  * Initialise la classe de configuration
  */
-$config = new \App\Config\Config();
+$config = new Config();
 
 /**
  * Création de quelques constantes importantes
@@ -84,4 +75,4 @@ chdir(BASE_PATH);
 /**
  * Démarre le console
  */
-(new Footup\Cli\Console())->run();
+(new Footup\Cli\Konsole('FOOTUP MVC Framework', 'v0.1.5'))->run();

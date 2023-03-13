@@ -415,6 +415,20 @@ if(!function_exists("calledMethod"))
 
 // --------------------------------------------------------------------
 
+if(!function_exists("router"))
+{
+    /**
+     * Exposition de l'objet Router
+     *
+     * @return \Footup\Routing\Router
+     */
+    function router()
+    {
+		global $Router;
+        return $Router;
+    }
+}
+
 if(!function_exists("response"))
 {
     /**

@@ -10,7 +10,7 @@
  */
 namespace Footup;
 
-use App\Config\Config;
+use Footup\Config\Config;
 use Footup\Http\Request;
 use Footup\Routing\Router;
 
@@ -20,24 +20,14 @@ use Footup\Routing\Router;
 defined('SYS_PATH') or define('SYS_PATH', realpath(__DIR__.DS).DS);
 
 /**
- * Chargement des classes de configuration
- * =======================================
- * - config système
- * - config utilisateur
- */
-include_once SYS_PATH.'Config/Config.php';
-include_once CONFIG_PATH.'Config.php';
-
-/**
  * Chargement des chargeurs de classes
  */
 include_once SYS_PATH.'Config/Autoload.php';
-include_once CONFIG_PATH.'Autoload.php';
 
 /**
  * Démarrer le chargeur de classes
  */
-(new \App\Config\Autoload())->register();
+new \Footup\Config\Autoload();
 
 /**
  * Initialise la classe de configuration

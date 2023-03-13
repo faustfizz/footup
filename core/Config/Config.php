@@ -105,8 +105,10 @@ class Config
     public function __construct(?array $config = null, ?array $page_error = null, ?array $locale = null)
     {
         $env = new DotEnv();
+        
+        $config = (array)($config ? ["config" => $config] : new \App\Config\Config());
 
-        $this->config = !empty($config) ? array_merge($this->config, $config) : $this->config;
+        $this->config = !empty($config) ? array_merge($this->config, $config["config"]) : $this->config;
         $this->page_error = !empty($page_error) ? array_merge($this->page_error, $page_error) : $this->page_error;
         $this->locale = !empty($locale) ? array_merge($this->locale, $locale) : $this->locale;
 

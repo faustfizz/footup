@@ -2,7 +2,7 @@
 
 Un mini framework MVC PHP qui comporte :
 
-* CLI support for generating class
+* CLI support for generating Controller, Model, Middle, Assets and View files ( [adhocore/php-cli](https://github.com/adhocore/php-cli) modified and used thanks :) )
 * Translation support
 * Config using PHP File or .env (Rename env to .env)
 * Gestion de Requête (Request)
@@ -24,122 +24,153 @@ Un mini framework MVC PHP qui comporte :
 
 ## Directories tree
 ```
-.
+FOOTUP MVC Framework
 ├── app
-│   ├── Config
-│   │   ├── Autoload.php
-│   │   ├── Config.php
-│   │   ├── Constants.php
-│   │   ├── Email.php
-│   │   ├── Paginator.php
-│   │   ├── Form.php
-│   │   └── Routes.php
-│   ├── Controller
-│   │   ├── BaseController.php
-│   │   └── Home.php
-│   ├── Functions.php
-│   ├── Lang
-│   ├── Libs
-│   ├── Middle
-│   │   └── Maintenance.php
-│   ├── Model
-│   │   └── Contact.php
-│   └── View
-│       └── accueil.php
+│   ├── Config
+│   │   ├── Autoload.php
+│   │   ├── Config.php
+│   │   ├── Constants.php
+│   │   ├── Email.php
+│   │   ├── Form.php
+│   │   ├── Paginator.php
+│   │   └── Routes.php
+│   ├── Controller
+│   │   ├── BaseController.php
+│   │   └── Home.php
+│   ├── Functions.php
+│   ├── Lang
+│   ├── Libs
+│   ├── Middle
+│   │   └── Maintenance.php
+│   ├── Model
+│   │   └── Contact.php
+│   └── View
+│       └── accueil.php
 ├── core
-│   ├── Boot.php
-│   ├── Cli
-│   │   ├── CLI.php
-│   │   ├── Colors.php
-│   │   ├── Console.php
-│   │   ├── Exception.php
-│   │   ├── Generator.php
-│   │   ├── Options.php
-│   │   ├── TableFormatter.php
-│   │   └── Tpl
-│   │       ├── Controller.tpl
-│   │       ├── Middle.tpl
-│   │       ├── Model.tpl
-│   │       └── View.tpl
-│   ├── Config
-│   │   ├── Autoload.php
-│   │   ├── Config.php
-│   │   ├── DotEnv
-│   │   │   ├── DotEnv.php
-│   │   │   └── Exception
-│   │   │       ├── Exception.php
-│   │   │       └── InvalidPathException.php
-│   │   ├── Email.php
-│   │   └── Mime.php
-│   ├── Controller.php
-│   ├── Files
-│   │   ├── File.php
-│   │   └── FileSystem.php
-│   ├── Paginator
-│   │   ├── AbstractPaginator.php
-│   │   ├── Page.php
-│   │   ├── PaginatorException.php
-│   │   ├── Paginator.php
-│   │   ├── Views
-│   │   │   └── default.php
-│   │   └── Paginator.php
-│   ├── Utils
-│   │   ├── Arrays
-│   │   │   ├── Arr.php
-│   │   │   ├── Arrayable.php
-│   │   │   ├── ArrDots.php
-│   │   │   ├── Collection.php
-│   │   │   └── Dots.php
-│   │   ├── Validator
-│   │   │   ├── Validate.php
-│   │   │   └── Validator.php
-│   │   └── Str.php
-│   ├── Footup.php
-│   ├── Functions.php
-│   ├── Html
-│   │   ├── Form.php
-│   │   └── Html.php
-│   ├── Http
-│   │   ├── Request.php
-│   │   ├── Response.php
-│   │   └── Session.php
-│   ├── I18n
-│   │   ├── Exceptions
-│   │   │   └── I18nException.php
-│   │   ├── TimeDifference.php
-│   │   └── Time.php
-│   ├── Lang
-│   │   ├── fr
-│   │   │   ├── core.json
-│   │   │   ├── date.json
-│   │   │   ├── db.json
-│   │   │   ├── email.json
-│   │   │   ├── validator.json
-│   │   │   ├── file.json
-│   │   │   ├── http.json
-│   │   │   └── view.json
-│   │   └── Lang.php
-│   ├── Model.php
-│   ├── Orm
-│   │   └── BaseModel.php
-│   └── Routing
-│       ├── Middle.php
-│       ├── Route.php
-│       └── Router.php
-├── public
-│   ├── assets
-│   │   ├── css
-│   │   │   └── style.css
-│   │   └── js
-│   │       └── script.js
-│   ├── error
-│   │   ├── 404.html
-│   │   └── 500.html
-│   ├── index.php
-│   └── uploads
+│   ├── Boot.php
+│   ├── Cli
+│   │   ├── Commands
+│   │   │   ├── Assets.php
+│   │   │   ├── Controller.php
+│   │   │   ├── Middle.php
+│   │   │   ├── Model.php
+│   │   │   ├── Multiple.php
+│   │   │   ├── Scaffold.php
+│   │   │   └── View.php
+│   │   ├── Exception
+│   │   │   ├── Exception.php
+│   │   │   ├── InvalidArgumentException.php
+│   │   │   ├── InvalidParameterException.php
+│   │   │   └── RuntimeException.php
+│   │   ├── Helper
+│   │   │   ├── InflectsString.php
+│   │   │   ├── Normalizer.php
+│   │   │   ├── OutputHelper.php
+│   │   │   └── Shell.php
+│   │   ├── Input
+│   │   │   ├── Argument.php
+│   │   │   ├── Command.php
+│   │   │   ├── Groupable.php
+│   │   │   ├── Option.php
+│   │   │   ├── Parameter.php
+│   │   │   ├── Parser.php
+│   │   │   └── Reader.php
+│   │   ├── IO
+│   │   │   └── Interactor.php
+│   │   ├── Konsole.php
+│   │   ├── Output
+│   │   │   ├── Color.php
+│   │   │   ├── Cursor.php
+│   │   │   ├── Table.php
+│   │   │   └── Writer.php
+│   │   └── Tpl
+│   │       ├── Controller.tpl
+│   │       ├── Middle.tpl
+│   │       ├── Model.tpl
+│   │       └── View.tpl
+│   ├── Config
+│   │   ├── Autoload.php
+│   │   ├── Config.php
+│   │   ├── DotEnv
+│   │   │   ├── DotEnv.php
+│   │   │   └── Exception
+│   │   │       ├── Exception.php
+│   │   │       └── InvalidPathException.php
+│   │   ├── Email.php
+│   │   └── Mime.php
+│   ├── Controller.php
+│   ├── Files
+│   │   ├── File.php
+│   │   └── FileSystem.php
+│   ├── Footup.php
+│   ├── Functions.php
+│   ├── Html
+│   │   ├── Form.php
+│   │   └── Html.php
+│   ├── Http
+│   │   ├── Request.php
+│   │   ├── Response.php
+│   │   └── Session.php
+│   ├── I18n
+│   │   ├── Exceptions
+│   │   │   └── I18nException.php
+│   │   ├── TimeDifference.php
+│   │   └── Time.php
+│   ├── Lang
+│   │   ├── fr
+│   │   │   ├── core.json
+│   │   │   ├── date.json
+│   │   │   ├── db.json
+│   │   │   ├── email.json
+│   │   │   ├── file.json
+│   │   │   ├── http.json
+│   │   │   ├── validator.json
+│   │   │   └── view.json
+│   │   └── Lang.php
+│   ├── Model.php
+│   ├── Orm
+│   │   ├── BaseModel.php
+│   │   └── DbConnection.php
+│   ├── Paginator
+│   │   ├── AbstractPaginator.php
+│   │   ├── Page.php
+│   │   ├── PaginatorException.php
+│   │   ├── PaginatorInterface.php
+│   │   ├── Paginator.php
+│   │   └── Views
+│   │       └── default.php
+│   ├── Routing
+│   │   ├── Middle.php
+│   │   ├── Route.php
+│   │   └── Router.php
+│   └── Utils
+│       ├── Arrays
+│       │   ├── Arrayable.php
+│       │   ├── ArrDots.php
+│       │   ├── Arr.php
+│       │   ├── Collection.php
+│       │   └── Dots.php
+│       ├── ClassLocator.php
+│       ├── Str.php
+│       └── Validator
+│           ├── Validate.php
+│           └── Validator.php
 ├── env
 ├── footup
 ├── LICENSE
+├── public
+│   ├── assets
+│   │   ├── avatar.jpg
+│   │   ├── css
+│   │   │   └── style.css
+│   │   └── js
+│   │       └── script.js
+│   ├── error
+│   │   ├── 404.html
+│   │   └── 500.html
+│   ├── index.php
+│   └── uploads
+│       └── cache
 └── README.md
 ```
 

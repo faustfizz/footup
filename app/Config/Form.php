@@ -8,6 +8,13 @@ namespace App\Config;
 
 class Form
 {
+    public static $config = [
+        'open'      => true,
+        'close'     => true,
+        'from_db'   => true
+    ];
+    public static $submitText = "Envoyer";
+
     /**
      * Definir les class à appliquer dans champs ( inputs )
      * @example - "inputType" => [

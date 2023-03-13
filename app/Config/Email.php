@@ -2,9 +2,7 @@
 
 namespace App\Config;
 
-use Footup\Config\Email as ConfigEmail;
-
-class Email extends ConfigEmail
+class Email
 {
 	/**
 	 * @var string
@@ -172,20 +170,12 @@ class Email extends ConfigEmail
 	 * Contructor
 	 *
 	 * @param array $config
-	 * @param boolean $call_parent_constructor
 	 */
-	public function __construct($config = null, $call_parent_constructor = true)
+	public function __construct($config = [])
 	{
-		$FlyConfig = isset($_ENV['email']) ? array_filter($_ENV['email']) : $this;
-		$config = !is_null($config) ? $config : $FlyConfig;
-		
-		if($call_parent_constructor)
-		{
-			parent::__construct($config);
-		}else{
-			$this->initialize($config);
-			isset(parent::$func_overload) || parent::$func_overload = (extension_loaded('mbstring') && ini_get('mbstring.func_overload'));
-		}
+		array_walk($config, function($value, $key, $class){
+			$class->{$key} = $value;
+		}, $this);
 	}
 
 }

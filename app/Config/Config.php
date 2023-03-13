@@ -10,7 +10,7 @@
  */
 namespace App\Config;
 
-class Config extends \Footup\Config\Config
+class Config
 {
     /**
      * @var string
@@ -39,7 +39,7 @@ class Config extends \Footup\Config\Config
     /**
      * @var array
      */
-    protected $config = [
+    public $config = [
         // Configuration des dossiers
         /**
          * Dissier uploads pour les fichiers téléversés [relative to public dir]
@@ -104,11 +104,6 @@ class Config extends \Footup\Config\Config
         $this->config = !empty($config) ? array_merge($this->config, $config) : $this->config;
         $this->page_error = !empty($page_error) ? array_merge($this->page_error, $page_error) : $this->page_error;
         $this->locale = !empty($locale) ? array_merge($this->locale, $locale) : $this->locale;
-        
-        /**
-         * @todo NE TOUCHER JAMAIS CETTE LIGNE
-         */
-        parent::__construct($this->config, $this->page_error, $this->locale);
     }
 
 }
