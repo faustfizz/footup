@@ -20,7 +20,7 @@ Un mini framework MVC PHP qui comporte :
 * Extensible (You can integrate any library you want and you can add (news folders and class) in the App Directory in condition you use psr4)
 
 ### ReadMe should be updated -- (Soon i'll create the docs website for FootUp PHP MVC Framework)
-------------------
+--------------------
 
 ## Directories tree
 ```
