@@ -18,6 +18,7 @@ class Scaffold extends Command
             ->option('-n --namespace', 'The namespace of these classes')
             ->option('-t --table', 'The table name if you generate Model class')
             ->option('-p --primaryKey', 'The primary key name if you generate Model class')
+            ->option('-r --returnType', 'The return type of the fetched data of the model')
             ->option('-x --extension', 'The extension of the view file')
             // Usage examples:
             ->usage(
@@ -44,6 +45,9 @@ class Scaffold extends Command
         if ($this->table && !is_string($this->table) && $this->type === "model") {
             $this->set("table", $io->prompt("Please give the table name as you selected the model type "));
         }
+        if ($this->returnType && !is_string($this->returnType)) {
+            $this->set("returnType", $io->choice("You can't add empty returnType, Please choose one : ", ["self", "object", "array"], "self"));
+        }
         if ($this->primaryKey && !is_string($this->primaryKey) && $this->type === "model") {
             $this->set("primaryKey", $io->prompt("Please give the primaryKey as you selected the model type "));
         }
@@ -59,6 +63,10 @@ class Scaffold extends Command
         if($classname)
         {
             $this->classname = $classname;
+        }
+        if(!$this->returnType)
+        {
+            $this->returnType = "self";
         }
 
         // more codes ...
@@ -79,6 +87,7 @@ class Scaffold extends Command
         $modelCommand = new Model($this->app(), $this->classname, $this->namespace);
         $this->table && $modelCommand->set("table", $this->table);
         $this->primaryKey && $modelCommand->set("primaryKey", $this->primaryKey);
+        $this->returnType && $modelCommand->set("returnType", $this->returnType);
         $modelCommand->execute($this->classname);
         
         # view...

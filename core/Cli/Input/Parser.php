@@ -15,7 +15,6 @@ use Footup\Cli\Exception\InvalidParameterException;
 use Footup\Cli\Exception\RuntimeException;
 use Footup\Cli\Helper\Normalizer;
 use Footup\Cli\IO\Interactor;
-use Footup\Cli\Output\Writer;
 
 /**
  * Argv parser for the cli.
@@ -238,7 +237,15 @@ abstract class Parser
                     continue;
                 }
             }
-            $io->boldRed(\sprintf(' %s "%s" is required, can\'t continue ! ', $label, $name), true);
+
+            $io->eol()
+                ->error(\sprintf('%s "%s" is required, can\'t continue ! ', $label, $name), true, ["mod" => 1])
+                ->info("Type ")
+                    ->boldCyan(\sprintf("php footup %s -h", $this->name()))
+                    ->cyan(" or ")
+                    ->boldCyan(\sprintf("php footup %s -h", $this->alias()))
+                ->cyan(" to view help !", true);
+            
             exit(0);
             // throw new RuntimeException(
             //     \sprintf('%s "%s" is required, can\'t continue !', $label, $name)

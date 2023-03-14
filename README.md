@@ -130,7 +130,8 @@ FOOTUP MVC Framework
 │   ├── Model.php
 │   ├── Orm
 │   │   ├── BaseModel.php
-│   │   └── DbConnection.php
+│   │   ├── DbConnection.php
+│   │   └── QueryBuilder.php
 │   ├── Paginator
 │   │   ├── AbstractPaginator.php
 │   │   ├── Page.php

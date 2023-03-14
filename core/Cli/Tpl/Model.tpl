@@ -25,6 +25,13 @@ class {class_name} extends Model
     protected $primaryKey = '{primary_key}';
 
     /**
+     * ReturnType
+     *  self or object or array -- default to self
+     * @var string
+     */
+    protected $returnType = '{return_type}';
+
+    /**
      * FRelationships
      *
      * @example # Use with arrays:

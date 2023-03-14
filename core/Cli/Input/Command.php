@@ -358,7 +358,7 @@ class Command extends Parser implements Groupable
         $io     = $this->io();
         $helper = new OutputHelper($io->writer());
 
-        $io->bold("Command {$this->_name}, version {$this->_version}", true)->eol();
+        $io->eol()->bold("Command ")->boldBlue($this->_name)->bold(", version {$this->_version}", true)->eol();
         $io->comment($this->_desc, true)->eol();
         $io->bold('Usage: ')->yellow("{$this->_name} [OPTIONS...] [ARGUMENTS...]", true);
 

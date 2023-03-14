@@ -191,7 +191,7 @@ class OutputHelper
             return;
         }
 
-        $space = 4;
+        $space = 7;
         $group = $lastGroup = null;
         foreach ($this->sortItems($items, $padLen) as $item) {
             $name  = $this->getName($item);
@@ -201,7 +201,7 @@ class OutputHelper
             }
             $desc  = str_replace(["\r\n", "\n"], str_pad("\n", $padLen + $space + 3), $item->desc());
 
-            $this->writer->boldPurple('  ' . str_pad($name, $padLen + $space));
+            $this->writer->boldPurple('  ' . str_pad(strtr($name, ["|" => " | ", "[" => "[ ", "]" => " ]"]), $padLen + $space));
             $this->writer->comment($desc, true);
         }
 

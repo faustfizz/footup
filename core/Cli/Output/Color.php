@@ -61,7 +61,7 @@ class Color
      *
      * @return string
      */
-    public function error(string $text, array $style = ["bold"   =>  true]): string
+    public function error(string $text, array $style = []): string
     {
         return $this->line('✖ '. $text, ['fg' => static::RED] + $style);
     }
@@ -74,7 +74,7 @@ class Color
      *
      * @return string
      */
-    public function ok(string $text, array $style = ["bold"   =>  true]): string
+    public function ok(string $text, array $style = []): string
     {
         return $this->line('✓ '. $text, ['fg' => static::GREEN] + $style);
     }
@@ -87,7 +87,7 @@ class Color
      *
      * @return string
      */
-    public function success(string $text, array $style = ["bold"   =>  true]): string
+    public function success(string $text, array $style = []): string
     {
         return $this->ok($text, $style);
     }
@@ -100,7 +100,7 @@ class Color
      *
      * @return string
      */
-    public function warn(string $text, array $style = ["bold"   =>  true]): string
+    public function warn(string $text, array $style = []): string
     {
         return $this->line('⚠ '. $text, ['fg' => static::YELLOW] + $style);
     }
@@ -113,7 +113,7 @@ class Color
      *
      * @return string
      */
-    public function info(string $text, array $style = ["bold"   =>  true]): string
+    public function info(string $text, array $style = []): string
     {
         return $this->line('ℹ '. $text, ['fg' => static::BLUE] + $style);
     }

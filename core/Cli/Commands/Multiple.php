@@ -18,6 +18,7 @@ class Multiple extends Command
             ->option('-n --namespace', 'The namespace of these classes')
             ->option('-T --type', 'The type can be controller, model, middle or view class')
             ->option('-t --table', 'The table name if you generate Model class')
+            ->option('-r --returnType', 'The return type of the fetched data of the model')
             ->option('-p --primaryKey', 'The primary key name if you generate Model class')
             ->option('-x --extension', 'The extension of the view file')
             // Usage examples:
@@ -45,6 +46,9 @@ class Multiple extends Command
         if ($this->type && !is_string($this->type)) {
             $this->set("type", $io->choice("Choose the type of file [controller, model, middle, view]; default: controller ", ["controller", "model", "middle", "view"], "controller"));
         }
+        if ($this->returnType && !is_string($this->returnType)) {
+            $this->set("returnType", $io->choice("You can't add empty returnType, Please choose one : ", ["self", "object", "array"], "self"));
+        }
         if ($this->table && !is_string($this->table) && $this->type === "model") {
             $this->set("table", $io->prompt("Please give the table name as you selected the model type "));
         }
@@ -64,6 +68,10 @@ class Multiple extends Command
         {
             $this->classname = $classname;
         }
+        if(!$this->returnType)
+        {
+            $this->returnType = "self";
+        }
 
         // more codes ...
         foreach ($this->values(0)["classname"] as $value) {
@@ -80,6 +88,7 @@ class Multiple extends Command
                         $modelCommand = new Model($this->app(), $value, $this->namespace);
                         $this->table && $modelCommand->set("table", $this->table);
                         $this->primaryKey && $modelCommand->set("primaryKey", $this->primaryKey);
+                        $this->returnType && $modelCommand->set("returnType", $this->returnType);
                         $modelCommand->execute($value);
                     break;
                 case "view":

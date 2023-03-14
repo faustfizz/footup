@@ -14,6 +14,7 @@ class Model extends Command
     protected $replacements = array(
             "{name_space}"  =>  null,
             "{class_name}"  =>  null,
+            "{return_type}" =>  "self",
             "{table}"       =>  null,
             "{primary_key}" =>  null
         );
@@ -25,12 +26,13 @@ class Model extends Command
 			->argument('<classname>', 'The name of the class to generate')
             ->option('-n --namespace', 'The namespace of the model class')
             ->option('-t --table', 'The table name of the model')
+            ->option('-r --returnType', 'The return type of the fetched data of the model')
             ->option('-p --primaryKey', 'The primary key of the model table default fall to  id_table')
             // Usage examples:
             ->usage(
                 // $0 will be interpolated to actual command name
                 '<bold>  $0</end> <comment> <classname> </end> ## Generate the class without specifying anything than the name<eol/>' .
-                '<bold>  $0</end> <comment> <classname> -t tableName -p idTable </end> ## Generate the class with namespace<eol/>' 
+                '<bold>  $0</end> <comment> <classname> -t tableName -p idTable -r object</end> ## Generate the class with namespace<eol/>' 
             );
             
         $this->inGroup("Generator");
@@ -49,6 +51,9 @@ class Model extends Command
         }
         if ($this->table && !is_string($this->table)) {
             $this->set("table", $io->prompt("Please give the table name "));
+        }
+        if ($this->returnType && !is_string($this->returnType)) {
+            $this->set("returnType", $io->choice("You can't add empty returnType, Please choose one : ", ["self", "object", "array"], "self"));
         }
         if ($this->primaryKey && !is_string($this->primaryKey)) {
             $this->set("primaryKey", $io->prompt("Please give the primaryKey "));
@@ -86,6 +91,7 @@ class Model extends Command
         $this->replacements = array(
             "{name_space}"  =>  ucfirst($this->name_space),
             "{class_name}"  =>  ucfirst($this->classname),
+            "{return_type}" =>  $this->returnType,
             "{table}"       =>  strtolower($this->table ?? $this->classname),
             "{primary_key}" =>  $this->primaryKey ? $this->primaryKey : 'id_'.strtolower($this->table ?? $this->classname)
         );
@@ -113,6 +119,11 @@ class Model extends Command
 
     public function generate($scaffold = false)
     {
+        if(!$this->returnType)
+        {
+            $this->returnType = "self";
+        }
+
         $this->normalize($this->classname, $this->namespace);
 
         $hasSlash = strpos($this->classname, "/");
@@ -134,6 +145,7 @@ class Model extends Command
                 $this->replace([
                     "{name_space}"  => $this->name_space . '\\' . strtr($dir, "/" , "\\"),
                     "{class_name}"  => ucfirst($file),
+                    "{return_type}" => $this->returnType,
                     "{table}"       => strtolower($this->table ?? $file),
                     "{primary_key}" => $this->primaryKey ? $this->primaryKey : 'id_'.strtolower($this->table ?? $this->classname),
                 ])->parse_file_content(__DIR__."/../Tpl/Model.tpl")
@@ -146,6 +158,7 @@ class Model extends Command
                 APP_PATH."Model/".ucfirst($this->classname).'.php',
                 $this->replace([
                     "{name_space}"  => $this->name_space,
+                    "{return_type}" => $this->returnType,
                     "{table}"       => strtolower($this->table ?? $this->classname),
                     "{primary_key}" => $this->primaryKey ? $this->primaryKey : 'id_'.strtolower($this->table ?? $this->classname),
                 ])->parse_file_content(__DIR__."/../Tpl/Model.tpl")
