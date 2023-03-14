@@ -1,7 +1,7 @@
 <?php 
 
 /**
- * FOOTUP - 0.1.3 - 11.2021
+ * FOOTUP - 0.1.5 - 03.2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -12,7 +12,7 @@
 
 namespace Footup\Orm;
 
-use App\Config\Config;
+use Footup\Config\Config;
 use PDO;
 use Exception;
 
@@ -22,6 +22,13 @@ class DbConnection
      * @var \PDO $db connection
      */
     protected static $db = null;
+
+    /**
+     * @var string[] $db_type Type de connexion à la base
+     */
+    protected static $db_types = array(
+        'pdomysql', 'pdopgsql', 'pdosqlite'
+    );
 
     /**
      * Sets the database connection.
@@ -50,6 +57,11 @@ class DbConnection
             // Connection information
             else if (is_array($config) || is_null($config)) {
                 $Config = (new Config($config))->config;
+
+                if(!in_array($Config['db_type'], self::$db_types))
+                {
+                    throw new Exception(text("Db.unsupportedType", [$Config['db_type'], self::$db_types]));
+                }
 
                 switch ($Config['db_type']) {
                     case 'pdopgsql':
@@ -82,7 +94,7 @@ class DbConnection
                     throw new Exception(text("Db.undefinedDb"));
                 }
             }
-            // Connection object or resource
+            // Connection object or resource invalid
             else {
                 throw new Exception(text("Db.unsupportedType"));
             }
