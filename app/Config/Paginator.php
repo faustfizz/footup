@@ -38,7 +38,7 @@ class Paginator
 	 *
 	 * @var string
 	 */
-	public $pageName = "pagel";
+	public $pageName = "page";
 
 	/**
      * items on each side

@@ -1,12 +1,12 @@
 <?php
 
 /**
- * FOOTUP - 0.1.3 - 11.2021
+ * FOOTUP - 0.1.5 - 03.2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Orm
- * @version 0.1
+ * @version 0.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -16,10 +16,69 @@ use Exception;
 use Footup\Html\Form;
 use Footup\Paginator\Paginator;
 use PDO;
-use PDOException;
-use PDOStatement;
 use ReflectionClass;
 
+/**
+ * BaseModel of FOOTUP
+ * 
+ * @method QueryBuilder reset()
+ * @method QueryBuilder from($table, $reset = true)
+ * @method QueryBuilder join($table, $fields, $type = 'INNER', $operator = '=')
+ * @method QueryBuilder eftJoin($table, $fields, $operator = '=')
+ * @method QueryBuilder rightJoin($table, $fields, $operator = '=')
+ * @method QueryBuilder fullJoin($table, $fields, $operator = '=')
+ * @method QueryBuilder where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
+ * @method QueryBuilder whereOr(array|string $key, $val = null, $operator = null, $escape = true)
+ * @method QueryBuilder whereIn($key, array $val, $escape = true)
+ * @method QueryBuilder whereNotIn($key, array $val, $escape = true)
+ * @method QueryBuilder whereRaw($str)
+ * @method QueryBuilder whereNotNull($key)
+ * @method QueryBuilder whereNull($key)
+ * @method QueryBuilder whereOrIn(array|string $key, array $val, $escape = true)
+ * @method QueryBuilder whereOrNotIn(array|string $key, array $val, $escape = true)
+ * @method QueryBuilder whereOrRaw($str)
+ * @method QueryBuilder whereOrNotNull($key)
+ * @method QueryBuilder whereOrNull($key)
+ * @method QueryBuilder asc($field)
+ * @method QueryBuilder desc($field)
+ * @method QueryBuilder orderBy($field, $direction = 'ASC')
+ * @method QueryBuilder groupBy($field)
+ * @method QueryBuilder having($field, $value = null)
+ * @method QueryBuilder limit($limit = null, $offset = null)
+ * @method QueryBuilder offset($offset, $limit = null)
+ * @method QueryBuilder distinct($value = true)
+ * @method QueryBuilder between($field, $value1, $value2)
+ * @method QueryBuilder select($fields = '*', $limit = null, $offset = null)
+ * @method bool|int insert(array $data = [])
+ * @method boll update($data)
+ * @method bool delete($where = null)
+ * @method QueryBuilder|string sql($sql = null)
+ * @method QueryBuilder setDb($config = null, $init = true)
+ * @method \PDO getDb()
+ * @method object execute(array $params = [])
+ * @method BaseModel[]|null get($select = "*", $where = null, $limit = null, $offset = null)
+ * @method BaseModel|null one($fields = null, $where = null)
+ * @method BaseModel|null first($field = null, $where = null)
+ * @method BaseModel|null last($field = null, $where = null)
+ * @method mixed value($name)
+ * @method mixed min($field, $key = null)
+ * @method mixed max($field, $key = null)
+ * @method mixed sum($field, $key = null)
+ * @method mixed avg($field, $key = null)
+ * @method int|null count($field = '*')
+ * @method mixed quote($value)
+ * @method BaseModel|BaseModel[]|null find($value = null, $field = null)
+ * @method bool save(BaseModel $object = null, array $fields = null)
+ * @method bool remove($object = null)
+ * @method array getTableInfo()
+ * @method bool create(array $properties)
+ * @method BaseModel[]|bool findOrCreate(array $properties = null)
+ * @method string getLastQuery()
+ * @method QueryBuilder setLastQuery(string $last_query)
+ * @method int getNumRows()
+ * @method int|string getInsertID()
+ * @method int getAffectedRows()
+ */
 class BaseModel
 {
     /**
@@ -31,51 +90,6 @@ class BaseModel
      * @var string
      */
     protected $primaryKey = 'id';
-
-    /**
-     * @var string $where
-     */
-    protected $where;
-
-    /**
-     * @var string $joins
-     */
-    protected $joins;
-
-    /**
-     * @var string $order
-     */
-    protected $order;
-
-    /**
-     * @var string $groups
-     */
-    protected $groups;
-
-    /**
-     * @var string $having
-     */
-    protected $having;
-
-    /**
-     * @var string $distinct
-     */
-    protected $distinct;
-
-    /**
-     * @var string $limit
-     */
-    protected $limit;
-
-    /**
-     * @var string $offset
-     */
-    protected $offset;
-
-    /**
-     * @var string $sql SQL statement
-     */
-    protected $sql;
 
     /**
      * @var int
@@ -91,48 +105,6 @@ class BaseModel
      * @var int
      */
     protected $per_page = 10;
-
-    /**
-     * @var \PDO $db connection
-     */
-    protected static $db = null;
-
-    /**
-     * @var string $class classe courrante
-     */
-    protected $class;
-
-    /**
-     * @var string[] $db_type Type de connexion à la base
-     */
-    protected $db_types = array(
-        'pdomysql', 'pdopgsql', 'pdosqlite'
-    );
-
-    /**
-     * @var string $last_query dernière requête sql
-     */
-    public $last_query;
-
-    /**
-     * @var int $num_rows
-     */
-    public $num_rows;
-
-    /**
-     * @var int|string $insert_id id dernièrement ajouté
-     */
-    public $insert_id;
-
-    /**
-     * @var int $affcted_rows
-     */
-    public $affected_rows;
-
-    /**
-     * @var bool $show_sql voir la requête dans l'erreur
-     */
-    public $show_sql = true;
 	
     /**
      * @var bool $allow_callbacks activer les évenements 
@@ -207,11 +179,6 @@ class BaseModel
      * @var array
      */
 	protected $afterUpdate          = [];
-
-    /**
-     * @var array|string $tableInfo informations de la table
-     */
-    protected $tableInfo  = [];
 
     /**
      * FRelationships
@@ -301,32 +268,27 @@ class BaseModel
     protected $belongsToMany = [];
 
     /**
+     * @var QueryBuilder
+     */
+    protected $builder;
+    
+    /**
      * @var \App\Config\Paginator
      */
-    public $paginatorConfig;
+    private $paginatorConfig;
 
     /**
      * @var \Footup\Paginator\Paginator
      */
-
-    public $paginator;
-    /**
-     * @var \Footup\Paginator\Paginator
-     */
-    public $pager;
+    private $paginator;
 
     /**
      * Class constructor.
      */
     public function __construct($data = [], $config = null, $init = true)
     {
-        $this->setDb($config, $init);
-
-        $this->getTable();
-        $this->getPrimaryKey();
-        // charger les relations
-        // $this->loadRelations();
-
+        DbConnection::setDb($config, $init);
+        $this->setBuilder(new QueryBuilder($this));
 
         if(!empty($data))
         {
@@ -372,482 +334,6 @@ class BaseModel
         return $data;
     }
 
-    /*** Core Methods ***/
-
-    /**
-     * @param string $sql SQL statement
-     * @param string $input Input string to append
-     * @return string New SQL statement
-     */
-    public function build($sql, $input)
-    {
-        return (strlen($input) > 0) ? ($sql . ' ' . $input) : $sql;
-    }
-
-    /**
-     * Checks whether the table property has been set.
-     * @throws Exception
-     */
-    public function checkTable()
-    {
-        if (!$this->getTable()) {
-            throw new Exception(text("Db.undefinedTable"));
-        }
-    }
-
-    /**
-     * Checks whether the class property has been set.
-     * @throws Exception
-     */
-    public function checkClass()
-    {
-        if (!$this->class) {
-            throw new Exception(text("Db.modelClassUndefined"));
-        }
-    }
-
-    /**
-     * Resets class properties.
-     * 
-     * @return BaseModel
-     */
-    public function reset()
-    {
-        $this->where    =
-            $this->joins    =
-            $this->order    =
-            $this->groups   =
-            $this->having   =
-            $this->distinct =
-            $this->limit    =
-            $this->offset   =
-            $this->sql      = '';
-
-        return $this;
-    }
-
-    /*** SQL Builder Methods ***/
-
-    /**
-     * Sets the table.
-     *
-     * @param string $table Table name
-     * @param boolean $reset Reset class properties
-     * @return BaseModel Self reference
-     */
-    public function from($table, $reset = true)
-    {
-        $this->table = $table;
-        if ($reset) {
-            return $this->reset();
-        }
-        return $this;
-    }
-
-    /**
-     * Adds a table join.
-     *
-     * @param string $table Table to join to
-     * @param array|string $fields Fields to join on
-     * @param string $type Type of join
-     * @return BaseModel Self reference
-     * @throws Exception For invalid join type
-     */
-    public function join($table, $fields, $type = 'INNER', $operator = '=')
-    {
-        static $joins = array(
-            'INNER',
-            'LEFT OUTER',
-            'RIGHT OUTER',
-            'FULL OUTER',
-            'LEFT',
-            'RIGHT',
-            'FULL'
-        );
-
-        if (!in_array($type, $joins)) {
-            throw new Exception(text("Db.invalidJoin", [$type]));
-        }
-
-        $this->joins .= ' ' . $type . ' JOIN ' . $table . ' ON ' .
-            (is_string($fields) ? $fields : '');
-
-        if (is_array($fields)) {
-            foreach ($fields as $key => $value) {
-                $this->joins .= $key . ' ' . $operator . ' ' . $value;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Adds a left table join.
-     *
-     * @param string $table Table to join to
-     * @param array|string $fields Fields to join on
-     * @return BaseModel Self reference
-     */
-    public function leftJoin($table, $fields, $operator = '=')
-    {
-        return $this->join($table, $fields, 'LEFT OUTER', $operator);
-    }
-
-    /**
-     * Adds a right table join.
-     *
-     * @param string $table Table to join to
-     * @param array|string $fields Fields to join on
-     * @return BaseModel Self reference
-     */
-    public function rightJoin($table, $fields, $operator = '=')
-    {
-        return $this->join($table, $fields, 'RIGHT OUTER', $operator);
-    }
-
-    /**
-     * Adds a full table join.
-     *
-     * @param string $table Table to join to
-     * @param array $fields Fields to join on
-     * @return BaseModel Self reference
-     */
-    public function fullJoin($table, $fields, $operator = '=')
-    {
-        return $this->join($table, $fields, 'FULL OUTER', $operator);
-    }
-
-    /**
-     * @param array|string $key
-     * @param string|array $val
-     * @param string $operator
-     * @param string $link
-     * @return BaseModel
-     */
-    public function where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
-    {
-        $this->where .= (empty($this->where)) ? 'WHERE ' : '';
-
-        if (is_array($key)) {
-            $key = array_filter($key);
-            foreach ($key as $k => $v) {
-                $link = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where']) ? $link : '';
-                $this->where .= $link . $k . ' ' . trim($operator ?? '=') . ' ' . ($escape && !is_numeric($v) ? $this->quote($v) : $v);
-            }
-        } else if (is_string($key) && is_null($val)) {
-            $link = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where'])  ? $link : '';
-            $this->where .= $link . $key;
-        } else {
-            $link = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where'])  ? $link : '';
-            if (trim($operator) != 'IS' && trim($operator) != 'is') {
-                if (is_array($val) && !empty($val)) {
-                    $val = '(' . implode(',', array_map(array($this, 'quote'), $val)) . ')';
-                    $operator = ' IN ';
-                }
-                if (is_null($val)) {
-                    $operator = "IS NOT NULL";
-                }
-                if (is_string($val) && !empty($val)) {
-                    $val = ($escape && !is_numeric($val) ? $this->quote($val) : $val);
-                }
-            }
-            $this->where .= trim($link . $key . ' ' . trim($operator ?? '=') . ' ' . $val);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param string|array $key
-     * @param array|string $val
-     * @param string $operator
-     * @return BaseModel
-     */
-    public function whereOr(array|string $key, $val = null, $operator = null, $escape = true)
-    {
-        return $this->where($key, $val, $operator, ' OR ', $escape);
-    }
-
-    /**
-     * @param array|string $key
-     * @param array|string $val
-     * @return BaseModel
-     */
-    public function whereIn($key, array $val, $escape = true)
-    {
-        return $this->where($key, $val, ' IN ', 'AND', $escape);
-    }
-
-    /**
-     * @param $key
-     * @param array $val
-     * @return BaseModel
-     */
-    public function whereNotIn($key, array $val, $escape = true)
-    {
-        return $this->where($key, $val, ' NOT IN ', 'AND', $escape);
-    }
-
-    /**
-     * @param $str
-     * @param array|null $build_data
-     * @param string $link
-     * @return BaseModel
-     */
-    public function whereRaw($str)
-    {
-        return $this->where($str);
-    }
-
-    /**
-     * @param $key
-     * @return BaseModel
-     */
-    public function whereNotNull($key)
-    {
-        return $this->where($key, 'NOT NULL', ' IS ');
-    }
-
-    /**
-     * @param $key
-     * @return BaseModel
-     */
-    public function whereNull($key)
-    {
-        return $this->where($key, 'NULL', ' IS ');
-    }
-
-    // where OR
-
-    /**
-     * @param array|string $key
-     * @param array|string $val
-     * @return BaseModel
-     */
-    public function whereOrIn(array|string $key, array $val, $escape = true)
-    {
-        return $this->whereOr($key, $val, ' IN ', $escape);
-    }
-
-    /**
-     * @param array|string $key
-     * @param array $val
-     * @return BaseModel
-     */
-    public function whereOrNotIn(array|string $key, array $val, $escape = true)
-    {
-        return $this->whereOr($key, $val, ' NOT IN ', $escape);
-    }
-
-    /**
-     * @param $str
-     * @param array|null $build_data
-     * @param string $link
-     * @return BaseModel
-     */
-    public function whereOrRaw($str)
-    {
-        return $this->whereOr($str);
-    }
-
-    /**
-     * @param $key
-     * @return BaseModel
-     */
-    public function whereOrNotNull($key)
-    {
-        return $this->whereOr($key, ' NOT NULL ', ' IS ');
-    }
-
-    /**
-     * @param $key
-     * @return BaseModel
-     */
-    public function whereOrNull($key)
-    {
-        return $this->whereOr($key, 'NULL', ' IS ');
-    }
-
-    /**
-     * Adds an ascending sort for a field.
-     *
-     * @param string $field Field name
-     * @return BaseModel Self reference
-     */
-    public function asc($field)
-    {
-        return $this->orderBy($field, 'ASC');
-    }
-
-    /**
-     * Adds an descending sort for a field.
-     *
-     * @param string $field Field name
-     * @return BaseModel Self reference
-     */
-    public function desc($field)
-    {
-        return $this->orderBy($field, 'DESC');
-    }
-
-    /**
-     * Adds fields to order by.
-     *
-     * @param string $field Field name
-     * @param string $direction Sort direction
-     * @return BaseModel Self reference
-     */
-    public function orderBy($field, $direction = 'ASC')
-    {
-        $join = (empty($this->order)) ? 'ORDER BY' : ',';
-
-        if (is_array($field)) {
-            foreach ($field as $key => $value) {
-                $field[$key] = $value . ' ' . $direction;
-            }
-        } else {
-            $field .= ' ' . $direction;
-        }
-
-        $fields = (is_array($field)) ? implode(', ', $field) : $field;
-
-        $this->order .= $join . ' ' . $fields;
-
-        return $this;
-    }
-
-    /**
-     * Adds fields to group by.
-     *
-     * @param string|array $field Field name or array of field names
-     * @return BaseModel Self reference
-     */
-    public function groupBy($field)
-    {
-        $join = (empty($this->order)) ? 'GROUP BY' : ',';
-        $fields = (is_array($field)) ? implode(',', $field) : $field;
-
-        $this->groups .= $join . ' ' . $fields;
-
-        return $this;
-    }
-
-    /**
-     * Adds having conditions.
-     *
-     * @param string|array $field A field name or an array of fields and values.
-     * @param string $value A field value to compare to
-     * @return BaseModel Self reference
-     */
-    public function having($field, $value = null)
-    {
-        $join = (empty($this->having)) ? 'HAVING' : '';
-        $this->having .= $this->where($field, $value, $join);
-
-        return $this;
-    }
-
-    /**
-     * Adds a limit to the query.
-     *
-     * @param int $limit Number of rows to limit
-     * @param int $offset Number of rows to offset
-     * @return BaseModel Self reference
-     */
-    public function limit($limit = null, $offset = null)
-    {
-        if ($limit !== null) {
-            $this->limit = 'LIMIT ' . $limit;
-        }
-        if ($offset !== null) {
-            $this->offset($offset);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Adds an offset to the query.
-     *
-     * @param int $offset Number of rows to offset
-     * @param int $limit Number of rows to limit
-     * @return BaseModel Self reference
-     */
-    public function offset($offset, $limit = null)
-    {
-        if ($offset !== null) {
-            $this->offset = 'OFFSET ' . $offset;
-        }
-        if ($limit !== null) {
-            $this->limit($limit);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Sets the distinct keyword for a query.
-     * 
-     * @param bool $value
-     * @return BaseModel
-     */
-    public function distinct($value = true)
-    {
-        $this->distinct = ($value) ? 'DISTINCT' : '';
-
-        return $this;
-    }
-
-    /**
-     * Sets a between where clause.
-     *
-     * @param string $field Database field
-     * @param string $value1 First value
-     * @param string $value2 Second value
-     * @return BaseModel
-     */
-    public function between($field, $value1, $value2)
-    {
-        $this->where(sprintf(
-            '%s BETWEEN %s AND %s',
-            $field,
-            $this->quote($value1),
-            $this->quote($value2)
-        ));
-        return $this;
-    }
-
-    /**
-     * Builds a select query.
-     *
-     * @param array|string $fields Array of field names to select
-     * @param int $limit Limit condition
-     * @param int $offset Offset condition
-     * @return BaseModel Self reference
-     */
-    public function select($fields = '*', $limit = null, $offset = null)
-    {
-        $this->checkTable();
-
-        $fields = (is_array($fields)) ? implode(',', $fields) : $fields;
-        $this->limit($limit, $offset);
-
-        return $this->sql(array(
-            'SELECT',
-            $this->distinct,
-            $fields,
-            'FROM',
-            $this->getTable(),
-            $this->joins,
-            $this->where,
-            $this->groups,
-            $this->having,
-            $this->order,
-            $this->limit,
-            $this->offset
-        ));
-    }
-
     /**
      * Builds an insert query.
      *
@@ -856,8 +342,6 @@ class BaseModel
      */
     public function insert(array $data = [])
     {
-        $this->checkTable();
-
         if (empty($data)) return false;
 
         $eventData = ['data' => $data];
@@ -868,30 +352,14 @@ class BaseModel
             $data = $eventData['data'];
 		}
 
-        $keys = implode(',', array_keys($data));
-        $values = implode(',', array_values(
-            array_map(
-                array($this, 'quote'),
-                $data
-            )
-        ));
-        
-        $this->sql(array(
-            'INSERT INTO',
-            $this->getTable(),
-            '(' . $keys . ')',
-            'VALUES',
-            '(' . $values . ')'
-        ));
-
-        $insert = $this->execute();
+        $inserted = $this->getBuilder()->insert($data);
 
         $eventData = [
-			'id'     => $insert->ok,
+			'id'     => $this->getBuilder()->getInsertID(),
 			'data'   => $data
 		];
 
-		if ($this->tmp_callbacks && $insert->ok)
+		if ($this->tmp_callbacks && $inserted)
 		{
             $data[$this->getPrimaryKey()] = $eventData["id"];
             $eventData["data"] = $data;
@@ -901,7 +369,7 @@ class BaseModel
 
         $this->tmp_callbacks = $this->allow_callbacks;
 
-        return $insert->ok;
+        return $inserted;
     }
 
     /**
@@ -912,24 +380,11 @@ class BaseModel
      */
     public function update($data)
     {
-        $this->checkTable();
-
-        $values = array();
+        if (empty($data)) return false;
 
         $pk = $this->getPrimaryKey();
-        $id = $this->{$pk} ?? null;
 
-        if(is_null($id))
-        {
-            $this->{$pk} = $id = isset($data[$pk]) ? $data[$pk] : null;
-            $this->where($pk ? ($pk . " = " . $id) : null);
-        }else{
-            $this->where($pk . " = " . $id);
-        }
-        
-        if (empty($this->where) && is_null($id) || is_null($this->where)) {
-            throw new Exception(text("Db.dontUse", ["UPDATE"]));
-        }
+        $this->{$pk} = $id = isset($data[$pk]) ? $data[$pk] : $this->{$pk};
 
         $eventData = [
 			'id'   => $id,
@@ -942,33 +397,16 @@ class BaseModel
             $data = isset($eventData['data']) && !empty($eventData['data']) ? $eventData['data'] : $data;
 		}
 
-        if (is_array($data)) {
-            foreach ($data as $key => $value) {
-                $values[] = is_numeric($key) ? $value : $key . '=' . $this->quote($value);
-            }
-        } else {
-            $values[] = (string)$data;
-        }
-        
-        $this->sql(array(
-            'UPDATE',
-            $this->table,
-            'SET',
-            implode(',', $values),
-            $this->where
-        ));
-
-        $ex = $this->execute();
-        $execute = $ex->ok;
+        $executed = $this->getBuilder()->update($data);
 
 		$eventData = [
 			'id'     => $id,
 			'data'   => $data,
-			'result' => $execute,
+			'result' => $executed,
 		];
 
         
-		if ($this->tmp_callbacks && $execute)
+		if ($this->tmp_callbacks && $executed)
 		{
             $this->fill($data);
 			$this->trigger('afterUpdate', $eventData);
@@ -976,7 +414,7 @@ class BaseModel
 
 		$this->tmp_callbacks = $this->allow_callbacks;
 
-        return $execute;
+        return $executed;
     }
 
     /**
@@ -987,28 +425,12 @@ class BaseModel
      */
     public function delete($where = null)
     {
-        $this->checkTable();
-
         $pk = $this->getPrimaryKey();
-        $id = $this->{$pk} ?? null;
+        $id = $this->{$pk} ?? $this->getBuilder()->getInsertID();
 
         $eventData = [
-            'id'    => is_int($where) ? $where : ($id ?? $this->insert_id)
+            'id'    => is_int($where) ? $where : $id
         ];
-
-        if (is_int($where) || is_null($where) && $this->insert_id || $eventData["id"]) {
-            $this->{$pk} = $eventData["id"];
-            $where = $pk . " = " . $eventData["id"];
-        }
-
-
-        if ($where !== null) {
-            $this->where($where);
-        }
-
-        if (is_null($where) || empty($this->where)) {
-            throw new Exception(text("Db.dontUse", ["DELETE"]));
-        }
 
 		if ($this->tmp_callbacks)
 		{
@@ -1016,17 +438,11 @@ class BaseModel
 			$eventData = $this->trigger('beforeDelete', $eventData);
 		}
 
-        $this->sql(array(
-            'DELETE FROM',
-            $this->table,
-            $this->where
-        ));
+        $executed = $this->getBuilder()->delete($where);
 
-        $execute = ($this->execute())->ok;
-
-		if ($this->tmp_callbacks && $execute)
+		if ($this->tmp_callbacks && $executed)
 		{
-            $eventData['result'] = $execute;
+            $eventData['result'] = $executed;
 
 			// Call the before event and check for a return
 			$this->trigger('afterDelete', $eventData);
@@ -1034,107 +450,7 @@ class BaseModel
 
 		$this->tmp_callbacks = $this->allow_callbacks;
 
-        return $execute;
-    }
-
-    /**
-     * Gets or sets the SQL statement.
-     *
-     * @param string|array SQL statement
-     * @return BaseModel|string SQL statement
-     */
-    public function sql($sql = null)
-    {
-        if ($sql !== null) {
-            $this->sql = trim(
-                (is_array($sql)) ?
-                    array_reduce($sql, array($this, 'build')) :
-                    $sql
-            );
-
-            return $this;
-        }
-
-        return $this->sql;
-    }
-
-    /*** Database Access Methods ***/
-
-    /**
-     * Sets the database connection.
-     *
-     * @param \PDO|DbConnection|string|array $config
-     * @param boolean $init
-     * @throws Exception For connection error
-     * @return BaseModel
-     */
-    public function setDb($config = null, $init = true)
-    {
-        self::$db = DbConnection::setDb($config, $init);
-        return $this;
-    }
-
-    /**
-     * Gets the database connection.
-     *
-     * @return object Database connection
-     */
-    public function getDb()
-    {
-        return self::$db;
-    }
-
-    /**
-     * Executes a sql statement.
-     *
-     * @throws Exception When database is not defined
-     * @param array $params
-     * @return object Query results object
-     */
-    public function execute(array $params = [])
-    {
-        if (!self::$db && !$this->setDb()) {
-            throw new Exception('Database is not defined.');
-        }
-
-        $result = null;
-
-        $this->num_rows = 0;
-        $this->affected_rows = 0;
-        $this->insert_id = -1;
-        $this->last_query = $this->sql;
-
-        if (!empty($this->sql))
-        {
-            $error = null;
-
-            try {
-                $result = self::$db->prepare($this->sql);
-
-                if (!$result) {
-                    $error = self::$db->errorInfo()[2];
-                } else {
-                    $bool = $result->execute($params);
-                    $error = !$bool ? $result->errorInfo()[2] : null;
-
-                    $this->num_rows = $result->rowCount();
-                    $this->affected_rows = $result->rowCount();
-                    $this->insert_id = self::$db->lastInsertId();
-                }
-            } catch (PDOException $ex) {
-                $error = $ex->getMessage();
-            }
-
-            if ($error !== null) {
-                if ($this->show_sql) {
-                    $error .= "\nSQL: " . $this->sql;
-                }
-                throw new Exception('Database error: ' . $error);
-            }
-        }
-        
-        $res = ['ok' => ($bool && $this->insert_id ? $this->insert_id : $bool), 'result' => $result];
-        return (object)$res;
+        return $executed;
     }
 
     /**
@@ -1163,35 +479,15 @@ class BaseModel
 		{
 			$eventData = $this->trigger('beforeFind', [
                 'data'      => [],
-                'where'     => $where ?? $this->where ?? null,
-				'limit'     => $limit ?? $this->limit ?? null,
-				'offset'    => $offset ?? $this->offset ?? null
+                'where'     => $where,
+				'limit'     => $limit,
+				'offset'    => $offset
 			]);
 		}
 
-        if (!is_null($eventData['where'])) {
-            $this->where($eventData['where']);
-        }
+        $data = $this->getBuilder()->get($select, $where, $limit, $offset);
 
-        if (empty($this->sql)) {
-            $this->select($select, $limit, $offset);
-        }
-
-        $data = array();
-
-        $execute = $this->execute();
-
-        /**
-         * @var \PDOStatement
-         */
-        $result = $execute->result;
-
-        /**
-         * @var BaseModel[]
-         */
-        $data = $result->fetchAll(PDO::FETCH_CLASS, get_class($this));
-
-		if ($this->tmp_callbacks && $execute->ok)
+		if ($this->tmp_callbacks && !empty($data))
 		{
 			$eventData = $this->trigger('afterFind', [
                 'data'      => $data
@@ -1215,10 +511,7 @@ class BaseModel
 	{
         $this->paginatorConfig = new \App\Config\Paginator();
 
-        if(!$perPage)
-        {
-            $perPage = $this->paginatorConfig->perPage;
-        }
+        $this->per_page = $perPage ?? $this->paginatorConfig->perPage ?? $this->per_page;
 
         if($pageName)
         {
@@ -1229,189 +522,35 @@ class BaseModel
         $page = (int)request()->get($this->paginatorConfig->pageName, $page);
 		$page  = $page >= 1 ? $page : 1;
 
-		$total = (int)$this->count();
+		$total = (int)$this->getBuilder()->count();
 
 		// Store it in the Pager library so it can be
 		// paginated in the views.
-		$perPage     = is_null($perPage) ? $this->per_page : $perPage;
-		$this->page_count = $total / $perPage;
+		$this->page_count = $total / $this->per_page;
 		$this->current_page = $page;
 
 		$offset      = ($page - 1) * $perPage;
 
-        $this->paginator = $this->pager = new Paginator($total, $perPage, $page, request()->url(), $this->paginatorConfig);
+        $this->setPaginator(new Paginator($total, $this->per_page, $page, request()->url(), $this->paginatorConfig));
 
-        return $this->get("*", null, $perPage, $offset);
+        $data = $this->get("*", null, (int)$this->per_page, (int)$offset);
+
+        /**
+         * I wanted to set the paginator  aivalable with same on all paginated results classes
+         */
+        if(!empty($data))
+        {
+            $currentClass = $this;
+            $data = array_map(function(BaseModel $modelWithData) use($currentClass){
+                $modelWithData->page_count = $currentClass->page_count;
+                $modelWithData->current_page = $currentClass->current_page;
+                $modelWithData->per_page = $currentClass->current_page;
+                $modelWithData->setPaginator($currentClass->getPaginator());
+                return $modelWithData;
+            }, $data);
+        }
+        return $data;
 	}
-
-    /**
-     * Fetch a single row from a select query.
-     * 
-     * @param string $fields
-     * @param string|array $where
-     *
-     * @return BaseModel|null Row
-     */
-    public function one($fields = null, $where = null)
-    {
-        if (empty($this->sql)) {
-            $this->limit(1)->select();
-        }
-
-        $data = $this->get($fields ?? "*");
-
-        $row = (!empty($data)) ? $data[0] : null;
-
-        return $row;
-    }
-
-    /**
-     * Fetch a single row from a select query.
-     *
-     * @param string $field
-     * @param string|array $where
-     *
-     * @return BaseModel|null Row
-     */
-    public function first($field = null, $where = null)
-    {
-        return $this->asc($field ?? $this->getPrimaryKey())->one(null, $where);
-    }
-
-    /**
-     * Fetch a single row from a select query.
-     *
-     * @param string $field
-     * @param string|array $where
-     *
-     * @return BaseModel|null Row
-     */
-    public function last($field = null, $where = null)
-    {
-        if (empty($this->sql)) {
-            $this->desc($field ?? $this->getPrimaryKey());
-        }
-
-        return $this->one(null, $where);
-    }
-
-    /**
-     * Fetch a value from a field.
-     *
-     * @param string $name Database field name
-     * @return mixed Row value
-     */
-    public function value($name)
-    {
-        $row = $this->one();
-
-        $value = (!empty($row)) ? $row->$name : null;
-
-        return $value;
-    }
-
-    /**
-     * Gets the min value for a specified field.
-     *
-     * @param string $field Field name
-     * @return mixed Row value
-     */
-    public function min($field, $key = null, $expire = 0)
-    {
-        $this->select('MIN(' . $field . ') min_value');
-
-        return $this->value(
-            'min_value'
-        );
-    }
-
-    /**
-     * Gets the max value for a specified field.
-     *
-     * @param string $field Field name
-     * @return mixed Row value
-     */
-    public function max($field, $key = null, $expire = 0)
-    {
-        $this->select('MAX(' . $field . ') max_value');
-
-        return $this->value(
-            'max_value'
-        );
-    }
-
-    /**
-     * Gets the sum value for a specified field.
-     *
-     * @param string $field Field name
-     * @return mixed Row value
-     */
-    public function sum($field, $key = null, $expire = 0)
-    {
-        $this->select('SUM(' . $field . ') sum_value');
-
-        return $this->value(
-            'sum_value'
-        );
-    }
-
-    /**
-     * Gets the average value for a specified field.
-     *
-     * @param string $field Field name
-     * @return mixed Row value
-     */
-    public function avg($field, $key = null, $expire = 0)
-    {
-        $this->select('AVG(' . $field . ') avg_value');
-
-        return $this->value(
-            'avg_value'
-        );
-    }
-
-
-    /**
-     * Gets a count of records for a table.
-     *
-     * @param string $field Field name
-     * @return mixed Row value
-     */
-    public function count($field = '*')
-    {
-        $this->select('COUNT(' . $field . ') num_rows');
-
-        return $this->value(
-            'num_rows'
-        );
-    }
-
-    /**
-     * Wraps quotes around a string and escapes the content for a string parameter.
-     *
-     * @param mixed $value mixed value
-     * @return mixed Quoted value
-     */
-    public function quote($value)
-    {
-        if ($value === null) return 'NULL';
-
-        if (is_string($value)) {
-            if (self::$db !== null) {
-                return self::$db->quote($value);
-            }
-
-            $value = str_replace(
-                array('\\', "\0", "\n", "\r", "'", '"', "\x1a"),
-                array('\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'),
-                $value
-            );
-
-            return "'$value'";
-        }
-
-        return $value;
-    }
 
     /**
      * Loads properties for an object.
@@ -1429,104 +568,6 @@ class BaseModel
         }
 
         return $object;
-    }
-
-    /**
-     * Finds and populates an object.
-     *
-     * @param int|string|array Search value
-     * @param string $field Search value
-     * @return object|array|null Populated object
-     */
-    public function find($value = null, $field = null)
-    {
-        $field = is_null($field) ? $this->getPrimaryKey() : $field;
-
-        $this->from($this->table ?? $this->getTable(), false);
-
-        if ($value !== null) {
-            if ((is_int($value) || is_string($value)) && ($this->getPrimaryKey() == $field || property_exists($this, $field))) {
-                $this->where($field, $value);
-            } else if (is_array($value)) {
-                $this->whereIn($field, $value);
-            }
-        }
-
-        if (empty($this->sql)) {
-            $this->select();
-        }
-
-
-        return $field == $this->getPrimaryKey() && is_array($value) ? $this->get() : $this->one($field);
-    }
-
-    /**
-     * Saves an object to the database.
-     *
-     * @param \Footup\Orm\BaseModel $object Class instance
-     * @param array $fields Select database fields to save
-     * @return bool
-     */
-    public function save($object = null, array $fields = null)
-    {
-        $object = is_null($object) ? $this : $object;
-
-        $this->from($object->getTable());
-
-        $pk = $object->getPrimaryKey();
-        $id = $object->{$pk} ?? null;
-
-        $data = $object->getAttributes();
-
-        if (is_null($id)) {
-            if ($bool = $this->insert(
-                    array_filter($data, 
-                        function($v, $k) {
-                            return  trim($v) !== "";
-                        }, ARRAY_FILTER_USE_BOTH
-                    )
-                )
-            ) {
-                $object->{$pk} = $this->insert_id;
-            }
-            return $bool;
-        } else {
-            if ($fields !== null) {
-                $keys = array_flip($fields);
-                $data = array_intersect_key($data, $keys);
-            }
-            
-            return $this->where($pk, $id)
-                ->update(
-                    array_filter($data, 
-                        function($v, $k) {
-                            return trim($v) !== "";
-                        }, ARRAY_FILTER_USE_BOTH
-                    )
-                );
-        }
-    }
-
-    /**
-     * Removes an object from the database.
-     *
-     * @param \Footup\Orm\BaseModel $object Class instance
-     * @return bool
-     */
-    public function remove($object = null)
-    {
-        $object = is_null($object) ? $this : $object;
-
-        $this->from($object->getTable());
-
-        $pk = $object->getPrimaryKey();
-        $id = $object->{$pk} ?? null;
-
-        if ($id !== null) {
-            return $this->where($pk, $id)
-                ->delete();
-        }
-        return false;
     }
 
     /**
@@ -1570,6 +611,10 @@ class BaseModel
         {
             return $this->loadRelations($name);
         }
+        if(property_exists($this->builder, $name))
+        {
+            return $this->builder->{$name};
+        }
     }
 
     public function __set($property, $val)
@@ -1589,19 +634,19 @@ class BaseModel
             // it's a find_by_{fieldname} dynamic method
             $fieldname = substr($name, 6); // remove find by
             $match     = isset($arguments[0]) ? $arguments[0] : null;
-            return $this->find($match, strtolower($fieldname));
+            return $this->getBuilder()->find($match, strtolower($fieldname));
         }
 
         if (!method_exists($this, $name) && preg_match('/^firstBy/', $name) == 1) {
             // it's a find_by_{fieldname} dynamic method
             $fieldname = substr($name, 7);
-            return $this->first(strtolower($fieldname));
+            return $this->getBuilder()->first(strtolower($fieldname));
         }
 
         if (!method_exists($this, $name) && preg_match('/^lastBy/', $name) == 1) {
             // it's a find_by_{fieldname} dynamic method
             $fieldname = substr($name, 6);
-            return $this->last(strtolower($fieldname));
+            return $this->getBuilder()->last(strtolower($fieldname));
         }
 
         $setter = substr($name, 0, 3);
@@ -1623,28 +668,30 @@ class BaseModel
             return $this->loadRelations($name, (isset($arguments[0]) ? $arguments[0] : $this->per_page), (isset($arguments[1]) ? $arguments[1] : 0));
         }
 
+        // Load the method from the QueryBuilder magically
+        if (method_exists($this->builder, $name)) {
+            // it's a find_by_{fieldname} dynamic method
+            return $this->getBuilder()->{$name}(...$arguments);
+        }
+
         throw new Exception(__CLASS__ . ' not such method [' . $name . ']');
     }
 
     /**
-     * @return array|string|false $tableInfo
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
      */
-    public function getTableInfo()
+    public static function __callStatic($method, $args)
     {
-        if (empty($this->tableInfo)) {
-            $stmt = self::$db->prepare(
-                "SHOW COLUMNS FROM " . $this->getTable() . ";"
-            );
-            $stmt->execute();
-            $this->tableInfo = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
-        return $this->tableInfo;
+        $model = (new ReflectionClass(\get_called_class()))->newInstance();
+        return $model->{$method}(...$args);
     }
 
     public function fieldTypes()
     {
         $fields = array();
-        foreach (self::$db->query("SHOW COLUMNS FROM `{$this->getTable()}`")->fetchAll(PDO::FETCH_OBJ) as $field) {
+        foreach ($this->getBuilder()->getDb()->query("SHOW COLUMNS FROM `{$this->getTable()}`")->fetchAll(PDO::FETCH_OBJ) as $field) {
             $type = explode("(", $field->Type);
             
             $_type = $type[0];
@@ -1676,7 +723,7 @@ class BaseModel
             $fields[$field->Field]['default'] = $field->Default;
             $fields[$field->Field]['crudType'] = $this->getCrudType($_type, $length);
         }
-        $results = $this->getTableInfo();
+        $results = $this->getBuilder()->getTableInfo();
         $flds = array();
         foreach ($results as $num => $row) {
             $row = (array)$row;
@@ -1694,7 +741,7 @@ class BaseModel
     public function getFieldNames()
     {
         $fields = [];
-        foreach ($this->getTableInfo() as $column) {
+        foreach ($this->getBuilder()->getTableInfo() as $column) {
             if (is_array($column)) {
                 $fields[] = $column['Field'];
             }
@@ -1707,16 +754,16 @@ class BaseModel
      *
      * @param string $field
      * @return mixed SQL type of property
-     * @return bool
+     * @return bool|string
      */
-    protected function getFieldType($field)
+    public function getFieldType($field)
     {
-        foreach ($this->getTableInfo() as $column) {
+        foreach ($this->getBuilder()->getTableInfo() as $column) {
             if ($column['Field'] == $field) {
                 return ($column['Type']);
             }
         }
-        return false;
+        return "varchar";
     }
 
     /**
@@ -1825,38 +872,6 @@ class BaseModel
 
         $form = new Form($action, $this->fieldTypes(), $data);
         return $form->build()->print($print);
-    }
-
-    /**
-     * Create new data row.
-     *
-     * @param array $properties
-     * 
-     * @return bool
-     */
-    public function create(array $properties)
-    {
-        return $this->insert($properties);
-    }
-
-
-    /**
-     * Find one model in the database.
-     * or create if not exists.
-     *
-     * @param array $properties
-     * 
-     * @return BaseModel[]|bool|array
-     */
-    public function findOrCreate(array $properties = null)
-    {
-        // search for model and create if not exists
-        $object = $this->get('*', $properties);
-        if (empty($object) && !empty($properties)) {
-            return $this->create($properties);
-        } else {
-            return $object;
-        }
     }
 
     /**
@@ -2069,4 +1084,52 @@ class BaseModel
 		$this->tmp_callbacks = $value;
 		return $this;
 	}
+
+    /**
+     * Get the value of builder
+     *
+     * @return  QueryBuilder
+     */ 
+    public function getBuilder()
+    {
+        return $this->builder;
+    }
+
+    /**
+     * Set the value of builder
+     *
+     * @param  QueryBuilder  $builder
+     *
+     * @return  self
+     */ 
+    public function setBuilder(QueryBuilder $builder)
+    {
+        $this->builder = $builder;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of paginator
+     *
+     * @return  \Footup\Paginator\Paginator
+     */ 
+    public function getPaginator()
+    {
+        return $this->paginator;
+    }
+
+    /**
+     * Set the value of paginator
+     *
+     * @param  \Footup\Paginator\Paginator  $paginator
+     *
+     * @return  self
+     */ 
+    public function setPaginator(Paginator $paginator)
+    {
+        $this->paginator = $paginator;
+
+        return $this;
+    }
 }
