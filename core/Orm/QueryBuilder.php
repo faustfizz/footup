@@ -30,6 +30,11 @@ class QueryBuilder
     protected $primaryKey = 'id';
 
     /**
+     * @var string
+     */
+    protected $returnType;
+
+    /**
      * @var string $where
      */
     protected $where;
@@ -142,6 +147,7 @@ class QueryBuilder
 
         $this->getTable();
         $this->getPrimaryKey();
+        $this->getReturnType();
     }
 
     /*** Core Methods ***/
@@ -863,10 +869,18 @@ class QueryBuilder
          */
         $result = $execute->result;
 
-        /**
-         * @var BaseModel[]
-         */
-        return $result->fetchAll(PDO::FETCH_CLASS, get_class($this->class));
+        switch ($this->returnType) {
+            case 'object':
+                return $result->fetchAll(PDO::FETCH_OBJ);
+            
+            case 'array':
+                return $result->fetchAll(PDO::FETCH_ASSOC);
+                
+            case 'self':
+                default:
+                return $result->fetchAll(PDO::FETCH_CLASS, get_class($this->class));
+        }
+
     }
 
     /**
@@ -1045,13 +1059,13 @@ class QueryBuilder
      * @param string $field Search value
      * @return object|array|null Populated object
      */
-    public function find($value = null, $field = null)
+    public function find($value = [], $field = null)
     {
         $field = is_null($field) ? $this->getPrimaryKey() : $field;
 
         $this->from($this->table ?? $this->getTable(), false);
 
-        if ($value !== null) {
+        if (!empty($value)) {
             if ((is_int($value) || is_string($value)) && ($this->getPrimaryKey() == $field || property_exists($this, $field))) {
                 $this->where($field, $value);
             } else if (is_array($value)) {
@@ -1155,6 +1169,16 @@ class QueryBuilder
     public function getPrimaryKey()
     {
         return $this->primaryKey = $this->class->getPrimaryKey();
+    }
+
+    /**
+     * Get the value of primaryKey
+     * 
+     * @return string
+     */
+    public function getReturnType()
+    {
+        return $this->returnType = $this->class->getReturnType();
     }
 
     /**

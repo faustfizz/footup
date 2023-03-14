@@ -92,6 +92,11 @@ class BaseModel
     protected $primaryKey = 'id';
 
     /**
+     * @var string can be self | object | array -- self for BaseModel and it's the default
+     */
+    protected $returnType = 'self';
+
+    /**
      * @var int
      */
     protected $page_count = null;
@@ -541,11 +546,15 @@ class BaseModel
         if(!empty($data))
         {
             $currentClass = $this;
-            $data = array_map(function(BaseModel $modelWithData) use($currentClass){
-                $modelWithData->page_count = $currentClass->page_count;
-                $modelWithData->current_page = $currentClass->current_page;
-                $modelWithData->per_page = $currentClass->current_page;
-                $modelWithData->setPaginator($currentClass->getPaginator());
+            $data = array_map(function($modelWithData) use($currentClass){
+                if($modelWithData instanceof $currentClass)
+                {
+                    $modelWithData->page_count = $currentClass->page_count;
+                    $modelWithData->current_page = $currentClass->current_page;
+                    $modelWithData->per_page = $currentClass->current_page;
+                    $modelWithData->setPaginator($currentClass->getPaginator());
+                    return $modelWithData;
+                }
                 return $modelWithData;
             }, $data);
         }
@@ -603,6 +612,23 @@ class BaseModel
         }
             
         return $this->primaryKey;
+    }
+
+    /**
+     * Get the value of primaryKey
+     * 
+     * @return string
+     */
+    public function getReturnType()
+    {
+        $classVar = get_class_vars(get_class($this));
+
+        if (isset($classVar['returnType']))
+        {
+            $this->returnType = $classVar['returnType'];
+        }
+            
+        return $this->returnType;
     }
 
     public function __get($name)
