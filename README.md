@@ -5,7 +5,6 @@
   <h2 class="name_title">FOOTUP MVC FRAMEWORK - 0.1.5</h2>
 </div>
 
-
 Un mini framework MVC PHP qui comporte :
 
 * CLI support for generating Controller, Model, Middle, Assets and View files ( [adhocore/php-cli](https://github.com/adhocore/php-cli) modified and used thanks :) )
