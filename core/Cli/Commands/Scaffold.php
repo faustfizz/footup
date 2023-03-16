@@ -113,5 +113,6 @@ class Scaffold extends Command
         {
             $io->success($file, true);
         }
+        $io->eol();
     }
 }

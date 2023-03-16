@@ -73,6 +73,7 @@ class Controller extends Command
         {
             $io->success($file, true);
         }
+        $io->eol();
 
         // If you return integer from here, that will be taken as exit error code
     }

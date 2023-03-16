@@ -102,6 +102,7 @@ class Multiple extends Command
                         $viewCommand->execute($value);
                     break;
             }
+            $io->eol();
         }
 
         // If you return integer from here, that will be taken as exit error code
