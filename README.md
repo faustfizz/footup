@@ -2,8 +2,11 @@
 
 <div align="center">
   <img src="core/footup-ascii-art.png" alt="Footup Logo"/>
-  <h2 style="color:yellow">FOOTUP MVC FRAMEWORK - 0.1.5</h2>
-
+  <h2 class="name_title">FOOTUP MVC FRAMEWORK - 0.1.5</h2>
+  <style>
+    .name_title{
+      padding-bottom: 12px
+    }
 </div>
 
 
