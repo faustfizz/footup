@@ -20,6 +20,7 @@ class Scaffold extends Command
             ->option('-p --primaryKey', 'The primary key name if you generate Model class')
             ->option('-r --returnType', 'The return type of the fetched data of the model')
             ->option('-x --extension', 'The extension of the view file')
+            ->option('-f --force', 'Force override file', null, false)
             // Usage examples:
             ->usage(
                 // $0 will be interpolated to actual command name
@@ -69,31 +70,48 @@ class Scaffold extends Command
             $this->returnType = "self";
         }
 
+        $generated = [];
         // more codes ...
         # assets...
         $assetsCommand = new Assets($this->app(), $this->classname);
         $assetsCommand->set('all', 1);
-        $assetsCommand->execute($this->classname);
-
-        # middle...
-        $middleCommand = new Middle($this->app(), $this->classname, $this->namespace);
-        $middleCommand->execute($this->classname);
+        $assetsCommand->scaffold = true;
+        $this->force && $assetsCommand->set("force", true);
+        $generated = array_merge($generated, $assetsCommand->execute($this->classname));
 
         # controller...
         $controllerCommand = new Controller($this->app(), $this->classname, $this->namespace);
-        $controllerCommand->execute($this->classname);
+        $controllerCommand->scaffold = true;
+        $this->force && $controllerCommand->set("force", true);
+        $generated = array_merge($generated, $controllerCommand->execute($this->classname));
+
+        # middle...
+        $middleCommand = new Middle($this->app(), $this->classname, $this->namespace);
+        $middleCommand->scaffold = true;
+        $this->force && $middleCommand->set("force", true);
+        $generated = array_merge($generated, $middleCommand->execute($this->classname));
 
         # model...
         $modelCommand = new Model($this->app(), $this->classname, $this->namespace);
         $this->table && $modelCommand->set("table", $this->table);
         $this->primaryKey && $modelCommand->set("primaryKey", $this->primaryKey);
         $this->returnType && $modelCommand->set("returnType", $this->returnType);
-        $modelCommand->execute($this->classname);
+        $modelCommand->scaffold = true;
+        $this->force && $modelCommand->set("force", true);
+        $generated = array_merge($generated, $modelCommand->execute($this->classname));
         
         # view...
         $viewCommand = new View($this->app(), $this->classname);
         $this->extension && $viewCommand->set("ext", $this->extension);
-        $viewCommand->execute($this->classname);
+        $viewCommand->scaffold = true;
+        $this->force && $viewCommand->set("force", true);
+        $generated = array_merge($generated, $viewCommand->execute($this->classname));
         // If you return integer from here, that will be taken as exit error code
+
+        !empty($generated) && $io->info("All generated files :", true);
+        foreach($generated as $file)
+        {
+            $io->success($file, true);
+        }
     }
 }

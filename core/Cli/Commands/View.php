@@ -9,6 +9,7 @@ use Footup\Cli\Konsole as App;
 class View extends Command
 {
     protected $filename;
+    public $scaffold = false;
     protected $extension = "php";
 
     protected $replacements = array(
@@ -22,6 +23,7 @@ class View extends Command
         $this
 			->argument('<filename>', 'The name of the file to generate')
             ->option('-x --ext', 'The extension of the view file')
+            ->option('-f --force', 'Force override file', null, false)
             // Usage examples:
             ->usage(
                 // $0 will be interpolated to actual command name
@@ -61,6 +63,11 @@ class View extends Command
 
         // more codes ...
         $this->generate();
+        
+        if($this->scaffold)
+            return $this->generated;
+
+        
         !empty($this->generated) && $io->info("All generated files :", true);
         foreach($this->generated as $file)
         {
@@ -118,9 +125,15 @@ class View extends Command
             {
                 @mkdir(VIEW_PATH."/".strtolower($dir), 0777, true);
             }
+
+            if(!$this->force && file_exists(VIEW_PATH. strtolower($dir).DIRECTORY_SEPARATOR.strtolower($file).'.'.$this->extension))
+            {
+                $this->app()->io()->eol()->warn(\sprintf('"%s.%s" exists, use --force to override !', end($expl)."/View/".strtolower($dir).DIRECTORY_SEPARATOR.strtolower($file), $this->extension), true)->eol();
+                exit(0);
+            }
             
             @file_put_contents(
-                VIEW_PATH."/".strtolower($dir).DIRECTORY_SEPARATOR.strtolower($file).'.' . $this->extension,
+                VIEW_PATH.strtolower($dir).DIRECTORY_SEPARATOR.strtolower($file).'.' . $this->extension,
                 $this->replace([
                     "{class_name}" => strtolower($file),
                     "{_class_name}" => strtolower($file)
@@ -129,8 +142,14 @@ class View extends Command
             
             $this->generated[] = end($expl)."/View/".strtolower($dir).DIRECTORY_SEPARATOR.strtolower($file).'.' . $this->extension;
         }else{
+            if(!$this->force && file_exists(VIEW_PATH.strtolower($this->filename).'.'.$this->extension))
+            {
+                $this->app()->io()->eol()->warn(\sprintf('"%s.%s" exists, use --force to override !', end($expl)."/View/".strtolower($this->filename), $this->extension), true)->eol();
+                exit(0);
+            }
+            
             @file_put_contents(
-                VIEW_PATH."/".strtolower($this->filename).'.' . $this->extension,
+                VIEW_PATH.strtolower($this->filename).'.' . $this->extension,
                 $this->replace([
                     "{class_name}" => strtolower($this->filename),
                     "{_class_name}" => strtolower($this->filename)

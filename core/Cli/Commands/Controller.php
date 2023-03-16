@@ -9,6 +9,7 @@ use Footup\Cli\Konsole as App;
 class Controller extends Command
 {
     protected $classname;
+    public $scaffold = false;
     protected $name_space = "App\\Controller";
 
     protected $replacements = array(
@@ -24,6 +25,7 @@ class Controller extends Command
         $this
 			->argument('<classname>', 'The name of the class to generate')
             ->option('-n --namespace', 'The namespace of the class')
+            ->option('-f --force', 'Force override file', null, false)
             // Usage examples:
             ->usage(
                 // $0 will be interpolated to actual command name
@@ -61,6 +63,11 @@ class Controller extends Command
 
         // more codes ...
         $this->generate();
+        
+        if($this->scaffold)
+            return $this->generated;
+
+        
         !empty($this->generated) && $io->info("All generated files :", true);
         foreach($this->generated as $file)
         {
@@ -120,6 +127,12 @@ class Controller extends Command
             {
                 @mkdir(APP_PATH."Controller/".ucfirst($dir), 0777, true);
             }
+
+            if(!$this->force && file_exists(APP_PATH."Controller/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php'))
+            {
+                $this->app()->io()->eol()->warn('"'.end($expl)."/Controller/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php" exists, use --force to override !', true)->eol();
+                exit(0);
+            }
             
             @file_put_contents(
                 APP_PATH."Controller/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php',
@@ -133,6 +146,12 @@ class Controller extends Command
             
             $this->generated[] =  end($expl)."/Controller/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php';
         }else{
+
+            if(!$this->force && file_exists(APP_PATH."Controller/".ucfirst($this->classname).'.php'))
+            {
+                $this->app()->io()->eol()->warn('"'.end($expl)."/Controller/".ucfirst($this->classname).'.php" exists, use --force to override !', true)->eol();
+                exit(0);
+            }
             @file_put_contents(
                 APP_PATH."Controller/".ucfirst($this->classname).'.php',
                 $this->replace([

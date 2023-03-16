@@ -21,6 +21,7 @@ class Multiple extends Command
             ->option('-r --returnType', 'The return type of the fetched data of the model')
             ->option('-p --primaryKey', 'The primary key name if you generate Model class')
             ->option('-x --extension', 'The extension of the view file')
+            ->option('-f --force', 'Force override file', null, false)
             // Usage examples:
             ->usage(
                 // $0 will be interpolated to actual command name
@@ -81,6 +82,7 @@ class Multiple extends Command
                 case "middle":
                         # code...
                         $contrMiddleCommand = $this->type === "middle" ? new Middle($this->app(), $value, $this->namespace) : new Controller($this->app(), $value, $this->namespace);
+                        $this->force && $contrMiddleCommand->set("force", true);
                         $contrMiddleCommand->execute($value);
                     break;
                 case "model":
@@ -89,12 +91,14 @@ class Multiple extends Command
                         $this->table && $modelCommand->set("table", $this->table);
                         $this->primaryKey && $modelCommand->set("primaryKey", $this->primaryKey);
                         $this->returnType && $modelCommand->set("returnType", $this->returnType);
+                        $this->force && $modelCommand->set("force", true);
                         $modelCommand->execute($value);
                     break;
                 case "view":
                         # code...
                         $viewCommand = new View($this->app(), $value);
                         $this->extension && $viewCommand->set("ext", $this->extension);
+                        $this->force && $viewCommand->set("ext", true);
                         $viewCommand->execute($value);
                     break;
             }

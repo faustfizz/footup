@@ -9,6 +9,7 @@ use Footup\Cli\Konsole as App;
 class Assets extends Command
 {
     protected $filename;
+    public $scaffold = false;
     protected $generated = [];
 
     public function __construct(App $cli, $filename = null)
@@ -20,6 +21,7 @@ class Assets extends Command
             ->option('-a --all', 'Generate CSS and JS', null, true)
             ->option('-c --css', 'Generate just the css file')
             ->option('-j --js', 'Generate just the js file')
+            ->option('-f --force', 'Force override file', null, false)
             // Usage examples:
             ->usage(
                 // $0 will be interpolated to actual command name
@@ -58,6 +60,11 @@ class Assets extends Command
         
         // more codes ...
         $this->generate();
+        
+        if($this->scaffold)
+            return $this->generated;
+
+        
         !empty($this->generated) && $io->info("All generated files :", true);
         foreach($this->generated as $file)
         {
@@ -84,6 +91,12 @@ class Assets extends Command
         }
         if($this->css || $this->all)
         {
+            if(!$this->force && file_exists(ASSETS_DIR."css/".strtolower(end($class)).'.css'))
+            {
+                $this->app()->io()->eol()->warn('"'.end($expl)."/css/".strtolower(end($class)).'.css" exists, use --force to override !', true)->eol();
+                exit(0);
+            }
+
             if(file_put_contents(ASSETS_DIR."css/".strtolower(end($class)).'.css', "/* Put CSS Code here */"))
             {
                 $this->generated[] = end($expl)."/css/".strtolower(end($class)).'.css';
@@ -91,6 +104,12 @@ class Assets extends Command
         }
         if($this->js || $this->all)
         {
+            if(!$this->force && file_exists(ASSETS_DIR."js/".strtolower(end($class)).'.js'))
+            {
+                $this->app()->io()->eol()->warn('"'.end($expl)."/js/".strtolower(end($class)).'.js" exists, use --force to override !', true)->eol();
+                exit(0);
+            }
+
             if(file_put_contents(ASSETS_DIR."js/".strtolower(end($class)).'.js', "/* Put JS Code here */"))
             {
                 $this->generated[] = end($expl)."/js/".strtolower(end($class)).'.js';

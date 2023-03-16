@@ -9,6 +9,7 @@ use Footup\Cli\Konsole as App;
 class Middle extends Command
 {
     protected $classname;
+    public $scaffold = false;
     protected $name_space = "App\\Middle";
 
     protected $replacements = array(
@@ -22,6 +23,7 @@ class Middle extends Command
         $this
 			->argument('<classname>', 'The name of the class to generate')
             ->option('-n --namespace', 'The namespace of the middleware class')
+            ->option('-f --force', 'Force override file', null, false)
             // Usage examples:
             ->usage(
                 // $0 will be interpolated to actual command name
@@ -59,6 +61,11 @@ class Middle extends Command
 
         // more codes ...
         $this->generate();
+
+        if($this->scaffold)
+            return $this->generated;
+
+        
         !empty($this->generated) && $io->info("All generated files :", true);
         foreach($this->generated as $file)
         {
@@ -116,6 +123,13 @@ class Middle extends Command
             {
                 @mkdir(APP_PATH."Middle/".ucfirst($dir), 0777, true);
             }
+
+            if(!$this->force && file_exists(APP_PATH."Middle/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php'))
+            {
+                $this->app()->io()->eol()->warn('"'.end($expl)."/Middle/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php" exists, use --force to override !', true)->eol();
+                exit(0);
+            }
+            
             
             @file_put_contents(
                 APP_PATH."Middle/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php',
@@ -127,6 +141,12 @@ class Middle extends Command
             
             $this->generated[] =  end($expl)."/Middle/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php';
         }else{
+            if(!$this->force && file_exists(APP_PATH."Middle/".ucfirst($this->classname).'.php'))
+            {
+                $this->app()->io()->eol()->warn('"'.end($expl)."/Middle/".ucfirst($this->classname).'.php" exists, use --force to override !', true)->eol();
+                exit(0);
+            }
+            
             @file_put_contents(
                 APP_PATH."Middle/".ucfirst($this->classname).'.php',$this->replace([
                     "{name_space}" => $this->name_space,

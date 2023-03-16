@@ -9,6 +9,7 @@ use Footup\Cli\Konsole as App;
 class Model extends Command
 {
     protected $classname;
+    public $scaffold = false;
     protected $name_space = "App\\Model";
 
     protected $replacements = array(
@@ -28,6 +29,7 @@ class Model extends Command
             ->option('-t --table', 'The table name of the model')
             ->option('-r --returnType', 'The return type of the fetched data of the model')
             ->option('-p --primaryKey', 'The primary key of the model table default fall to  id_table')
+            ->option('-f --force', 'Force override file', null, false)
             // Usage examples:
             ->usage(
                 // $0 will be interpolated to actual command name
@@ -74,6 +76,11 @@ class Model extends Command
 
         // more codes ...
         $this->generate();
+        
+        if($this->scaffold)
+            return $this->generated;
+
+        
         !empty($this->generated) && $io->info("All generated files :", true);
         foreach($this->generated as $file)
         {
@@ -140,6 +147,12 @@ class Model extends Command
                 @mkdir(APP_PATH."Model/".ucfirst($dir), 0777, true);
             }
 
+            if(!$this->force && file_exists(APP_PATH."Model/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php'))
+            {
+                $this->app()->io()->eol()->warn('"'.end($expl)."/Model/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php" exists, use --force to override !', true)->eol();
+                exit(0);
+            }
+
             @file_put_contents(
                 APP_PATH."Model/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php',
                 $this->replace([
@@ -154,6 +167,12 @@ class Model extends Command
             $this->generated[] =  end($expl)."/Model/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php';
 
         }else{
+            if(!$this->force && file_exists(APP_PATH."Model/".ucfirst($this->classname).'.php'))
+            {
+                $this->app()->io()->eol()->warn('"'.end($expl)."/Model/".ucfirst($this->classname).'.php" exists, use --force to override !', true)->eol();
+                exit(0);
+            }
+            
             @file_put_contents(
                 APP_PATH."Model/".ucfirst($this->classname).'.php',
                 $this->replace([
