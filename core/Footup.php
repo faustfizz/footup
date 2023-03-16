@@ -1,11 +1,11 @@
 <?php
 /**
- * FOOTUP - 0.1.4 - 01.2022
+ * FOOTUP - 0.1.5 - 03.2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1.4
+ * @version 0.1.5
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
@@ -18,10 +18,18 @@ use Footup\Routing\Router;
 class Footup
 {
     protected $router;
+    protected $name = "FOOTUP MVC Framework";
 
-    public function __construct(Router $router)
+    protected $_version = "0.1.5";
+
+    protected $_code = 00105;
+
+    public function __construct(Router &$router)
     {
-        $this->router = $router;
+        $this->router = &$router;
+        $this->router->setFrameworkName($this->name())
+            ->setFrameworkVersion($this->version())
+            ->setFrameworkVersionCode($this->code());
     }
 
     /**
@@ -167,4 +175,28 @@ class Footup
         return $controller;
     }
 
+
+    /**
+     * Get the value of _version
+     */ 
+    public function version()
+    {
+        return $this->_version;
+    }
+
+    /**
+     * Get the value of name
+     */ 
+    public function name()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Get the value of _code
+     */ 
+    public function code()
+    {
+        return $this->_code;
+    }
 }

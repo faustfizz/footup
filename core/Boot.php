@@ -56,6 +56,14 @@ include_once CONFIG_PATH.'Routes.php';
 $Router = ($router ?? (new Router(new Request())) )->addDefaultRoute();
 
 /**
+ * C'est ici que je charge vos contantes donc ne faites pas de vos constates une partie très importante
+ * du framework mais plutôt de votre application
+ */
+if(file_exists(CONFIG_PATH."Constants.php"))
+	require_once(CONFIG_PATH."Constants.php");
+
+    
+/**
  * Chargement des function globales
  */
 if(file_exists(APP_PATH.'Functions.php'))

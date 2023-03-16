@@ -9,9 +9,10 @@
     <?= css("style.css") ?>
 </head>
 <body>
-    <div class="text-center justify-content-center my-7">
-        <h1>Bienvenue à notre illustration de l'utilisation d'une architecture MVC</h1>
-        <form class="form-inline" enctype="multipart/form-data" method="POST">
+    <div class="text-center justify-content-center my-7" align="center">
+        <h1><?= frameworkName() ?> - version: <?= frameworkVersion() ?></h1>
+        <h2>Bienvenue à notre illustration de l'utilisation d'une architecture MVC</h2>
+        <form class="form-inline" enctype="multipart/form-data" method="POST" style="margin:auto;width:100%;max-width:500px">
             <div class="form-group">
                 <label for="">Fichiers</label>
                 <input type="file" class="form-control-file" name="image" id="" >

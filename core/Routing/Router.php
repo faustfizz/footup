@@ -59,6 +59,12 @@ class Router
 
     public static $auto_route = false;
 
+    protected $framework_name = "";
+
+    protected $framework_version = "";
+
+    protected $framework_codeVersion = 0;
+
     protected $controllerName = "App\Controller\Home";
 
     protected $controllerMethod = "index";
@@ -526,5 +532,68 @@ class Router
     public function getRequest()
     {
         return $this->request;
+    }
+
+    /**
+     * Get the value of framework_name
+     */ 
+    public function getFrameworkName()
+    {
+        return $this->framework_name;
+    }
+
+    /**
+     * Set the value of framework_name
+     *
+     * @param string $name
+     * @return  self
+     */ 
+    public function setFrameworkName($framework_name)
+    {
+        $this->framework_name = $framework_name;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of framework_version
+     */ 
+    public function getFrameworkVersion()
+    {
+        return $this->framework_version;
+    }
+
+    /**
+     * Set the value of framework_version
+     *
+     * @param string
+     * @return  self
+     */ 
+    public function setFrameworkVersion($framework_version)
+    {
+        $this->framework_version = $framework_version;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of framework_codeVersion
+     */ 
+    public function getFrameworkVersionCode()
+    {
+        return $this->framework_codeVersion;
+    }
+
+    /**
+     * Set the value of framework_codeVersion
+     *
+     * @param int
+     * @return  self
+     */ 
+    public function setFrameworkVersionCode($framework_codeVersion)
+    {
+        $this->framework_codeVersion = $framework_codeVersion;
+
+        return $this;
     }
 }

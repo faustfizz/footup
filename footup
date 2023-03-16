@@ -42,7 +42,10 @@ defined('CONFIG_PATH') or define('CONFIG_PATH', realpath(APP_PATH.'Config').DS);
  */
 defined('ROOT_PATH') or define('ROOT_PATH', realpath(APP_PATH.'../').DS);
 
-require_once ROOT_PATH."core/Boot.php";
+/**
+ * @var \Footup\Footup
+ */
+$footup = require(ROOT_PATH."core/Boot.php");
 
 /**
  * On se positionne dans le dossier public
@@ -52,4 +55,4 @@ chdir(BASE_PATH);
 /**
  * Démarre le console
  */
-(new Footup\Cli\Konsole('FOOTUP MVC Framework', 'v0.1.5'))->run();
+(new Footup\Cli\Konsole($footup->name(), $footup->version()))->run();

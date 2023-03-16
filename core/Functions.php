@@ -429,6 +429,48 @@ if(!function_exists("router"))
     }
 }
 
+if(!function_exists("frameworkName"))
+{
+    /**
+     * Exposition du nom du framework
+     *
+     * @return string
+     */
+    function frameworkName()
+    {
+		global $Router;
+        return $Router->getFrameworkName();
+    }
+}
+
+if(!function_exists("frameworkVersion"))
+{
+    /**
+     * Exposition de la version
+     *
+     * @return string
+     */
+    function frameworkVersion()
+    {
+		global $Router;
+        return $Router->getFrameworkVersion();
+    }
+}
+
+if(!function_exists("frameworkVersionCode"))
+{
+    /**
+     * Exposition de la version
+     *
+     * @return int
+     */
+    function frameworkVersionCode()
+    {
+		global $Router;
+        return $Router->getFrameworkVersionCode();
+    }
+}
+
 if(!function_exists("response"))
 {
     /**
