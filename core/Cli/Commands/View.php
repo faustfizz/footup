@@ -10,7 +10,7 @@ class View extends Command
 {
     protected $filename;
     public $scaffold = false;
-    protected $extension = "php";
+    protected $extension = VIEW_EXT;
 
     protected $replacements = array(
             "{classname}"   =>  null,
@@ -18,7 +18,7 @@ class View extends Command
         );
     protected $generated = [];
 
-    public function __construct(App $cli, $filename = null, $extension = "php")
+    public function __construct(App $cli, $filename = null, $extension = VIEW_EXT)
     {
         $this
 			->argument('<filename>', 'The name of the file to generate')

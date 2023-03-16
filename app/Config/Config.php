@@ -56,7 +56,7 @@ class Config
         /**
          * Extension des vues
          */
-        "view_ext" => ".php",
+        "view_ext" => "php",
         /**
          * Nom du controlleur par défaut
          */

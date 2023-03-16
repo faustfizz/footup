@@ -42,6 +42,7 @@ $config = new Config();
  * - chemin vers le dossier de téléversement
  */
 defined('VIEW_PATH') or define('VIEW_PATH', realpath($config->view_path).DS);
+defined('VIEW_EXT') or define('VIEW_EXT', trim($config->view_ext, "."));
 defined('STORE_DIR') or define('STORE_DIR', realpath($config->store_dir).DS);
 defined('ASSETS_DIR') or define('ASSETS_DIR', realpath($config->assets_dir).DS);
 

@@ -10,7 +10,6 @@
  */
 namespace Footup;
 
-use Footup\Config\Config;
 use Exception;
 use Footup\Http\Request;
 use Footup\Http\Response;
@@ -60,7 +59,7 @@ class Controller
      * @param \Footup\Http\Session $session
      * @return $this
      */
-    public function __boot(\Footup\Http\Request $request, \Footup\Http\Response $response = null, \Footup\Http\Session $session = null)
+    public function __boot(Request $request, Response $response = null, Session $session = null)
     {
         $this->request  = $request;
         $this->response = is_null($response) ? $this->response : $response;
@@ -90,16 +89,16 @@ class Controller
         return json_encode($data);
     }
 
-    function view( $path , $data = null, $ext = null )
+    function view( $path , $data = null, $ext = VIEW_EXT )
     {
         extract($data);
         $path = trim($path, "/");
-        $config = new Config();
-        if(!file_exists($config->view_path . $path . ($ext ?? $config->view_ext)))
+        
+        if(!file_exists(VIEW_PATH . $path . ".". $ext))
         {
-            throw new Exception(text("View.missedFile", [$path . ($ext ?? $config->view_ext)]));
+            throw new Exception(text("View.missedFile", [$path . ".". $ext]));
         }
-        return include_once($config->view_path . $path . ($ext ?? $config->view_ext));
+        return include_once(VIEW_PATH . $path . ".". $ext);
     }
 
 
