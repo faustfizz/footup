@@ -2,9 +2,9 @@
 <div align="center">
   <img src="core/footup-ascii-art.png" alt="Footup Logo"/>
   <h2 style="color:yellow">FOOTUP MVC FRAMEWORK - 0.1.5</h2>
+
 </div>
 
-<br />
 
 Un mini framework MVC PHP qui comporte :
 
