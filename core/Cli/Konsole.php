@@ -57,6 +57,7 @@ class Konsole
     {
         $this->name    = $name;
         $this->version = $version;
+        $this->logo(file_get_contents(__DIR__.'/logo'));
 
         // @codeCoverageIgnoreStart
         $this->onExit = $onExit ?? function ($exitCode = 0) {
