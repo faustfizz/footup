@@ -7,6 +7,7 @@
     .name_title{
       padding-bottom: 12px
     }
+  </style>
 </div>
 
 
