@@ -128,7 +128,7 @@ class Color
      */
     public function line(string $text, array $style = []): string
     {
-        $style += ['bg' => null, 'fg' => static::WHITE, 'bold' => 0, 'mod' => null];
+        $style += ['bg' => null, 'fg' => static::WHITE, 'bold' => 0, 'mod' => 1];
 
         $format = $style['bg'] === null
             ? \str_replace(';:bg:', '', $this->format)

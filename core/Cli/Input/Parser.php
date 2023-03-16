@@ -241,10 +241,10 @@ abstract class Parser
             $io->eol()
                 ->error(\sprintf('%s "%s" is required, can\'t continue ! ', $label, $name), true, ["mod" => 1])
                 ->info("Type ")
-                    ->boldCyan(\sprintf("php footup %s -h", $this->name()))
-                    ->cyan(" or ")
-                    ->boldCyan(\sprintf("php footup %s -h", $this->alias()))
-                ->cyan(" to view help !", true);
+                    ->boldPurple(\sprintf("php footup %s -h", $this->name()))
+                    ->blue(" or ")
+                    ->boldPurple(\sprintf("php footup %s -h", $this->alias()))
+                ->blue(" to view help !", true);
             
             exit(0);
             // throw new RuntimeException(
