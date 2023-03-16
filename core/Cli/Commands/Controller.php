@@ -111,7 +111,7 @@ class Controller extends Command
         return strtr($tpl, $this->replacements);
     }
 
-    public function generate($scaffold = false)
+    public function generate()
     {
         $this->normalize($this->classname, $this->namespace);
 
@@ -141,7 +141,7 @@ class Controller extends Command
                     "{name_space}" => $this->name_space . '\\' . strtr($dir, "/" , "\\"),
                     "{class_name}" => ucfirst($file),
                     "{class_view}" => $dir.DIRECTORY_SEPARATOR.strtolower($file),
-                    "{use_header}" => $scaffold ? "use App\Controller\BaseController;\nuse App\Model\\".strtr($dir, "/" , "\\")."\\".ucfirst($file)." as ".ucfirst($file)."Model;\n" : "use App\Controller\BaseController;\n"
+                    "{use_header}" => $this->scaffold ? "use App\Controller\BaseController;\nuse App\Model\\".strtr($dir, "/" , "\\")."\\".ucfirst($file)." as ".ucfirst($file)."Model;\n" : "use App\Controller\BaseController;\n"
                 ])->parse_file_content(__DIR__."/../Tpl/Controller.tpl")
             );
             
@@ -157,7 +157,7 @@ class Controller extends Command
                 APP_PATH."Controller/".ucfirst($this->classname).'.php',
                 $this->replace([
                     "{name_space}"  => $this->name_space,
-                    "{use_header}"  => $scaffold ? "use App\Model\\".ucfirst($this->classname)." as ".ucfirst($this->classname)."Model;\n" : ""
+                    "{use_header}"  => $this->scaffold ? "use App\Model\\".ucfirst($this->classname)." as ".ucfirst($this->classname)."Model;\n" : ""
                 ])->parse_file_content(__DIR__."/../Tpl/Controller.tpl")
             );
             
