@@ -1,11 +1,11 @@
 <?php
 /**
- * FOOTUP - 0.1.3 - 11.2021
+ * FOOTUP - 0.1.5 - 03.2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package FOOTUP
- * @version 0.1
+ * @version 0.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -26,11 +26,6 @@ chdir(__DIR__);
 defined("DS") or define("DS", DIRECTORY_SEPARATOR);
 
 /**
- * Le Dossier ROOT du projet
- */
-defined('ROOT_PATH') or define('ROOT_PATH', realpath(__DIR__.DS.'/../').DS);
-
-/**
  * Le dossier publique
  */
 defined('BASE_PATH') or define('BASE_PATH', __DIR__ .DS);
@@ -38,8 +33,13 @@ defined('BASE_PATH') or define('BASE_PATH', __DIR__ .DS);
 /**
  * @todo Configure ceci pour pointer au dossier contenant vos fichier de configuration
  */
-defined('CONFIG_PATH') or define('CONFIG_PATH', realpath(ROOT_PATH.'app/Config').DS);
-defined('APP_PATH') or define('APP_PATH', realpath(ROOT_PATH."app").DS);
+defined('APP_PATH') or define('APP_PATH', realpath(__DIR__."/../app").DS);
+defined('CONFIG_PATH') or define('CONFIG_PATH', realpath(APP_PATH.'Config').DS);
+
+/**
+ * Le Dossier ROOT du projet (Where to find .env)
+ */
+defined('ROOT_PATH') or define('ROOT_PATH', realpath(APP_PATH.'../').DS);
 
 /**
  * C'est ici que je charge vos contantes donc ne faites pas de vos constates une partie très importante
@@ -51,5 +51,7 @@ if(file_exists(CONFIG_PATH."Constants.php"))
 /**
  * @todo Vous pouvez modifier ceci dans le cas où le dossier système n'est pas le dossier core
  * @example - require_once(ROOT_PATH.'sys/Boot.php');
+ * @return \Footup\Footup
  */
-require_once(ROOT_PATH.'core/Boot.php');
+$footup = require(ROOT_PATH.'core/Boot.php');
+$footup->terminate();

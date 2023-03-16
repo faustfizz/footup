@@ -3,18 +3,24 @@
 use Footup\Config\Config;
 
 /**
- * FOOTUP - 0.1.4 - 12.2021
+ * FOOTUP - 0.1.5 - 03.2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1
+ * @version 0.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
+// Valid PHP Version?
+$minPHPVersion = '7.1';
+if (version_compare(PHP_VERSION, $minPHPVersion, '<'))
+{
+	die("Your PHP version must be {$minPHPVersion} or higher to run FootUp. Current version: " . PHP_VERSION);
+}
+unset($minPHPVersion);
 
-// Refuse to run when called from php-cgi
-if (substr(php_sapi_name(), 0, 3) === 'cgi')
+if (strpos(PHP_SAPI, 'cgi') === 0)
 {
 	die("The cli tool is not supported when running php-cgi. It needs php-cli to function!\n\n");
 }
@@ -26,46 +32,17 @@ defined("DS") or define("DS", DIRECTORY_SEPARATOR);
 define('BASE_PATH', __DIR__ . '/public' . DS);
 
 /**
- * Le dossier système
- */
-defined('SYS_PATH') or define('SYS_PATH', realpath(__DIR__.DS).DS."core/");
-
-/**
- * Le Dossier ROOT du projet
- */
-defined('ROOT_PATH') or define('ROOT_PATH', __DIR__.DS);
-
-/**
  * @todo Configure ceci pour pointer au dossier contenant vos fichier de configuration
  */
-defined('CONFIG_PATH') or define('CONFIG_PATH', realpath(ROOT_PATH.'app/Config').DS);
-defined('APP_PATH') or define('APP_PATH', realpath(ROOT_PATH."app").DS);
+defined('APP_PATH') or define('APP_PATH', realpath(__DIR__."/app").DS);
+defined('CONFIG_PATH') or define('CONFIG_PATH', realpath(APP_PATH.'Config').DS);
 
 /**
- * Chargement des chargeurs de classes
+ * Le Dossier ROOT du projet (Where to find .env)
  */
-include_once SYS_PATH.'Config/Autoload.php';
+defined('ROOT_PATH') or define('ROOT_PATH', realpath(APP_PATH.'../').DS);
 
-/**
- * Démarrer le chargeur de classes
- */
-new \Footup\Config\Autoload();
-
-/**
- * Initialise la classe de configuration
- */
-$config = new Config();
-
-/**
- * Création de quelques constantes importantes
- * ==========================================
- * - le chemin vers le dossier (app)
- * - chemin vers le dossier des vues (app/view)
- * - chemin vers le dossier de téléversement
- */
-defined('VIEW_PATH') or define('VIEW_PATH', realpath($config->view_path).DS);
-defined('STORE_DIR') or define('STORE_DIR', realpath($config->store_dir).DS);
-defined('ASSETS_DIR') or define('ASSETS_DIR', realpath($config->assets_dir).DS);
+require_once ROOT_PATH."core/Boot.php";
 
 /**
  * On se positionne dans le dossier public

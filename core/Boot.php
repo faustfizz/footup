@@ -65,6 +65,6 @@ if(file_exists(APP_PATH.'Functions.php'))
 include_once SYS_PATH.'Functions.php';
 
 /**
- * Démarrage de Footup Framework
+ * Return le Kernel de Footup Framework
  */
-(new Footup($Router))->terminate();
+return new Footup($Router);
