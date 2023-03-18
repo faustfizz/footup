@@ -33,7 +33,7 @@ class Scaffold extends Command
 
         $this->alias("scaffold");
 
-        parent::__construct('make:scaffold', 'Scaffold classes of same type (Controller | Model | Middle | View)', false, $cli);
+        parent::__construct('make:scaffold', 'Generate Controller, Model, Middle, View and Assets files using the same command', false, $cli);
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance
