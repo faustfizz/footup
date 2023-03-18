@@ -327,7 +327,7 @@ class Konsole
     public function run(array $argv = null)
     {
         if ('cli' != php_sapi_name()) {
-            throw new Exception('This has to be run from the command line');
+            throw new \Exception('This has to be run from the command line');
         }
 
         $argv = is_null($argv) ? $_SERVER['argv'] : $argv;
