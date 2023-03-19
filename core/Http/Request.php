@@ -14,6 +14,7 @@ namespace Footup\Http;
 
 use Footup\Config\Config;
 use Footup\Files\File;
+use Footup\Utils\Arrays\ArrDots;
 use Footup\Utils\Validator\Validator;
 
 class Request
@@ -203,38 +204,12 @@ class Request
      */
     public function server($name = null, $default = null)
     {
-        $kname = is_null($name) ? null : mb_strtoupper($name);
+        $kname = is_null($name) ? null : str_replace('-', '_', mb_strtoupper($name));
 
         if (is_null($kname)) {
             return $default;
         }
 
-        if (isset($this->server[$kname]) || isset($this->server[$name])) {
-            return $this->server[$kname] ?? $this->server[$name];
-        }
-        $kname = str_replace('_', '-', $kname);
-        $name = str_replace('_', '-', $name);
-        if (isset($this->server[$kname]) || isset($this->server[$name])) {
-            return $this->server[$kname] ?? $this->server[$name];
-        }
-        $kname = str_replace('-', '_', $kname);
-        $name = str_replace('-', '_', $name);
-        if (isset($this->server[$kname]) || isset($this->server[$name])) {
-            return $this->server[$kname] ?? $this->server[$name];
-        }
-
-        $kname = mb_strtolower($kname);
-        $name = mb_strtolower($name);
-        if (isset($this->server[$kname]) || isset($this->server[$name])) {
-            return $this->server[$kname] ?? $this->server[$name];
-        }
-        $kname = str_replace('_', '-', $kname);
-        $name = str_replace('_', '-', $name);
-        if (isset($this->server[$kname]) || isset($this->server[$name])) {
-            return $this->server[$kname] ?? $this->server[$name];
-        }
-        $kname = str_replace('-', '_', $kname);
-        $name = str_replace('-', '_', $name);
         if (isset($this->server[$kname]) || isset($this->server[$name])) {
             return $this->server[$kname] ?? $this->server[$name];
         }
@@ -458,7 +433,7 @@ class Request
      */
     public function url($withQuery = true, $base = false): string
     {
-        $base_url = isset($_ENV["base_url"]) ? $_ENV["base_url"] : (new Config())->base_url;
+        $base_url = $this->env("base_url") ?? (new Config())->base_url;
         $base_url = trim((string) $base_url, " \n\r\t\v\x00\/");
 
         if($base === true)
@@ -544,36 +519,14 @@ class Request
     public function header(string $keyname = null, $default = null)
     {
         $kname = is_null($keyname) ? null : 'HTTP_' . mb_strtoupper($keyname);
+
         if (is_null($kname)) {
             return $default;
         }
 
-        if (isset($this->server[$kname])) {
-            return $this->server[$kname];
-        }
         $kname = str_replace('-', '_', $kname);
-        if (isset($this->server[$kname])) {
-            return $this->server[$kname];
-        }
-        $kname = str_replace('_', '-', $kname);
-        if (isset($this->server[$kname])) {
-            return $this->server[$kname];
-        }
-
-        $kname = mb_strtolower($kname);
-        if (isset($this->server[$kname])) {
-            return $this->server[$kname];
-        }
-        $kname = str_replace('-', '_', $kname);
-        if (isset($this->server[$kname])) {
-            return $this->server[$kname];
-        }
-        $kname = str_replace('_', '-', $kname);
-        if (isset($this->server[$kname])) {
-            return $this->server[$kname];
-        }
-
-        return $default;
+        
+        return $this->server[$kname] ?? $default;
     }
 
     /**
@@ -621,6 +574,7 @@ class Request
      */
     public function env($name = null, $default = null)
     {
+        $name = is_null($name) ? null : str_replace('-', '_', mb_strtolower($name));
         $kname = is_null($name) ? null : mb_strtoupper($name);
 
         if (is_null($kname)) {
@@ -630,20 +584,10 @@ class Request
         if (isset($this->env[$kname]) || isset($this->env[$name])) {
             return $this->env[$kname] ?? $this->env[$name];
         }
-        $kname = strtolower($kname);
-        $name = strtolower($name);
-        if (isset($this->env[$kname]) || isset($this->env[$name])) {
-            return $this->env[$kname] ?? $this->env[$name];
-        }
-        $kname = str_replace('_', '-', $kname);
-        $name = str_replace('_', '-', $name);
-        if (isset($this->env[$kname]) || isset($this->env[$name])) {
-            return $this->env[$kname] ?? $this->env[$name];
-        }
-        $kname = str_replace('-', '_', $kname);
-        $name = str_replace('-', '_', $name);
-        if (isset($this->env[$kname]) || isset($this->env[$name])) {
-            return $this->env[$kname] ?? $this->env[$name];
+
+        if(strpos($name, ".") && $value = ArrDots::get($this->env, $name, null))
+        {
+            return $value;
         }
 
         return $this->server($name, $default);
