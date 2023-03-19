@@ -68,6 +68,10 @@ class Footup
         $session = new Session();
 
         try {
+            if($handler instanceof \Closure)
+            {
+                return $handler(...array_values($route->getArgs()));
+            }
             /**
              * @var \Footup\Controller $controller
              */

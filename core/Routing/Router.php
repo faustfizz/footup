@@ -183,7 +183,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|collable|\Footup\Controller $handler
+     * @param string|\Closure|\Footup\Controller $handler
      * @return self
      */
     public function any(string $uri, $handler): self
@@ -193,7 +193,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|collable|\Footup\Controller $handler
+     * @param string|\Closure|\Footup\Controller $handler
      * @return self
      */
     public function get(string $uri, $handler): self
@@ -203,7 +203,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|collable|\Footup\Controller $handler
+     * @param string|\Closure|\Footup\Controller $handler
      * @return self
      */
     public function post(string $uri, $handler): self
@@ -213,7 +213,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|collable|\Footup\Controller $handler
+     * @param string|\Closure|\Footup\Controller $handler
      * @return self
      */
     public function put(string $uri, $handler): self
@@ -223,7 +223,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|collable|\Footup\Controller $handler
+     * @param string|\Closure|\Footup\Controller $handler
      * @return self
      */
     public function delete(string $uri, $handler): self
@@ -233,7 +233,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|collable|\Footup\Controller $handler
+     * @param string|\Closure|\Footup\Controller $handler
      * @return self
      */
     public function patch(string $uri, $handler): self
@@ -243,7 +243,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|collable|\Footup\Controller $handler
+     * @param string|\Closure|\Footup\Controller $handler
      * @return self
      */
     public function head(string $uri, $handler): self
@@ -280,7 +280,6 @@ class Router
             $this->routes[$requestMethod] ?? []
         );
         
-        
         // Check for direct matches
         if (isset($this->routes[$requestMethod][$requestUri])) {
             $route = $this->routes[$requestMethod][$requestUri];
@@ -297,7 +296,7 @@ class Router
         );
 
         /**
-         * @var string                         $uri
+         * @var string   $uri
          * @var \Footup\Routing\Route $route
          */
         foreach ($routes as $uri => $route) {
@@ -353,6 +352,8 @@ class Router
 
                 // Replace the full placeholder with a match-anything rule
                 $expression = str_replace($placeholder, "($replacement)", $expression);
+        
+            // print_r($expression);die;
             }
 
             // Keep the matched variable values
