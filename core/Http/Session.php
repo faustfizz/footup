@@ -36,13 +36,29 @@ class Session
      */
     public function __get($name)
     {
-        return $this->get($name);
+        return in_array($name, ["id", "session_id"]) ? $this->id() : $this->get($name);
     }
 
     public function __set($name, $val)
     {
         return $this->set($name, $val);
     }
+    
+    /**
+	 * Push new value onto session value that is array.
+	 *
+	 * @param string $key  Identifier of the session property we are interested in.
+	 * @param array  $data value to be pushed to existing session key.
+	 *
+	 * @return void
+	 */
+	public function push(string $key, array $data)
+	{
+		if ($this->has($key) && is_array($value = $this->get($key)))
+		{
+			$this->set($key, array_merge($value, $data));
+		}
+	}
 
     /**
      * Get session ID
@@ -63,7 +79,7 @@ class Session
      */
     public function set($key, $val = null)
     {
-        if(is_array($key) && is_null($val)){
+        if(is_array($key) && !empty($key)){
             foreach($key as $k => $v){
                 $this->data[$k] = $v;
             }
@@ -82,7 +98,7 @@ class Session
      */
     public function setFlash($key, $val = null)
     {
-        if(is_array($key) && is_null($val)){
+        if(is_array($key) && !empty($val)){
             foreach($key as $k => $v){
                 $this->data["flash_".$k] = $v;
             }
@@ -183,7 +199,7 @@ class Session
      */
     public function delAll()
     {
-        return $_SESSION = $this->data = [];
+        $_SESSION = $this->data = [];
     }
 
     /**
@@ -215,13 +231,5 @@ class Session
     public function destroy() : bool
     {
         return session_destroy();
-    }
-
-    /**
-     * @return void
-     */
-    public function __destruct()
-    {
-        return $_SESSION = $this->data;
     }
 }

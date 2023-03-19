@@ -129,11 +129,10 @@ class DotEnv extends \ArrayObject
                 $value = (array) $value;
             }
             $_ENV[$variable] = $value;
-            $_SERVER[strtoupper($variable)] = $value;
+            is_string($value) && $_SERVER[strtoupper($variable)] = $value;
             
             foreach ($value as $key => $val) {
                 # code...
-                $_ENV[$key] = $val;
                 $_SERVER[strtoupper($key)] = $val;
             }
         }

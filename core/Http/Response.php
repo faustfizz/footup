@@ -88,7 +88,6 @@ class Response
         420 => 'Enhance Your Calm',
         422 => 'Unprocessable Entity',
         423 => 'Locked',
-        424 => 'Failed Dependency',
         424 => 'Method Failure',
         425 => 'Unordered Collection',
         426 => 'Upgrade Required',
@@ -128,11 +127,7 @@ class Response
     public function __construct($data = '', $status = 200, $header = [])
     {
 
-        $this->header = $header;
-
-        foreach ($header as $key => $value) {
-            $this->header($key, $value);
-        }
+        $this->header($header);
 
         if (! isset($this->header['Content-Type'])) {
             $this->header('Content-Type', 'text/html; charset=UTF-8');
@@ -282,6 +277,7 @@ class Response
         $this->header($header);
 
         $data = json_encode($data, $option);
+
         if ($this->body($data)) {
             $this->header('Content-Type', 'application/json; charset=UTF-8');
         }
@@ -309,7 +305,8 @@ class Response
         }
 
         if (! $filename) {
-            $filename = end(explode('/', $filepath));
+            $explode = explode('/', $filepath);
+            $filename = end($explode);
         }
 
         $this->body($content);
@@ -393,17 +390,19 @@ class Response
      * @param  array $header
      * @return $this
      */
-    public function header(...$header)
+    public function header(string|array $headerKey, $value = null)
     {
-        if (isset($header[0]) && is_array($header[0])) {
-            foreach ($header[0] as $key => $value) {
-                $this->header($key, $value);
+        if(empty($headerKey)) return $this;
+
+        if (!empty($headerKey) && is_array($headerKey)) {
+            foreach ($headerKey as $key => $val) {
+                $this->header($key, $val);
             }
 
             return $this;
         }
 
-        $this->header[$header[0]] = $header[1];
+        $this->header[$headerKey] = $value;
 
         return $this;
     }
@@ -411,13 +410,13 @@ class Response
     /**
      * @return array
      */
-    public function headers()
+    public function headers($key = null)
     {
-        return $this->header;
+        return !is_null($key) && isset($this->header[$key]) ? $this->header[$key] : $this->header;
     }
 
     /**
-     * @return void
+     * @return mixed
      */
     public function send($echo = false)
     {
@@ -450,7 +449,7 @@ class Response
     /**
      * @param string $status
      * @param string|int $message
-     * @return $this
+     * @return $this|void
      */
     public function die($status = '404', $title = "404: Not Found !", $message = "")
     {

@@ -290,17 +290,14 @@ if(!function_exists("request"))
      */
     function request($method_or_index = null, $arg = null)
     {
-        global $Router;
-        $req = $Router->getRequest();
-        if(is_null($method_or_index))
-        {
-            return $req;
-        }elseif(method_exists($req, $method_or_index) && !is_null($arg))
+        $req = router()->getRequest();
+
+		if(method_exists($req, $method_or_index))
         {
             return $req->$method_or_index($arg);
         }elseif($val = $req->$method_or_index)
         {
-            return $val;
+            return !empty($arg) ? $req->$method_or_index = $arg : $val;
         }else{
             return $req;
         }
@@ -393,9 +390,8 @@ if(!function_exists("calledController"))
      */
     function calledController($withNamespace = true)
     {
-        global $Router;
-        $controller = explode("\\", $Router->getControllerName());
-        return $withNamespace ? $Router->getControllerName() : end($controller);
+        $controller = explode("\\", router()->getControllerName());
+        return $withNamespace ? router()->getControllerName() : end($controller);
     }
 }
 
@@ -408,8 +404,7 @@ if(!function_exists("calledMethod"))
      */
     function calledMethod()
     {
-        global $Router;
-        return $Router->getControllerMethod();
+        return router()->getControllerMethod();
     }
 }
 
@@ -438,8 +433,7 @@ if(!function_exists("frameworkName"))
      */
     function frameworkName()
     {
-		global $Router;
-        return $Router->getFrameworkName();
+        return router()->getFrameworkName();
     }
 }
 
@@ -452,8 +446,7 @@ if(!function_exists("frameworkVersion"))
      */
     function frameworkVersion()
     {
-		global $Router;
-        return $Router->getFrameworkVersion();
+        return router()->getFrameworkVersion();
     }
 }
 
@@ -466,8 +459,7 @@ if(!function_exists("frameworkVersionCode"))
      */
     function frameworkVersionCode()
     {
-		global $Router;
-        return $Router->getFrameworkVersionCode();
+        return router()->getFrameworkVersionCode();
     }
 }
 
@@ -501,20 +493,17 @@ if(!function_exists("session"))
     function session($key = null, $value = null)
     {
         $session = new Session();
+
         if(is_array($key))
         {
             return $session->set($key);
         }
-        elseif(!is_null($key) && !is_null($value))
-        {
-            return $session->set($key, $value);
-        }
         elseif(is_string($key) && !empty($key))
         {
-            return $session->get($key);
-        }else{
-            return $session;
+            return !empty($value) ? $session->set($key, $value) : $session->get($key);
         }
+
+		return $session;
     }
 }
 
@@ -523,12 +512,12 @@ if (!function_exists('url'))
     /**
      * @param mixed $uri
      * @param boolean $withQuery
-     * @param string|null $protocol
+     * @param string|null $scheme
      * @return string
      */
-	function url($uri = '', bool $withQuery = false, string $protocol = null): string
+	function url($uri = '', bool $withQuery = false, string $scheme = null): string
 	{
-		return base_url($uri, $withQuery, $protocol);
+		return base_url($uri, $withQuery, $scheme);
 	}
 }
 
@@ -558,35 +547,38 @@ if (! function_exists('base_url'))
     /**
      * Génére des urls 
      *
-     * @param mixed $uri
+     * @param array|string $uri
      * @param boolean $withQuery
-     * @param string|null $protocol
+     * @param string|null $scheme
      * @return string
      */
-	function base_url($uri = '', bool $withQuery = false, string $protocol = null): string
+	function base_url(array|string $uri = '', bool $withQuery = false, string $scheme = null): string
 	{
-		$base_url = isset($_ENV["base_url"]) ? $_ENV["base_url"] : config("base_url");
+		$base_url = trim((string) request()->url(false, true), " \n\r\t\v\x00\/")."/";
+		$query = "";
 
-		if($protocol)
+		if($scheme)
 		{
-			$protocol = strtr($protocol, ["://" => ""]);
+			$scheme = strtr($scheme, ["://" => ""]);
 			$url = parse_url($base_url);
-			$base_url = $protocol."://".$url["host"];
+			$base_url = strtr($base_url, [$url["scheme"] => $scheme]);
 		}
-		
+
+		if($withQuery)
+		{
+			$q = request()->query();
+			$query = !empty($q) ? "?".http_build_query($q, "_key", "&") : $query;
+		}
+
         if(empty($uri) || $uri == '/')
         {
-            return trim((string) $base_url, " \n\r\t\v\x00\/")."/";
+            return $base_url.$query;
         }
 
         // convert segment array to string
-        $uri = is_array($uri) ? implode('/', $uri) : trim($uri, "/");
-
-		$uri = !empty($query) && $withQuery ? $uri."?".http_build_query($query, "_key", "&") : $uri;
-            
-        $url = trim((string) $base_url, " \n\r\t\v\x00\/")."/".$uri;
-
-        return $url;
+        $uri = trim(is_array($uri) ? implode('/', $uri) : $uri, " \n\r\t\v\x00\/");
+		
+        return trim((string) $base_url, " \n\r\t\v\x00\/")."/".$uri.$query;
     }
 }
 
@@ -1003,12 +995,12 @@ if (! function_exists('url_is'))
 	/**
 	 * Determines si le path d'url a le path donné en parametre
 	 *
-	 * @param string $path
+	 * @param string|array $path
 	 * @return boolean
 	 */
-	function url_is(string $path): bool
+	function url_is(array|string $path): bool
 	{
-		return "/".trim($path, "/") === "/".trim(path(), "/");
+		return request()->is($path);
 	}
 }
 
@@ -1018,11 +1010,12 @@ if (! function_exists('in_url'))
 	 * Determines si le path d'url a le path donné en parametre
 	 *
 	 * @param string $path
+	 * @param bool $withQuery
 	 * @return boolean
 	 */
-	function in_url(string $path): bool
+	function in_url(string $path, bool $withQuery = true): bool
 	{
-		return stripos("/".trim(path(), "/"), "/".trim($path, "/")) !== false;
+		return stripos(trim(request()->url($withQuery), "/"), trim($path, "/")) !== false;
 	}
 }
 
@@ -1037,9 +1030,9 @@ if(! function_exists("json"))
      * @param boolean $echo
      * @return Response|mixed
      */
-    function json(array $data, $echo = false)
+    function json(array $data, $echo = true)
     {
-        return response()->json($data, $echo, 200, ["Content-Type" => 'application/json; charset=UTF-8'], 0);
+        return response()->json($data, $echo, 200);
     }
 }
 

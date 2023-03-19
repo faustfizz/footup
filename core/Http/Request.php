@@ -1,12 +1,12 @@
 <?php
 
 /**
- * FOOTUP - 0.1.3 - 11.2021
+ * FOOTUP - 0.1.5 - 03.2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Http
- * @version 0.1
+ * @version 0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -78,6 +78,8 @@ class Request
         $this->files   = &$_FILES;
         $this->request = &$_REQUEST;
 
+        $this->setLang($this->env("lang"));
+
         $this->validator = new Validator();
     }
 
@@ -116,37 +118,33 @@ class Request
      * @param mixed $default
      * @return Request
      */
-    public function withGetInput(mixed $key = null, mixed $default = null)
+    public function withGetInput()
     {
-        $this->data = array_merge($this->get($key, $default), $this->json($key, false));
+        $this->data = array_merge($this->get(), $this->json(null, false));
 
         return $this;
     }
 
     /**
      * Choose the POST data to validate
-     *
-     * @param mixed $key
-     * @param mixed $default
+     * 
      * @return Request
      */
-    public function withPostInput(mixed $key = null, mixed $default = null)
+    public function withPostInput()
     {
-        $this->data = array_merge($this->post($key, $default), $this->json($key, false));
+        $this->data = array_merge($this->post(), $this->json(null, false));
 
         return $this;
     }
 
     /**
      * Grab the GET, POST data to validate
-     *
-     * @param mixed $key
-     * @param mixed $default
+     * 
      * @return Request
      */
-    public function withInput(mixed $key = null, mixed $default = null)
+    public function withInput()
     {
-        $this->data = array_merge($this->get($key, $default), $this->post($key, $default), $this->json($key, false));
+        $this->data = array_merge($this->get(), $this->post(), $this->json(null, false));
 
         return $this;
     }
@@ -199,22 +197,22 @@ class Request
 
 
     /**
-     * @param $name
+     * @param $key
      * @return mixed|null
      */
-    public function server($name = null, $default = null)
+    public function server($key, $default = null)
     {
-        $kname = is_null($name) ? null : str_replace('-', '_', mb_strtoupper($name));
+        $kname = is_null($key) ? null : str_replace('-', '_', mb_strtoupper($key));
 
         if (is_null($kname)) {
             return $default;
         }
 
-        if (isset($this->server[$kname]) || isset($this->server[$name])) {
-            return $this->server[$kname] ?? $this->server[$name];
+        if (isset($this->server[$kname]) || isset($this->server[$key])) {
+            return $this->server[$kname] ?? $this->server[$key];
         }
 
-        return $this->header($name, $default);
+        return $this->header($key, $default);
     }
 
     /**
@@ -516,11 +514,11 @@ class Request
      * @param  string|null $name
      * @return mixed
      */
-    public function header(string $keyname = null, $default = null)
+    public function header(string $keyname, $default = null)
     {
         $kname = is_null($keyname) ? null : 'HTTP_' . mb_strtoupper($keyname);
 
-        if (is_null($kname)) {
+        if (empty($kname)) {
             return $default;
         }
 
@@ -551,46 +549,41 @@ class Request
     }
 
     /**
-     * @param  mixed ...$patterns
+     * @param  string|array $patterns
      * @return bool
      */
-    public function is(...$patterns)
+    public function is(string|array $patterns)
     {
         $path = rawurldecode($this->path());
+        $pattern = strtr( (is_array($patterns) ? implode("/", $patterns) : $patterns), [$this->url(false, true) => ""]);
 
-        foreach ($patterns as $pattern) {
-            if ($pattern == $path) {
-                return true;
-            }
-        }
-
-        return false;
+        return trim($pattern, " \n\r\t\v\x00/") === trim($path, " \n\r\t\v\x00/");
     }
     
     /**
-     * @param string $name
+     * @param string $key
      * @param mixed $default
      * @return mixed
      */
-    public function env($name = null, $default = null)
+    public function env($key, $default = null)
     {
-        $name = is_null($name) ? null : str_replace('-', '_', mb_strtolower($name));
-        $kname = is_null($name) ? null : mb_strtoupper($name);
+        $key = is_null($key) ? null : str_replace('-', '_', mb_strtolower($key));
+        $kname = is_null($key) ? null : mb_strtoupper($key);
 
-        if (is_null($kname)) {
+        if (empty($kname)) {
             return $default;
         }
 
-        if (isset($this->env[$kname]) || isset($this->env[$name])) {
-            return $this->env[$kname] ?? $this->env[$name];
+        if (isset($this->env[$kname]) || isset($this->env[$key])) {
+            return $this->env[$kname] ?? $this->env[$key];
         }
 
-        if(strpos($name, ".") && $value = ArrDots::get($this->env, $name, null))
+        if(strpos($key, ".") && $value = ArrDots::get($this->env, $key, null))
         {
             return $value;
         }
 
-        return $this->server($name, $default);
+        return $this->server($key, $default);
     }
 
     /**
