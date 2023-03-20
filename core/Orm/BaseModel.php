@@ -539,25 +539,7 @@ class BaseModel
         $this->setPaginator(new Paginator($total, $this->per_page, $page, request()->url(), $this->paginatorConfig));
 
         $data = $this->get("*", null, (int)$this->per_page, (int)$offset);
-
-        /**
-         * I wanted to set the paginator  aivalable with same on all paginated results classes
-         */
-        if(!empty($data))
-        {
-            $currentClass = $this;
-            $data = array_map(function($modelWithData) use($currentClass){
-                if($modelWithData instanceof $currentClass)
-                {
-                    $modelWithData->page_count = $currentClass->page_count;
-                    $modelWithData->current_page = $currentClass->current_page;
-                    $modelWithData->per_page = $currentClass->current_page;
-                    $modelWithData->setPaginator($currentClass->getPaginator());
-                    return $modelWithData;
-                }
-                return $modelWithData;
-            }, $data);
-        }
+        
         return $data;
 	}
 

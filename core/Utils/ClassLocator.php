@@ -19,7 +19,7 @@ class ClassLocator
 
     protected static function translateNamespacePath(string $namespace): string
     {
-        $namespace = strtr($namespace, ['Footup\\' => SYS_PATH, 'App\\' => APP_PATH, "\\"   =>  "/"]);
+        $namespace = strtr($namespace, ['Footup\\' => SYS_PATH, 'App\\' => APP_PATH, "\\"   =>  DS]);
 
         if (empty($namespace)) {
             return '';

@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.3 - 11.2021
+ * FOOTUP - 0.1.5 - 03.2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -8,7 +8,7 @@
  * Ce fichier fait partie du framework
  * 
  * @package Footup
- * @version 0.1.3
+ * @version 0.1.4
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -20,6 +20,8 @@ use App\Config\Config;
 use Footup\Config\Mime;
 use Footup\I18n\Time;
 use Footup\Lang\Lang;
+use Footup\Model;
+use Footup\Utils\Shared;
 use Footup\Utils\Validator\Validator;
 
 // Tableau de caractères à remplacer
@@ -304,12 +306,30 @@ if(!function_exists("request"))
     }
 }
 
+if(!function_exists("model"))
+{
+    /**
+     * Une fonction pour retrouver un model d'instance partagée ou non
+	 * 
+	 * Get the model (Shared Instance or non shared)
+     *
+     * @param string $modelName
+     * @param bool $shared
+	 * 
+     * @return Model
+     */
+    function model($modeName, $shared = true)
+    {
+		return Shared::loadModels($modeName, $shared);
+    }
+}
+
 if(!function_exists("validator"))
 {
     /**
      * Une fonction pour exposer l'objet Validator
      *
-     * @return Footup\Utils\Validator\Validator
+     * @return Validator
      */
     function validator()
     {
@@ -870,6 +890,20 @@ if (! function_exists('slugify'))
 }
 
 // ---------------------------------------------------------------------
+
+if(!function_exists("getMimeType"))
+{
+    /**
+     * getMimeType
+     *
+     * @param string $file
+     * @return string
+     */
+    function getMimeType($file)
+    {
+		return Mime::getMime(pathinfo($file, PATHINFO_EXTENSION));
+    }
+}
 
 if(!function_exists("favicon"))
 {

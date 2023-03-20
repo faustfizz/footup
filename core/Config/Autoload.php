@@ -1,11 +1,12 @@
 <?php
+
 /**
- * FOOTUP - 0.1.3 - 11.2021
+ * FOOTUP - 0.1.5 - 03.2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Config
- * @version 0.1
+ * @version 0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup\Config;
@@ -60,19 +61,11 @@ class Autoload{
      */
     public function mount($class)
     {
-        $c = explode('\\', $class);
-        $str = "";
-        for($r = 0; $r < count($c)-1; $r++){
-            if(isset($this->psr4[$c[$r]])){
-                $rn = rtrim($this->psr4[$c[$r]], DS);
-                $str .= strtr($rn.DS, [ROOT_PATH => ""]);
-            }else{
-                $str .= $r === 0 ? strtolower($c[$r]).DS : ucfirst($c[$r]).DS;
-            }
-        }
-        if(file_exists(ROOT_PATH.$str.ucfirst(end($c)).'.php'))
+        $file = strtr($class, ['Footup\\' => SYS_PATH, 'App\\' => APP_PATH, "\\"   =>  DS]);
+
+        if(file_exists($file. ".php"))
         {
-            return require_once(ROOT_PATH.$str.ucfirst(end($c)).'.php');
+            return require_once($file.'.php');
         }
     }
 	//--------------------------------------------------------------------
