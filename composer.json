@@ -1,0 +1,33 @@
+{
+    "name": "footup/framework",
+    "description": "FootUp MVC Framework: A Rich Featured LightWeight PHP MVC Framework",
+    "keywords": ["MVC", "FootUp Framework", "PHP Framework", "POO"],
+    "type": "project",
+    "license": "BSD-3",
+    "autoload": {
+        "psr-4": {
+            "Footup\\": "core/"
+        }
+    },
+    "authors": [
+        {
+            "name": "faustfizz",
+            "email": "youssoufmbae2@gmail.com",
+            "homepage": "https://faustfizz.slashz.net"
+        }
+    ],
+    "prefer-stable": true,
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.1||^8.0",
+        "ext-curl": "*",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {},
+    "readme": "./README.md",
+	"support": {
+        "source": "https://github.com/faustfizz/footup"
+    }
+}

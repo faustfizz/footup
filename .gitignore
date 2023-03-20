@@ -1,5 +1,6 @@
 *.local.php
-/app/Libs/*
+/app/Libs/
 /*/*.gitignore
 /.env
-/public/uploads/*/
+/public/uploads/
+/vendor/

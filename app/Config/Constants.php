@@ -14,7 +14,6 @@
  */
 namespace App\Config;
 
-defined('DS') || define('DS', DIRECTORY_SEPARATOR);
 defined('SECOND') || define('SECOND', 1);
 defined('MINUTE') || define('MINUTE', 60);
 defined('HOUR')   || define('HOUR', 3600);

@@ -28,6 +28,8 @@ class Autoload{
      */
     public function register()
     {
+        $this->copyComposerNamespaces();
+
         spl_autoload_register([$this, 'mount'], true, true);
 
         spl_autoload_register(function ($class) {
@@ -73,5 +75,54 @@ class Autoload{
             return require_once(ROOT_PATH.$str.ucfirst(end($c)).'.php');
         }
     }
+	//--------------------------------------------------------------------
+
+	/**
+	 * Locates all PSR4 & classMap compatible namespaces from Composer.
+	 */
+	protected function copyComposerNamespaces()
+	{
+        $composer_autoloader = ROOT_PATH."vendor/autoload.php";
+
+		if (! is_file($composer_autoloader))
+		{
+			return false;
+		}
+
+        /**
+         * @var \Composer\Autoload\ClassLoader
+         */
+		$composer = include $composer_autoloader;
+
+		$paths = $composer->getPrefixesPsr4();
+        $classmaps = $composer->getClassMap();
+
+        foreach ($classmaps as $key => $value) {
+            # code...
+            if(is_string($key) && stripos($key, "composer"))
+            {
+                unset($classmaps[$key]);
+            }
+        }
+
+		$this->classmap = array_merge($this->classmap, $classmaps);
+
+		unset($composer);
+
+		// Get rid of CodeIgniter so we don't have duplicates
+		if (isset($paths['Footup\\']))
+		{
+			unset($paths['Footup\\']);
+		}
+
+		// Composer stores namespaces with trailing slash. We don't.
+		$newPaths = [];
+		foreach ($paths as $key => $value)
+		{
+			$newPaths[rtrim($key, '\\ ')] = $value;
+		}
+
+		$this->psr4 = array_merge($this->psr4, $newPaths);
+	}
 
 }
