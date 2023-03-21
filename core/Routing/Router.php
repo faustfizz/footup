@@ -65,7 +65,7 @@ class Router
 
     protected $framework_codeVersion = 0;
 
-    protected $controllerName = "App\Controller\Home";
+    protected $controllerName = "App\\Controller\Home";
 
     protected $controllerMethod = "index";
 
@@ -114,7 +114,7 @@ class Router
         if (! isset($this->routes[static::METHOD_GET]))
         {
             $config = new Config;
-            $controller = "App\Controller\\".ucfirst($config->config['default_controller']);
+            $controller = "App\\Controller\\".ucfirst($config->config['default_controller']);
             $method = $config->config['default_method'];
             $this->get('/', "$controller@$method");
 
@@ -183,7 +183,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|\Closure|\Footup\Controller $handler
+     * @param callable|\Closure|string $handler
      * @return self
      */
     public function any(string $uri, $handler): self
@@ -193,7 +193,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|\Closure|\Footup\Controller $handler
+     * @param callable|\Closure|string $handler
      * @return self
      */
     public function get(string $uri, $handler): self
@@ -203,7 +203,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|\Closure|\Footup\Controller $handler
+     * @param callable|\Closure|string $handler
      * @return self
      */
     public function post(string $uri, $handler): self
@@ -213,7 +213,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|\Closure|\Footup\Controller $handler
+     * @param callable|\Closure|string $handler
      * @return self
      */
     public function put(string $uri, $handler): self
@@ -223,7 +223,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|\Closure|\Footup\Controller $handler
+     * @param callable|\Closure|string $handler
      * @return self
      */
     public function delete(string $uri, $handler): self
@@ -233,7 +233,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|\Closure|\Footup\Controller $handler
+     * @param callable|\Closure|string $handler
      * @return self
      */
     public function patch(string $uri, $handler): self
@@ -243,7 +243,7 @@ class Router
 
     /**
      * @param string $uri
-     * @param string|\Closure|\Footup\Controller $handler
+     * @param callable|\Closure|string $handler
      * @return self
      */
     public function head(string $uri, $handler): self
@@ -404,7 +404,7 @@ class Router
 
                 if(ucfirst($class) === $config->config['default_controller'] || $exist)
                 {
-                    $controller = "App\Controller\\".($exist ? ucfirst($class) : $config->config['default_controller']);
+                    $controller = "App\\Controller\\".($exist ? ucfirst($class) : $config->config['default_controller']);
                     $method = (!is_null($action) ? $action : $config->config['default_method']);
 
                 }else{
@@ -417,7 +417,7 @@ class Router
                         array_shift($uri);
 
                         if(file_exists(APP_PATH.'Controller/'.strtr($controller, ["\\" => "/"]).'.php')){
-                            $controller = "App\Controller\\".$controller;
+                            $controller = "App\\Controller\\".$controller;
                             $method = (isset($uri[0]) ? array_shift($uri) : $config->config['default_method']);
                         }
                     }else{
@@ -425,7 +425,7 @@ class Router
                     }
                 }
             }else{
-                $controller = "App\Controller\\".ucfirst($config->config['default_controller']);
+                $controller = "App\\Controller\\".ucfirst($config->config['default_controller']);
                 $method = $config->config['default_method'];
             }
 
@@ -467,7 +467,7 @@ class Router
      *
      * @param string    $method  HTTP request method
      * @param string    $uri     HTTP request URI
-     * @param callable|\Footup\Controller|string $handler Route handler. May be a
+     * @param callable|\Closure|string $handler Route handler. May be a
      *  callable, a controller instance or a fully qualified class path
      * @return self
      */

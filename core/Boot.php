@@ -13,6 +13,7 @@ namespace Footup;
 use Footup\Config\Config;
 use Footup\Http\Request;
 use Footup\Routing\Router;
+use Footup\Utils\Shared;
 
 /**
  * Le dossier système
@@ -32,7 +33,12 @@ new \Footup\Config\Autoload();
 /**
  * Initialise la classe de configuration
  */
-$config = new Config();
+$config = Shared::loadConfig();
+
+/**
+ * May be you need it not me
+ */
+defined('ENVIRONMENT') or define('ENVIRONMENT', $config->environment);
 
 /**
  * Création de quelques constantes importantes
@@ -47,23 +53,13 @@ defined('STORE_DIR') or define('STORE_DIR', realpath($config->store_dir).DS);
 defined('ASSETS_DIR') or define('ASSETS_DIR', realpath($config->assets_dir).DS);
 
 /**
- * Insertion des routeurs définies par l'utilisateur
- */
-include_once CONFIG_PATH.'Routes.php';
-
-/**
- * Recupère l'objet variable $router
- */
-$Router = ($router ?? (new Router(new Request())) )->addDefaultRoute();
-
-/**
  * C'est ici que je charge vos contantes donc ne faites pas de vos constates une partie très importante
  * du framework mais plutôt de votre application
  */
-if(file_exists(CONFIG_PATH."Constants.php"))
+if(file_exists(CONFIG_PATH."Constants.php")){
 	require_once(CONFIG_PATH."Constants.php");
+}
 
-    
 /**
  * Chargement des function globales
  */
@@ -72,6 +68,16 @@ if(file_exists(APP_PATH.'Functions.php'))
     include_once APP_PATH.'Functions.php';
 }
 include_once SYS_PATH.'Functions.php';
+
+/**
+ * Insertion des routeurs définies par l'utilisateur
+ */
+include_once CONFIG_PATH.'Routes.php';
+
+/**
+ * Recupère l'objet variable $router
+ */
+$Router = Shared::loadRouter()->addDefaultRoute();
 
 /**
  * Return le Kernel de Footup Framework

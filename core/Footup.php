@@ -14,6 +14,7 @@ use Exception;
 use Footup\Http\Request;
 use Footup\Http\Session, Footup\Http\Response;
 use Footup\Routing\Router;
+use Footup\Utils\Shared;
 
 class Footup
 {
@@ -37,6 +38,7 @@ class Footup
      * response creation to a handler.
      *
      * @throws Exception
+     * @return void
      */
     public function terminate()
     {
@@ -47,6 +49,7 @@ class Footup
      * Runs the route
      *
      * @throws Exception
+     * @return void
      */
     protected function go()
     {
@@ -65,18 +68,31 @@ class Footup
 
         $request = $this->router->request;
         $response = new Response();
-        $session = new Session();
+        /**
+         * @var Session
+         */
+        $session = Shared::loadSession();
 
         try {
             if($handler instanceof \Closure)
             {
-                return $handler(...array_values($route->getArgs()));
+                $return = $handler(...array_values($route->getArgs()));
+
+                if($return instanceof Response){
+                    echo $return;
+                }
+                return;
             }
             /**
              * @var \Footup\Controller $controller
              */
             $controller = $this->runMiddles(new $handler(), $method, $request, $response, $session);
-            return $controller->__boot($request, $response, $session)->{$method}(...array_values($route->getArgs()));
+            $return = $controller->__boot($request, $response, $session)->{$method}(...array_values($route->getArgs()));
+
+            if($return instanceof Response){
+                echo $return;
+            }
+            return;
 
         } catch (Exception $exception) {
             // Erreur 500.

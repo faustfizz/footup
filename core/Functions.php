@@ -16,7 +16,7 @@ use Footup\Html\Html;
 use Footup\Http\Request;
 use Footup\Http\Response;
 use Footup\Http\Session;
-use App\Config\Config;
+use Footup\Config\Config;
 use Footup\Config\Mime;
 use Footup\I18n\Time;
 use Footup\Lang\Lang;
@@ -439,8 +439,7 @@ if(!function_exists("router"))
      */
     function router()
     {
-		global $Router;
-        return $Router;
+        return Shared::loadRouter();
     }
 }
 
@@ -512,7 +511,7 @@ if(!function_exists("session"))
      */
     function session($key = null, $value = null)
     {
-        $session = new Session();
+        $session = Shared::loadSession();
 
         if(is_array($key))
         {
@@ -553,8 +552,7 @@ if (!function_exists('config'))
 	 */
 	function config($item = null)
 	{
-		global $config;
-		$config = &$config;
+		$config = Shared::loadConfig();
 
 		return !is_null($item) && isset($config->{$item}) ? $config->{$item} : $config;
 	}

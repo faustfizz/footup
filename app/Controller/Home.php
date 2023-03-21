@@ -18,12 +18,6 @@ class Home extends BaseController
         // unsetText("core.classNotFound", null, "en_US");
         // echo text("Core.home", ["Home"], "en_US");
 
-        /**
-         * Using Shared Model
-         */
-        model("Contact")->paginate(2);
-        echo model("Contact")->getPaginator()->displayLinks();
-
         return $this->view("accueil", [
             "titre" => text("Core.classNotFound", ["Home"])
         ]);

@@ -121,8 +121,8 @@ class Config
         {
             $this->locale = array_merge($this->locale, $_ENV["locale"]);
         }
-        
-        if(isset($this->config["environment"]) && $this->config["environment"] === "prod")
+
+        if($this->config["environment"] === "prod")
         {
             error_reporting(0);
             ini_set("display_errors", "Off");
@@ -132,6 +132,7 @@ class Config
             ini_set("display_errors", "On");
             ini_set("display_startup_errors", "On");
         }
+        
         
         @date_default_timezone_set($this->locale['timezone']);
 

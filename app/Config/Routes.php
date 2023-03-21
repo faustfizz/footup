@@ -10,10 +10,12 @@
  */
 namespace App\Config;
 
-use Footup\Http\Request;
-use Footup\Routing\Router;
+use Footup\Utils\Shared;
 
-$router = new Router(new Request());
+/**
+ * @var \Footup\Routing\Router
+ */
+$router = Shared::loadRouter();
 
 /**
  * Default route is $router->get('/', "App\Controller\Home@index") if autoroute is enabled

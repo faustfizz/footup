@@ -11,7 +11,10 @@
  */
 namespace Footup\Utils;
 
+use Footup\Http\{Request, Session};
 use Footup\Orm\BaseModel;
+use Footup\Routing\Router;
+use Footup\Config\Config;
 
 class Shared{
     
@@ -20,7 +23,28 @@ class Shared{
      * 
      * @var array<string,BaseModel>
      */
-    public static $models = [];
+    protected static $models = [];
+
+    /**
+     * Router instance
+     * 
+     * @var Router
+     */
+    protected static $router;
+
+    /**
+     * Config instance
+     * 
+     * @var Config
+     */
+    protected static $config;
+    
+    /**
+     * Session instance
+     * 
+     * @var Session
+     */
+    protected static $session;
 
     /**
      * Load a shared Model
@@ -36,11 +60,56 @@ class Shared{
             throw new \Exception(text("Core.classNotFound", ["App\\Model\\".$class]));
         }
 
-        if(isset(self::$models[$class])){
+        if(isset(self::$models[$class]) && $shared){
             return self::$models[$class];
         }
         $initializable = "App\\Model\\$class";
         return self::$models[$class] = new $initializable;
+    }
+
+    /**
+     * Load a shared Router
+     *
+     * @param boolean $shared
+     * @throws \Exception
+     * @return Router
+     */
+    public static function loadRouter($shared = true)
+    {
+        if(isset(self::$router) && $shared){
+            return self::$router;
+        }
+        return self::$router = new Router(new Request);
+    }
+
+    /**
+     * Load a shared Config
+     *
+     * @param boolean $shared
+     * @throws \Exception
+     * @return Config
+     */
+    public static function loadConfig($shared = true)
+    {
+        if(isset(self::$config) && $shared){
+            return self::$config;
+        }
+        return self::$config = new Config();
+    }
+
+    /**
+     * Load a shared Config
+     *
+     * @param boolean $shared
+     * @throws \Exception
+     * @return Session
+     */
+    public static function loadSession($shared = true)
+    {
+        if(isset(self::$session) && $shared){
+            return self::$session;
+        }
+        return self::$session = new Session();
     }
 
 }
