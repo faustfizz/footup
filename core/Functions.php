@@ -1003,6 +1003,8 @@ if(!function_exists("css"))
      */
     function css($file)
     {
+		$file = strtr($file, [".css" => ""]).".css";
+		
         return file_exists(ASSETS_DIR."css/".$file) ? Html::link(null, [
             "rel"       =>  "stylesheet",
             "href"      =>  base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"])."css/".$file),
@@ -1021,6 +1023,8 @@ if(!function_exists("js"))
      */
     function js($file)
     {
+		$file = strtr($file, [".js" => ""]).".js";
+		
         return file_exists(ASSETS_DIR."js/".$file) ? Html::script(null, [
             "src"      =>  base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"])."js/".$file),
             "type"      =>  "text/javascript"

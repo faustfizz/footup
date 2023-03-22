@@ -19,7 +19,7 @@ use Footup\Utils\Shared;
 class Footup
 {
     protected $router;
-    protected $name = "FOOTUP MVC Framework";
+    protected $name = "FootUP Framework";
 
     protected $_version = "0.1.5";
 
@@ -31,6 +31,7 @@ class Footup
         $this->router->setFrameworkName($this->name())
             ->setFrameworkVersion($this->version())
             ->setFrameworkVersionCode($this->code());
+        $router->getRequest()->setEnv("start_time", microtime(true));
     }
 
     /**
@@ -72,6 +73,12 @@ class Footup
          * @var Session
          */
         $session = Shared::loadSession();
+
+        $this->router->getRequest()->setEnv("end_time",  microtime(true));
+
+        list($start_time, $end_time) = [(float)$this->router->getRequest()->env("start_time"), (float)$this->router->getRequest()->env("end_time")];
+
+        $this->router->getRequest()->setEnv("delayed_time",  (float) number_format($end_time - $start_time, 4));
 
         try {
             if($handler instanceof \Closure)
