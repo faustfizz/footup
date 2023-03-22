@@ -87,7 +87,7 @@ class Footup
              * @var \Footup\Controller $controller
              */
             $controller = $this->runMiddles(new $handler(), $method, $request, $response, $session);
-            $return = $controller->__boot($request, $response, $session)->{$method}(...array_values($route->getArgs()));
+            $return = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
 
             if($return instanceof Response){
                 echo $return;

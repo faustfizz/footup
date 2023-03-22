@@ -11,6 +11,7 @@
  */
 
 namespace App\Controller;
+
 use Footup\Controller;
 
 class BaseController extends Controller
@@ -64,7 +65,7 @@ class BaseController extends Controller
      * @param \Footup\Http\Response $response
      * @param \Footup\Http\Session $session
      */
-    public function __boot(\Footup\Http\Request $request, \Footup\Http\Response $response = null, \Footup\Http\Session $session = null)
+    public function __boot(\Footup\Http\Request $request, \Footup\Http\Response $response)
     {
         /**
          * Extends the controller here | Etendre le controlleur ici
@@ -75,7 +76,7 @@ class BaseController extends Controller
         /**
          * @todo Don't Edit these last lines | Ne modifier pas ces dernières lignes
          */
-        parent::__boot($request, $response, $session);
+        parent::__boot($request, $response);
         return $this;
     }
 
