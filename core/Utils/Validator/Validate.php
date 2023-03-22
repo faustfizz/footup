@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * FOOTUP - 0.1.5 - 03.2023
+ * *************************
+ * Hard Coded by Faustfizz Yous
+ * 
+ * Ce fichier contient les fonctions globales du framework FOOTUP
+ * Ce fichier fait partie du framework
+ * 
+ * @package Footup/Utils/Validator
+ * @version 0.0.2
+ * @author Faustfizz Yous <youssoufmbae2@gmail.com>
+ */
+
+
 namespace Footup\Utils\Validator;
 
 use Countable;
@@ -7,11 +21,7 @@ use Footup\Utils\Arrays\ArrDots;
 use Footup\Utils\Str;
 
 // Add polyfill in case where running in < PHP 7.3
-if (!function_exists('is_countable')) {
-    function is_countable($var) {
-        return (is_array($var) || $var instanceof Countable);
-    }
-}
+
 
 class Validate
 {
@@ -54,6 +64,7 @@ class Validate
             ->addRule('human-name', [static::class, 'humanName'])
 
             ->addRule('is', [static::class, 'is'])
+            ->addRule('password', [static::class, 'password'])
 
             ->addRule('email', [static::class, 'email'])
             ->addRule('date', [static::class, 'date'])
@@ -948,6 +959,34 @@ class Validate
         }
     }
 
+    /**
+     * password <no parameter>
+     *
+     * @param Validator $validator
+     * @param array $data
+     * @param string $pattern
+     * @param string $rule
+     *
+     * ^: anchored to beginning of string
+     * \S*: any set of characters
+     * (?=\S{8,}): of at least length 8
+     * (?=\S*[a-z]): containing at least one lowercase letter
+     * (?=\S*[A-Z]): and at least one uppercase letter
+     * (?=\S*[\d]): and at least one number
+     * (?=\S*[-+_!@#$%^&*.,?)(|}{`]): and at least one symbol
+     * $: anchored to the end of the string
+     */
+    public static function password(Validator $validator, $data, $pattern, $rule)
+    {
+        foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
+
+            if (preg_match('/^\S*(?=\S{8,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])(?=\S*[-+_!@#$%^&*.,?)(|}{`])\S*$/', $value)) {
+                continue;
+            }
+
+            $validator->addError($attribute, $rule, [':chars' => 8]);
+        }
+    }
 
     /**
      * email
