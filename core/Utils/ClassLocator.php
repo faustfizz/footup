@@ -1,4 +1,18 @@
 <?php
+
+/**
+ * FOOTUP - 0.1.5 - 03.2023
+ * *************************
+ * Hard Coded by Faustfizz Yous
+ * 
+ * Ce fichier contient les fonctions globales du framework FOOTUP
+ * Ce fichier fait partie du framework
+ * 
+ * @package Footup/Utils
+ * @version 0.0.2
+ * @author Faustfizz Yous <youssoufmbae2@gmail.com>
+ */
+
 namespace Footup\Utils;
 
 use RecursiveDirectoryIterator;

@@ -6,7 +6,7 @@
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Http
- * @version 0.1
+ * @version 0.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -252,7 +252,7 @@ class Response
      */
     private function check($body)
     {
-        if (! is_null($body) && ! is_string($body) && ! is_numeric($body) && ! is_callable([$body, '__toString'])) {
+        if (!is_null($body) && !is_string($body) && !is_numeric($body) && !is_callable([$body, '__toString'])) {
             throw new Exception(text("Http.invalidBodyType", [gettype($body)]));
         }
 
@@ -273,14 +273,14 @@ class Response
      */
     public function json(array $data = [], $echo = false, int $status = 200, array $header = [], int $option = 0)
     {
-        $this->status($status);
-        $this->header($header);
+        $this->status($status)->header(array_merge($header, ['Content-Type' => 'application/json; charset=UTF-8']));
 
-        $data = json_encode($data, $option);
+        $data = json_encode(
+            empty($data) ? ["message" => $this->message[$status]] : $data,
+            $option
+        );
 
-        if ($this->body($data)) {
-            $this->header('Content-Type', 'application/json; charset=UTF-8');
-        }
+        $this->body($data);
         
         return $echo ? $this->send(true) : $this;
     }
@@ -422,7 +422,7 @@ class Response
     {
         if (! headers_sent()) {
             $status = $this->status;
-            $server = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0';
+            $server = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
 
             foreach ($this->headers() as $name => $values) {
                 if(is_array($values))

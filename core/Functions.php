@@ -8,7 +8,7 @@
  * Ce fichier fait partie du framework
  * 
  * @package Footup
- * @version 0.1.4
+ * @version 0.1.5
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -318,9 +318,9 @@ if(!function_exists("model"))
 	 * 
      * @return Model
      */
-    function model($modeName, $shared = true)
+    function model($modelName, $shared = true)
     {
-		return Shared::loadModels($modeName, $shared);
+		return Shared::loadModels($modelName, $shared);
     }
 }
 
@@ -333,7 +333,7 @@ if(!function_exists("validator"))
      */
     function validator()
     {
-		return request()->getValidator();
+		return Shared::loadValidator();
     }
 }
 
@@ -398,6 +398,12 @@ if (! function_exists('function_usable'))
 
 		return false;
 	}
+}
+
+if (!function_exists('is_countable')) {
+    function is_countable($var) {
+        return (is_array($var) || $var instanceof Countable);
+    }
 }
 
 if(!function_exists("calledController"))
