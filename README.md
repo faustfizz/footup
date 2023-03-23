@@ -242,11 +242,11 @@ request()->page;
 
 // And What ? how to get file with name: image ?
 // You can use as below
-$this->request->image; // or $this->request->getFile('image')
+$this->request->image; // or $this->request->file('image')
 
 // And What if image[] as multiple files ?
 // You can use as below
-$this->request->getFiles('image');
+$this->request->files('image');
 
 # Yes you can access the request using the global function request()
 ```
