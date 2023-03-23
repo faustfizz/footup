@@ -1,28 +1,28 @@
 # Footup MVC PHP Framework
 
 <div align="center">
-  <img src="core/footup-ascii-art.png" alt="Footup Logo"/>
-  <h2 class="name_title">FOOTUP MVC FRAMEWORK - 0.1.5</h2>
+  <img src="core/footup-ascii-art.png" alt="Footup Logo" width="100px" />
+  <h2 class="name_title">FOOTUP MVC FRAMEWORK - 0.1.6</h2>
 </div>
 
-Un mini framework MVC PHP qui comporte :
+A Rich Featured LightWeight PHP MVC Framework :
 
 * CLI support for generating Controller, Model, Middle, Assets and View files ( [adhocore/php-cli](https://github.com/adhocore/php-cli) modified and used thanks :) )
 * Translation support
 * Config using PHP File or .env (Rename env to .env)
-* Gestion de Requête (Request)
-* Gestion de Reponse (Response)
+* Request
+* Response
 * Validator (Form Validation - Not validating UploadedFile) Thanks to [pdscopes/php-form-validator](https://github.com/pdscopes/php-form-validator)
 * Pagination (Pagination and Pagination View) Thanks to [iranianpep/paginator](https://github/iranianpep/paginator)
 * Session
 * Email (CodeIgniter 4 Email Class)
 * Routing
-* Controller AND Middleware
+* Controller AND Middleware (But here we call it just Middle and are specific)
 * Model RelationShips ($hasOne, $hasMany, $belongsTo, $belongsToMany)
 * Model QueryBuilder
 * Model Events CallBacks
-* Fichiers (Upload File)
-* Extensible (You can integrate any library you want and you can add (news folders and class) in the App Directory in condition you use psr4)
+* Files (Upload File)
+* Extensible (You can integrate any library you want and you can add (news folders and class) in the App Directory using psr4 autoloading mecanism)
 
 ### ReadMe should be updated -- (Soon i'll create the docs website for FootUp PHP MVC Framework)
 --------------------
@@ -37,6 +37,7 @@ FOOTUP MVC Framework
 │   │   ├── Constants.php
 │   │   ├── Email.php
 │   │   ├── Form.php
+│   │   ├── Fuel.php
 │   │   ├── Paginator.php
 │   │   └── Routes.php
 │   ├── Controller
@@ -50,7 +51,8 @@ FOOTUP MVC Framework
 │   ├── Model
 │   │   └── Contact.php
 │   └── View
-│       └── accueil.php
+│       └── home.php
+├── composer.json
 ├── core
 │   ├── Boot.php
 │   ├── Cli
@@ -83,6 +85,7 @@ FOOTUP MVC Framework
 │   │   ├── IO
 │   │   │   └── Interactor.php
 │   │   ├── Konsole.php
+│   │   ├── logo
 │   │   ├── Output
 │   │   │   ├── Color.php
 │   │   │   ├── Cursor.php
@@ -107,6 +110,7 @@ FOOTUP MVC Framework
 │   ├── Files
 │   │   ├── File.php
 │   │   └── FileSystem.php
+│   ├── footup-ascii-art.png
 │   ├── Footup.php
 │   ├── Functions.php
 │   ├── Html
@@ -129,6 +133,7 @@ FOOTUP MVC Framework
 │   │   │   ├── email.json
 │   │   │   ├── file.json
 │   │   │   ├── http.json
+│   │   │   ├── paginator.json
 │   │   │   ├── validator.json
 │   │   │   └── view.json
 │   │   └── Lang.php
@@ -157,6 +162,7 @@ FOOTUP MVC Framework
 │       │   ├── Collection.php
 │       │   └── Dots.php
 │       ├── ClassLocator.php
+│       ├── Shared.php
 │       ├── Str.php
 │       └── Validator
 │           ├── Validate.php
@@ -174,6 +180,7 @@ FOOTUP MVC Framework
 │   ├── error
 │   │   ├── 404.html
 │   │   └── 500.html
+│   ├── favicon.svg
 │   ├── index.php
 │   └── uploads
 │       └── cache
@@ -182,24 +189,136 @@ FOOTUP MVC Framework
 
 ## Description
 
-Ce framework utilise les namespaces pour auto-loading des class.
-Pour interagir avec une base de données, le framework **Footup** utilise l'extension **PDO**.
+FOOTUP MVC Framework focus primarily to speed and minimalistic. It's **220 Kb zip**, **140 kb gz**.
+It render withing **0.001 seconds** (I used a PHP 8.0.7 environment to write and test it).
 
-Vous êtes libre et maître de votre code, soyez à l'aise
+My goal is doing a thing that i'm the first person that use it with ease.
+I added some features that help me working faster on my all day's work.
 
--- retrouvez toutes les configurations dans le dossier **app/Config** --
+## Requirements
 
-Ce framework a tout ce qu'il faut pour vous aider à developper vite votre application.
+Yo ! You can download this directly and use it without no need to external dependancy.
+It support composer libraries but i have not published **footup** yet to packagist.
 
-**#TO-DO:** Une documentation complète doit être rédigée si possible
+So you need:
+* *PDO extension*
+* *mb_string*
+* *intl*
+* *json*
 
-## Exemple d'Utilisation du CLI
+## WalkThrough
 
+### CLI
+
+For now I added just generators commands
+
+To show help:
 ```bash
 nuka@hacker_pc:~$ php footup 
 ```
 
-## Exemple de Model
+To generate controller:
+```bash
+nuka@hacker_pc:~$ php footup controller controllerName
+```
+Don't be so shy, try yourself
+
+### Request
+
+The request and the router class are the **BMW Motors**
+They hold many thing helpful. Here how we use the request:
+
+#### You are in the controller ? use like this :
+
+```php
+// using get function to get the page=3 present in the url
+$this->request->get("page");
+
+// you can use like this to get the page
+$this->request->page;
+
+// What ? you typing enough ? and that ?
+request()->page;
+
+// And What ? how to get file with name: image ?
+// You can use as below
+$this->request->image; // or $this->request->getFile('image')
+
+// And What if image[] as multiple files ?
+// You can use as below
+$this->request->getFiles('image');
+
+# Yes you can access the request using the global function request()
+```
+
+#### But Yes, with the request you can validate data via validator like this :
+
+```php
+// using get function to validate the page=3 present in the url
+$this->request->withGetInput()->validate(["page" => "is:int"]);
+
+// What ? you typing enough ? and that ?
+request()->withGetInput()->validate(["page" => "is:int"]);
+
+# Yes you can access the request using the global function request()
+```
+
+#### *Don't be so shy, explore the request class, your editor will autocomplete*
+
+
+### The Response object is available in the controller :
+
+```php
+// using get function to validate the page=3 present in the url
+$this->response->json(["page" => 2], true); // second parameter to echo directly
+
+# Yes you can access the response using the global function response()
+```
+
+### The Session 
+
+This is a shared class so the data withing it remain the same, here is the example  :
+
+```php
+// using set function to set session value
+$this->session->set(["page" => 2]); // or $this->session->page = 2
+
+// What ? you typing enough ? and that ?
+session("page", 2); // session()->set("page", 2); or session()->page = 2;
+
+// What ? i want to get the page ?
+// So
+session("page"); // session()->get("page"); or session()->page;
+
+# Yes you can access the session using the global function session() as shown
+```
+
+### Validator :
+If you validate data with validator, the validate function return **TRUE** if all passed and **FALSE** otherwise
+
+```php
+// Via request
+// with post data
+$this->request->withPostInput()->validate(["page" => "is:int"]);
+
+// With post and get data
+request()->withInput()->validate(["page" => "is:int"]);
+
+// With other data
+request()->with(["page" => 2])->validate(["page" => "is:int"]);
+
+// So how to get Error ?
+// Simple
+validator()->getError("page"); // request()->getValidator()->getErrors(); to grab all
+
+# Yes you can access the validator using the global function validator()
+# You can validate using the global function validate() too
+```
+
+## I will write documentation if if if .... LOL -- If you do it, help me !
+### I think i don't like writing LOL
+
+### Using the Model
 
 ```php
 <?php
@@ -250,7 +369,7 @@ class Contact extends Model{
   
 ```
 
-## _Globals Functions | Fonctions glabales_
+### _Globals Functions | Fonctions glabales_
 
 > **request($index = null, $arg = null)**
 
@@ -292,7 +411,7 @@ class Contact extends Model{
 
 > And many mores others globals functions
 
-## Uploading file | Téleverser un fichier
+### Uploading file | Téleverser un fichier
 
 ```php
   #eg. file field = image
@@ -309,7 +428,7 @@ class Contact extends Model{
   $this->request->image
 ```
 
-## Getting Auto Genereted Form | Avoir un formulaire auto généré
+### Getting Auto Genereted Form | Avoir un formulaire auto généré
 
 ```php
   $contact = new ContactModel();
@@ -318,7 +437,7 @@ class Contact extends Model{
   echo $contact->getForm();
 ```
 
-## QueryBuilder Methods | Méthode de Model QueryBuilder
+### QueryBuilder Methods | Méthode de Model QueryBuilder
 
 ### **_# model->from($table, $reset = true): $this_**
 
