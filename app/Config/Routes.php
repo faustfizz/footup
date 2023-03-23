@@ -25,5 +25,5 @@ $router = Shared::loadRouter();
  * $router->get('/{lang}/segment1/segment2', "App\Controller\Home@index")
  * $router->get('/{locale}/segment1/segment2', "App\Controller\Home@index")
  */
-$router->setAutoRoute(true)
-    ->get('/', "App\Controller\Home@index");
+// $router->setAutoRoute(true)
+//     ->get('/', "App\Controller\Home@index");

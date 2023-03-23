@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -294,10 +294,7 @@ if(!function_exists("request"))
     {
         $req = router()->getRequest();
 
-		if(method_exists($req, $method_or_index))
-        {
-            return $req->$method_or_index($arg);
-        }elseif($val = $req->$method_or_index)
+		if($val = $req->$method_or_index)
         {
             return !empty($arg) ? $req->$method_or_index = $arg : $val;
         }else{
@@ -554,13 +551,19 @@ if (!function_exists('config'))
 	 * Retrouve les configurations
 	 *
 	 * @param string $item
+	 * @param mixed $value
 	 * @return mixed|Config
 	 */
-	function config($item = null)
+	function config($item = null, $value  = null)
 	{
 		$config = Shared::loadConfig();
 
-		return !is_null($item) && isset($config->{$item}) ? $config->{$item} : $config;
+		if(!empty($item) && !empty($value))
+		{
+			return $config->{$item} = $value;
+		}
+
+		return !empty($item) ? $config->{$item} : $config;
 	}
 }
 

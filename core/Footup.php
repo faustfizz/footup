@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -122,9 +122,9 @@ class Footup
         /**
          * For globaux Middles
          */
-        foreach($controller->getGlobalMiddles() as $key => $value)
+        foreach($controller->getGlobalMiddles($method) as $key => $value)
         {
-            if(class_exists($value) && !is_string($key) || is_string($key) && $method === $key)
+            if(class_exists($value) || $method === $key)
             {
                 /**
                  * @var \Footup\Routing\Middle
@@ -149,7 +149,7 @@ class Footup
          * For spécifiques middles
          * @var string|string[]
          */
-        $middleware = $controller->getMiddles(trim(get_class($controller), '\\')) ?? $controller->getMiddles('\\'.trim(get_class($controller), '\\'));
+        $middleware = $controller->getMiddles(trim(get_class($controller), '\\')) ?? $controller->getMiddles(rtrim(get_class($controller), '\\'));
 
         if($middleware)
         {

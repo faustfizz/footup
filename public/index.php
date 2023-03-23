@@ -1,16 +1,16 @@
 <?php
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package FOOTUP
- * @version 0.2
+ * @version 0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
 // Valid PHP Version?
-$minPHPVersion = '7.1';
+$minPHPVersion = '7.4';
 if (version_compare(PHP_VERSION, $minPHPVersion, '<'))
 {
 	die("Your PHP version must be {$minPHPVersion} or higher to run FootUp. Current version: " . PHP_VERSION);

@@ -11,7 +11,6 @@
 namespace Footup;
 
 use Footup\Config\Config;
-use Footup\Http\Request;
 use Footup\Routing\Router;
 use Footup\Utils\Shared;
 
@@ -32,6 +31,7 @@ new \Footup\Config\Autoload();
 
 /**
  * Initialise la classe de configuration
+ * @var Config
  */
 $config = Shared::loadConfig();
 
@@ -76,6 +76,7 @@ include_once CONFIG_PATH.'Routes.php';
 
 /**
  * Recupère l'objet variable $router
+ * @var Router
  */
 $Router = Shared::loadRouter()->addDefaultRoute();
 

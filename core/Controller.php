@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -107,9 +107,9 @@ class Controller
      * @param string|null $index
      * @return  string|array
      */ 
-    public function getGlobalMiddles($index = null)
+    public function getGlobalMiddles($index)
     {
-        return isset($this->globalMiddles[$index]) ? $this->globalMiddles[$index] : $this->globalMiddles;
+        return $this->globalMiddles[$index] ?? $this->globalMiddles;
     }
 
     /**
@@ -120,8 +120,8 @@ class Controller
      * @param  string|null $index
      * @return  array|string|null
      */ 
-    public function getMiddles($index = null)
+    public function getMiddles($index)
     {
-        return isset($this->middles[$index]) ? $this->middles[$index] : null;
+        return $this->middles[$index] ?? null;
     }
 }

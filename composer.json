@@ -19,8 +19,8 @@
     "prefer-stable": true,
     "minimum-stability": "dev",
     "require": {
-        "php": "^7.1||^8.0",
-        "ext-curl": "*",
+        "php": "^7.4||^8.0",
+        "ext-pdo": "*",
         "ext-intl": "*",
         "ext-json": "*",
         "ext-mbstring": "*"
