@@ -315,7 +315,7 @@ validator()->getError("page"); // request()->getValidator()->getErrors(); to gra
 # You can validate using the global function validate() too
 ```
 
-## I will write documentation if if if .... LOL -- If you do it, help me !
+## I will write documentation if if if .... LOL -- If you can do it, help me !
 ### I think i don't like writing LOL
 
 ### Using the Model
