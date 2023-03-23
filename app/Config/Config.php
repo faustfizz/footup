@@ -50,10 +50,6 @@ class Config
          */
         "assets_dir" => BASE_PATH."assets/",
         /**
-         * Dissier contenant les fichiers de vues de votre application
-         */
-        "view_path" => ROOT_PATH."app/View/",
-        /**
          * Extension des vues
          */
         "view_ext" => "php",

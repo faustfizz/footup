@@ -383,7 +383,7 @@ class Paginator extends AbstractPaginator
     {
         if (! in_array($template, $this->config->templates))
 		{
-			throw new PaginatorException("Paginator template not found !");
+			throw new PaginatorException(text("paginator.templateNotFound", [$template]));
 		}
         $output = (function (string $view): string {
 			extract(["paginator"    =>  $this]);

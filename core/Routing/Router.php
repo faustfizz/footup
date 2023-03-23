@@ -114,6 +114,9 @@ class Router
     {
         if (! isset($this->routes[static::METHOD_GET]))
         {
+            /**
+             * @var Config
+             */
             $config = Shared::loadConfig();
             $controller = "App\\Controller\\".ucfirst($config->config['default_controller']);
             $method = $config->config['default_method'];
@@ -255,7 +258,7 @@ class Router
     /**
      * Recherche de correspondantes de routes
      * 
-     * @throws \Exception
+     * @throws Exception
      * @return Route|void
      */
     public function match()

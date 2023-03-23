@@ -5,7 +5,7 @@
  * Hard Coded by Faustfizz Yous
  * 
  * @package FOOTUP
- * @version 0.3
+ * @version 0.4
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -17,34 +17,21 @@ if (version_compare(PHP_VERSION, $minPHPVersion, '<'))
 }
 unset($minPHPVersion);
 
+defined("DS") or define("DS", DIRECTORY_SEPARATOR);
+
+/**
+ * Le dossier public
+ */
+defined('BASE_PATH') or define('BASE_PATH', __DIR__ .DS);
+
 /**
  * On se positionne dans le dossier public
  */
 chdir(__DIR__);
 
-// Directory Separator
-defined("DS") or define("DS", DIRECTORY_SEPARATOR);
+// Let's put the fuel and boot our amazing app.
+require realpath(BASE_PATH . '../app/Config/Fuel.php');
+// Change this accordingly to your app directory
 
-/**
- * Le dossier publique
- */
-defined('BASE_PATH') or define('BASE_PATH', __DIR__ .DS);
-
-/**
- * @todo Configure ceci pour pointer au dossier contenant vos fichier de configuration
- */
-defined('APP_PATH') or define('APP_PATH', realpath(__DIR__."/../app").DS);
-defined('CONFIG_PATH') or define('CONFIG_PATH', realpath(APP_PATH.'Config').DS);
-
-/**
- * Le Dossier ROOT du projet (Where to find .env)
- */
-defined('ROOT_PATH') or define('ROOT_PATH', realpath(APP_PATH.'../').DS);
-
-/**
- * @todo Vous pouvez modifier ceci dans le cas où le dossier système n'est pas le dossier core
- * @example - require_once(ROOT_PATH.'sys/Boot.php');
- * @return \Footup\Footup
- */
-$footup = require(ROOT_PATH.'core/Boot.php');
-$footup->terminate();
+// Load our friend FootUP.
+(require (rtrim(App\Config\Fuel::$sysDir, '\\/ ') . DS . 'Boot.php'))->terminate();

@@ -62,7 +62,7 @@ class Page
     public function setNumber(int $number): void
     {
         if ($this->isPageNumberValid($number) !== true) {
-            throw new PaginatorException('Invalid page number');
+            throw new PaginatorException(text("paginator.invalidNumber", [$number]));
         }
 
         $this->number = $number;

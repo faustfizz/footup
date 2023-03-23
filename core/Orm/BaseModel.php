@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -682,7 +682,7 @@ class BaseModel
             return $this->getBuilder()->{$name}(...$arguments);
         }
 
-        throw new Exception(__CLASS__ . ' not such method [' . $name . ']');
+        throw new Exception(text("Db.undefinedMethod", [$name , get_class($this)]));
     }
 
     /**
@@ -1072,7 +1072,7 @@ class BaseModel
         {
             if (! method_exists($this, $callback))
             {
-                throw new Exception("La méthode '{$callback}' n'existe pas dans la classe '".get_class($this)."'");
+                throw new Exception(text("Db.undefinedMethod", [$callback , get_class($this)]));
             }
 
             $eventData = $this->{$callback}($eventData);

@@ -32,5 +32,7 @@
     "date"              : ":attribute doit être une date au format: :format",
     "url"               : ":attribute doit être une URL valide",
     "uuid"              : ":attribute doit être un UUID valide",
-    "card-number"       : ":attribute doit être un numéro de carte valide"
+    "card-number"       : ":attribute doit être un numéro de carte valide",
+
+    "cannotMatch"       :   "Impossible de faire correpondre {0} au champ {1} !"
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -52,10 +52,6 @@ class Config
          * Dissier assets pour les fichiers statics css, js, img [relative to public dir]
          */
         "assets_dir" => BASE_PATH."assets/",
-        /**
-         * Dissier contenant les fichiers de vues de votre application
-         */
-        "view_path" => ROOT_PATH."app/View/",
         /**
          * Extension des vues
          */

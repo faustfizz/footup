@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 

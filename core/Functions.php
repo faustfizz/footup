@@ -251,7 +251,7 @@ if (! function_exists('directory_mirror')) {
     function directory_mirror(string $originDir, string $targetDir, bool $overwrite = true): void
     {
         if (! is_dir($originDir = rtrim($originDir, '\\/'))) {
-            throw new InvalidArgumentException(sprintf('The origin directory "%s" was not found.', $originDir));
+            throw new InvalidArgumentException(text('file.dirNotExist', [$originDir]));
         }
 
         if (! is_dir($targetDir = rtrim($targetDir, '\\/'))) {

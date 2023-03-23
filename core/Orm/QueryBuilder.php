@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -799,7 +799,7 @@ class QueryBuilder
     public function execute(array $params = [])
     {
         if (!self::$db && !$this->setDb()) {
-            throw new Exception('Database is not defined.');
+            throw new Exception(text("Db.undefinedDB"));
         }
 
         $result = null;

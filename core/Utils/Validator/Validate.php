@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -200,7 +200,7 @@ class Validate
 
         // Check that the pattern and field can be compared
         if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException('Cannot match pattern ('.$pattern.') to field ('.$field.')');
+            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
         }
 
         // If the required with field exists and the pattern field does not
@@ -242,7 +242,7 @@ class Validate
             $isWild       = strpos($field, $validator::WILD) !== false;
             $overlaps[$k] = $isWild ? Str::overlapLeft($field, $pattern) : null;
             if ($isWild && $overlaps[$k] === false) {
-                throw new \InvalidArgumentException('Cannot match pattern ('.$pattern.') to field ('.$field.')');
+                throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
             }
             // Store the longest overlap
             $longest = $isWild && strlen($overlaps[$k]) > strlen($overlaps[$longest]) ? $k : $longest;
@@ -313,7 +313,7 @@ class Validate
             $isWild       = strpos($field, $validator::WILD) !== false;
             $overlaps[$k] = $isWild ? Str::overlapLeft($field, $pattern) : null;
             if ($isWild && $overlaps[$k] === false) {
-                throw new \InvalidArgumentException('Cannot match pattern ('.$pattern.') to field ('.$field.')');
+                throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
             }
             // Store the longest overlap
             $longest = $isWild && strlen($overlaps[$k]) > strlen($overlaps[$longest]) ? $k : $longest;
@@ -377,7 +377,7 @@ class Validate
 
         // Check that the pattern and field can be compared
         if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException('Cannot match pattern ('.$pattern.') to field ('.$field.')');
+            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
         }
 
         // If the required with field exists and the pattern field does not
@@ -419,7 +419,7 @@ class Validate
 
         // Check that the pattern and field can be compared
         if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException('Cannot match pattern ('.$pattern.') to field ('.$field.')');
+            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
         }
 
         // Check values are equal
@@ -452,7 +452,7 @@ class Validate
 
         // Check that the pattern and field can be compared
         if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException('Cannot match pattern to field');
+            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
         }
 
         // Check values are equal
@@ -485,7 +485,7 @@ class Validate
 
         // Check that the pattern and field can be compared
         if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException('Cannot match pattern to field');
+            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
         }
 
         // Check values are equal
@@ -518,7 +518,7 @@ class Validate
 
         // Check that the pattern and field can be compared
         if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException('Cannot match pattern to field');
+            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
         }
 
         // Check values are equal
