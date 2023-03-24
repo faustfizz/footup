@@ -159,10 +159,9 @@ class Session
     public function get($key = null, $default = null)
     {
         if ($key && $this->has($key)) {
-            return $this->data[$key];
-        }else{
-            return $this->flash($key, $default);
+            return $this->data[$key] ?? $this->flash($key, $default);
         }
+        return $default;
     }
 
     /**
@@ -208,7 +207,7 @@ class Session
      */
     public function has(string $name) : bool
     {
-        return isset($this->data[$name]);
+        return isset($this->data[$name]) || isset($this->data['flash_'.$name]);
     }
 
     /**
