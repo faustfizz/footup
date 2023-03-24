@@ -63,7 +63,6 @@ class BaseController extends Controller
      * Controller constructor.
      * @param \Footup\Http\Request $request
      * @param \Footup\Http\Response $response
-     * @param \Footup\Http\Session $session
      */
     public function __boot(\Footup\Http\Request $request, \Footup\Http\Response $response)
     {
