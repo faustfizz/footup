@@ -6,7 +6,7 @@
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Config
- * @version 0.3
+ * @version 0.4
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup\Config;
@@ -61,11 +61,14 @@ class Autoload{
      */
     public function mount($class)
     {
-        $file = strtr($class, ['Footup\\' => SYS_PATH, 'App\\' => APP_PATH, "\\"   =>  DS]);
-
-        if(file_exists($file. ".php"))
-        {
-            return require_once($file.'.php');
+        foreach ($this->psr4 as $namespace => $match) {
+            # code...
+            $file = strtr($class, [$namespace."\\" => $match, "\\" => DS]);
+    
+            if(file_exists($file. ".php"))
+            {
+                return require_once($file.'.php');
+            }
         }
     }
 	//--------------------------------------------------------------------
