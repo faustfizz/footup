@@ -105,7 +105,7 @@ class Autoload{
 
 		unset($composer);
 
-		// Get rid of CodeIgniter so we don't have duplicates
+		// Get rid of FootUp so we don't have duplicates
 		if (isset($paths['Footup\\']))
 		{
 			unset($paths['Footup\\']);
