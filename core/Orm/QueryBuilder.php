@@ -308,9 +308,13 @@ class QueryBuilder
 
         if (is_array($key)) {
             $key = array_filter($key);
+            $counter = count($key);
             foreach ($key as $k => $v) {
-                $link = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where']) ? $link : '';
-                $this->where .= $link . $k . ' ' . trim($operator ?? '=') . ' ' . ($escape && !is_numeric($v) ? $this->quote($v) : $v);
+                $glue = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where']) ? $link : '';
+                $this->where .= $counter > 1 ? ' (' : '';
+                $counter--;
+                $this->where .= $glue . $k . ' ' . trim($operator ?? '=') . ' ' . ($escape && !is_numeric($v) ? $this->quote($v) : $v);
+                $this->where .= $counter == 0 && count($key) > 1 ? ') ' : '';
             }
         } else if (is_string($key) && is_null($val)) {
             $link = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where'])  ? $link : '';
@@ -331,6 +335,8 @@ class QueryBuilder
             }
             $this->where .= trim($link . $key . ' ' . trim($operator ?? '=') . ' ' . $val);
         }
+
+        var_dump($this->where);
 
         return $this;
     }
