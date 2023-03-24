@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -8,7 +8,7 @@
  * Ce fichier fait partie du framework
  * 
  * @package Footup
- * @version 0.1.4
+ * @version 0.1.5
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -251,7 +251,7 @@ if (! function_exists('directory_mirror')) {
     function directory_mirror(string $originDir, string $targetDir, bool $overwrite = true): void
     {
         if (! is_dir($originDir = rtrim($originDir, '\\/'))) {
-            throw new InvalidArgumentException(sprintf('The origin directory "%s" was not found.', $originDir));
+            throw new InvalidArgumentException(text('file.dirNotExist', [$originDir]));
         }
 
         if (! is_dir($targetDir = rtrim($targetDir, '\\/'))) {
@@ -294,10 +294,7 @@ if(!function_exists("request"))
     {
         $req = router()->getRequest();
 
-		if(method_exists($req, $method_or_index))
-        {
-            return $req->$method_or_index($arg);
-        }elseif($val = $req->$method_or_index)
+		if($val = $req->$method_or_index)
         {
             return !empty($arg) ? $req->$method_or_index = $arg : $val;
         }else{
@@ -318,9 +315,9 @@ if(!function_exists("model"))
 	 * 
      * @return Model
      */
-    function model($modeName, $shared = true)
+    function model($modelName, $shared = true)
     {
-		return Shared::loadModels($modeName, $shared);
+		return Shared::loadModels($modelName, $shared);
     }
 }
 
@@ -333,7 +330,7 @@ if(!function_exists("validator"))
      */
     function validator()
     {
-		return request()->getValidator();
+		return Shared::loadValidator();
     }
 }
 
@@ -398,6 +395,12 @@ if (! function_exists('function_usable'))
 
 		return false;
 	}
+}
+
+if (!function_exists('is_countable')) {
+    function is_countable($var) {
+        return (is_array($var) || $var instanceof Countable);
+    }
 }
 
 if(!function_exists("calledController"))
@@ -548,13 +551,19 @@ if (!function_exists('config'))
 	 * Retrouve les configurations
 	 *
 	 * @param string $item
+	 * @param mixed $value
 	 * @return mixed|Config
 	 */
-	function config($item = null)
+	function config($item = null, $value  = null)
 	{
 		$config = Shared::loadConfig();
 
-		return !is_null($item) && isset($config->{$item}) ? $config->{$item} : $config;
+		if(!empty($item) && !empty($value))
+		{
+			return $config->{$item} = $value;
+		}
+
+		return !empty($item) ? $config->{$item} : $config;
 	}
 }
 
@@ -997,6 +1006,8 @@ if(!function_exists("css"))
      */
     function css($file)
     {
+		$file = strtr($file, [".css" => ""]).".css";
+		
         return file_exists(ASSETS_DIR."css/".$file) ? Html::link(null, [
             "rel"       =>  "stylesheet",
             "href"      =>  base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"])."css/".$file),
@@ -1015,6 +1026,8 @@ if(!function_exists("js"))
      */
     function js($file)
     {
+		$file = strtr($file, [".js" => ""]).".js";
+		
         return file_exists(ASSETS_DIR."js/".$file) ? Html::script(null, [
             "src"      =>  base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"])."js/".$file),
             "type"      =>  "text/javascript"

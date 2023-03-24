@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -19,7 +19,7 @@ use Footup\Utils\Shared;
 class Footup
 {
     protected $router;
-    protected $name = "FOOTUP MVC Framework";
+    protected $name = "FootUP Framework";
 
     protected $_version = "0.1.5";
 
@@ -31,6 +31,7 @@ class Footup
         $this->router->setFrameworkName($this->name())
             ->setFrameworkVersion($this->version())
             ->setFrameworkVersionCode($this->code());
+        $router->getRequest()->setEnv("start_time", microtime(true));
     }
 
     /**
@@ -73,6 +74,12 @@ class Footup
          */
         $session = Shared::loadSession();
 
+        $this->router->getRequest()->setEnv("end_time",  microtime(true));
+
+        list($start_time, $end_time) = [(float)$this->router->getRequest()->env("start_time"), (float)$this->router->getRequest()->env("end_time")];
+
+        $this->router->getRequest()->setEnv("delayed_time",  (float) number_format($end_time - $start_time, 4));
+
         try {
             if($handler instanceof \Closure)
             {
@@ -87,7 +94,7 @@ class Footup
              * @var \Footup\Controller $controller
              */
             $controller = $this->runMiddles(new $handler(), $method, $request, $response, $session);
-            $return = $controller->__boot($request, $response, $session)->{$method}(...array_values($route->getArgs()));
+            $return = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
 
             if($return instanceof Response){
                 echo $return;
@@ -115,9 +122,9 @@ class Footup
         /**
          * For globaux Middles
          */
-        foreach($controller->getGlobalMiddles() as $key => $value)
+        foreach($controller->getGlobalMiddles($method) as $key => $value)
         {
-            if(class_exists($value) && !is_string($key) || is_string($key) && $method === $key)
+            if(class_exists($value) || $method === $key)
             {
                 /**
                  * @var \Footup\Routing\Middle
@@ -142,7 +149,7 @@ class Footup
          * For spécifiques middles
          * @var string|string[]
          */
-        $middleware = $controller->getMiddles(trim(get_class($controller), '\\')) ?? $controller->getMiddles('\\'.trim(get_class($controller), '\\'));
+        $middleware = $controller->getMiddles(trim(get_class($controller), '\\')) ?? $controller->getMiddles(rtrim(get_class($controller), '\\'));
 
         if($middleware)
         {

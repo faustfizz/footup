@@ -24,16 +24,33 @@
 lang    =   fr
 
 #
-# Langue par défaut | default language
+# Région | default timezone
 #
 timezone    =   'Africa/Nairobi'
 
 [config]
 
 #
-# Controleur par défaut
+# Base URL
 #
-base_url = http://footup_dev.io/
+base_url = http://footup_dev.io
+
+#
+# Assets directory located to public/
+# ex: assets/ or assets
+#
+assets_dir = assets
+
+#
+# Store Directory (Where to move uploaded file) located to public/
+# by default uploads
+#
+store_dir = uploads
+
+#
+# View extension (default php)
+#
+view_ext = php
 
 #
 # Controleur par défaut

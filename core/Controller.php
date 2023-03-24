@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -14,6 +14,7 @@ use Exception;
 use Footup\Http\Request;
 use Footup\Http\Response;
 use Footup\Http\Session;
+use Footup\Utils\Shared;
 use Locale;
 
 class Controller
@@ -31,39 +32,36 @@ class Controller
     protected $middles = [];
 
     /**
-     * @var \Footup\Http\Request
+     * @var Request
      */
     protected $request = null;
 
     /**
-     * @var \Footup\Http\Response
+     * @var Response
      */
     protected $response = null;
 
     /**
-     * @var \Footup\Http\Session
+     * @var Session
      */
     protected $session = null;
 
     public function __construct()
     {
-        $this->request  = new Request();
-        $this->response = new Response();
-        $this->session  = new Session();
+        $this->session  = Shared::loadSession();
     }
 
     /**
      * Controller constructor.
-     * @param \Footup\Http\Request $request
-     * @param \Footup\Http\Response $response
-     * @param \Footup\Http\Session $session
+     * @param Request $request
+     * @param Response $response
+     * 
      * @return $this
      */
-    public function __boot(Request $request, Response $response = null, Session $session = null)
+    public function __boot(Request $request, Response $response)
     {
         $this->request  = $request;
-        $this->response = is_null($response) ? $this->response : $response;
-        $this->session  = is_null($session) ? $this->session : $session;
+        $this->response = $response;
 
         /**
          * Default lang
@@ -82,11 +80,12 @@ class Controller
 
     /**
      * @param array $data
-     * @return string
+     * @param bool $echo send data
+     * @return void|Response
      */
-    protected function json($data)
+    protected function json($data, $echo = true)
     {
-        return json_encode($data);
+        return $this->response->json($data, $echo);
     }
 
     function view( $path , $data = null, $ext = VIEW_EXT )
@@ -108,9 +107,9 @@ class Controller
      * @param string|null $index
      * @return  string|array
      */ 
-    public function getGlobalMiddles($index = null)
+    public function getGlobalMiddles($index)
     {
-        return isset($this->globalMiddles[$index]) ? $this->globalMiddles[$index] : $this->globalMiddles;
+        return $this->globalMiddles[$index] ?? $this->globalMiddles;
     }
 
     /**
@@ -121,8 +120,8 @@ class Controller
      * @param  string|null $index
      * @return  array|string|null
      */ 
-    public function getMiddles($index = null)
+    public function getMiddles($index)
     {
-        return isset($this->middles[$index]) ? $this->middles[$index] : null;
+        return $this->middles[$index] ?? null;
     }
 }

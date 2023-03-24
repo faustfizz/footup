@@ -18,7 +18,7 @@ class Home extends BaseController
         // unsetText("core.classNotFound", null, "en_US");
         // echo text("Core.home", ["Home"], "en_US");
 
-        return $this->view("accueil", [
+        return $this->view("home", [
             "titre" => text("Core.classNotFound", ["Home"])
         ]);
     }

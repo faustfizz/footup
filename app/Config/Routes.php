@@ -13,11 +13,6 @@ namespace App\Config;
 use Footup\Utils\Shared;
 
 /**
- * @var \Footup\Routing\Router
- */
-$router = Shared::loadRouter();
-
-/**
  * Default route is $router->get('/', "App\Controller\Home@index") if autoroute is enabled
  * if we delete all codes in this file, this code $router->setAutoRoute(true)->get('/', "App\Controller\Home@index") will be executed
  * 
@@ -25,5 +20,5 @@ $router = Shared::loadRouter();
  * $router->get('/{lang}/segment1/segment2', "App\Controller\Home@index")
  * $router->get('/{locale}/segment1/segment2', "App\Controller\Home@index")
  */
-$router->setAutoRoute(true)
+Shared::loadRouter()->setAutoRoute(true)
     ->get('/', "App\Controller\Home@index");

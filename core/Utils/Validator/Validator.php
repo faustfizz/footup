@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * FOOTUP - 0.1.6 - 2021 - 2023
+ * *************************
+ * Hard Coded by Faustfizz Yous
+ * 
+ * Ce fichier contient les fonctions globales du framework FOOTUP
+ * Ce fichier fait partie du framework
+ * 
+ * @package Footup/Utils/Validator
+ * @version 0.0.2
+ * @author Faustfizz Yous <youssoufmbae2@gmail.com>
+ */
+
 namespace Footup\Utils\Validator;
 
 use Footup\Utils\Arrays\Arr;
@@ -29,6 +42,13 @@ class Validator
      * @var array
      */
     protected $processedErrors = [];
+
+    /**
+     * Labels of input  as [field => label]
+     * 
+     * @var string[]
+     */
+    protected $displayAs = [];
 
     /**
      * @var string
@@ -123,6 +143,7 @@ class Validator
     public function clear()
     {
         $this->errors = [];
+        $this->processedErrors = [];
 
         return $this;
     }
@@ -149,6 +170,8 @@ class Validator
             $message = ArrDots::get($this->messages['custom'], $error['attribute']) ?? ArrDots::get($this->messages['rules'], $error['rule']);
 
             foreach ($error['replacements'] as $search => $replace) {
+                $replace = strtr($replace, $this->displayAs);
+
                 switch ($search[0]) {
                     case ':':
                         $message = str_replace($search, Str::prettyAttribute($replace), $message);
@@ -170,7 +193,7 @@ class Validator
                         break;
                 }
             }
-            $errors[$error['attribute']][$error['rule']] = $message;
+            $errors[$error['attribute']][$error['rule']] = strtr($message, $this->displayAs);
         }
         
         return $this->processedErrors = $errors;
@@ -261,17 +284,23 @@ class Validator
      */
     public function validate($values, array $ruleSet, string $prefix = null) : bool
     {
+        // It have done a validation before, we reset it
+        if($this->hasErrors())
+        {
+            $this->clear();
+        }
+
         // If there are no rules, there is nothing to validate
         if(empty($ruleSet)) {
             return false;
         }
-        // If there are no rules, there is nothing to validate
+        // If there are no values, there is nothing to validate
         if(empty($values)) {
             return false;
         }
 
         $currentPrefix = $this->prefix;
-        if ($prefix !== null) {
+        if (!empty($prefix)) {
             $this->prefix .= $prefix . '.';
         }
 
@@ -348,5 +377,20 @@ class Validator
         }
 
         return null;
+    }
+
+    /**
+     * Set labels of input as [field => label]
+     *
+     * @param  string[]  $displayAs  Labels of input as [field => label]
+     * @param bool $merge if you want to merge | default is a replacement
+     *
+     * @return  Validator
+     */ 
+    public function setDisplayAs($displayAs, $merge = false)
+    {
+        $this->displayAs = $merge ? array_merge($this->displayAs, $displayAs) :$displayAs;
+
+        return $this;
     }
 }

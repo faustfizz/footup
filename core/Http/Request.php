@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -15,6 +15,7 @@ namespace Footup\Http;
 use Footup\Config\Config;
 use Footup\Files\File;
 use Footup\Utils\Arrays\ArrDots;
+use Footup\Utils\Shared;
 use Footup\Utils\Validator\Validator;
 
 class Request
@@ -80,25 +81,7 @@ class Request
 
         $this->setLang($this->env("lang"));
 
-        $this->validator = new Validator();
-    }
-
-    /**
-     * Function to interact with the validator
-     *
-     * @param array|null|object|null $values
-     * @param array|null $ruleSet
-     * @param string|null $prefix
-     * @return Validator|bool
-     */
-    private function validator(array|null|object $values = [], array $ruleSet = [], string $prefix = null)
-    {
-        if(empty($values) && empty($ruleSet))
-        {
-            return $this->validator;
-        }
-
-        return $this->validator->validate($values, $ruleSet, $prefix);
+        $this->validator = Shared::loadValidator();
     }
 
     /**
@@ -108,7 +91,7 @@ class Request
      */
     public function getValidator()
     {
-        return $this->validator();
+        return $this->validator;
     }
 
     /**
@@ -144,7 +127,7 @@ class Request
      */
     public function withInput()
     {
-        $this->data = array_merge($this->get(), $this->post(), $this->json(null, false));
+        $this->data = array_merge($this->request(), $this->json(null, false));
 
         return $this;
     }
@@ -499,7 +482,7 @@ class Request
      */
     public function secure(): bool
     {
-        return $this->server('HTTPS') === 'on';
+        return $this->server('HTTPS') === 'on' || $this->server("http_port") === "443";
     }
 
     /**

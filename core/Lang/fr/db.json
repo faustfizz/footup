@@ -6,5 +6,6 @@
 	"invalidJoin"  		: "Type de jointure insupporté : {0} !",
 	"modelClassUndefined"  : "Model: class non défini !",
 	"undefinedTable"  	: "Table indéfinie !",
+	"undefinedMethod"   : "La méthode {0} n'éxiste pas dans la classe {1} !",
 	"dontUse"   		: "Attention: N\"utilisez jamais une requête de type {0} sans une clause WHERE !"
 }

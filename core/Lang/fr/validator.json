@@ -27,9 +27,12 @@
     "str-len"           : ":attribute doit avoir exactement %value de long",
     "human-name"        : ":attribute doit être un nom valide",
     "is"                : ":attribute doit être du type :type",
+    "password"          : ":attribute doit avoir au moins :chars caractères de long, 1 lettre majuscule, 1 lettre minuscule, 1 nombre et 1 symbol",
     "email"             : ":attribute doit être une adresse email valide",
     "date"              : ":attribute doit être une date au format: :format",
     "url"               : ":attribute doit être une URL valide",
     "uuid"              : ":attribute doit être un UUID valide",
-    "card-number"       : ":attribute doit être un numéro de carte valide"
+    "card-number"       : ":attribute doit être un numéro de carte valide",
+
+    "cannotMatch"       :   "Impossible de faire correpondre {0} au champ {1} !"
 }

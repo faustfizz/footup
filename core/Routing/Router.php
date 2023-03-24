@@ -1,12 +1,12 @@
 <?php
 
 /**
- * FOOTUP - 0.1.4 - 12.2021
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Routing
- * @version 0.1
+ * @version 0.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -16,6 +16,7 @@ use Footup\Config\Config;
 use Exception;
 use Footup\Http\Request;
 use Footup\Http\Response;
+use Footup\Utils\Shared;
 
 /**
  * Router implementation
@@ -107,13 +108,16 @@ class Router
      * Activate auto-routing if no route defined
      * 
      * @param boolean $active
-     * @return self
+     * @return Router
      */
     public function addDefaultRoute(bool $active = true)
     {
         if (! isset($this->routes[static::METHOD_GET]))
         {
-            $config = new Config;
+            /**
+             * @var Config
+             */
+            $config = Shared::loadConfig();
             $controller = "App\\Controller\\".ucfirst($config->config['default_controller']);
             $method = $config->config['default_method'];
             $this->get('/', "$controller@$method");
@@ -254,23 +258,17 @@ class Router
     /**
      * Recherche de correspondantes de routes
      * 
-     * @return \Footup\Routing\Route
-     * @throws \Exception
+     * @throws Exception
+     * @return Route|void
      */
-    public function match(): Route
+    public function match()
     {
         $requestMethod = strtoupper($this->request->method());
         $requestUri = $this->request->path();
 
         // If the request method doesn't exist, something seems to be fucked up.
         if (! isset($this->routes[$requestMethod])) {
-            if($this->autoRoute() === true)
-            {
-                // if we use auto routing so
-                // Skip all these fucking logics
-                goto AUTO;
-            }
-            // Else throw a fucking Exception
+            // throw a fucking Exception
             throw new Exception(text("Http.routeMethodNotFound", [$requestMethod]));
         }
 
@@ -282,6 +280,9 @@ class Router
         
         // Check for direct matches
         if (isset($this->routes[$requestMethod][$requestUri])) {
+            /**
+             * @var Route
+             */
             $route = $this->routes[$requestMethod][$requestUri];
             
             return $route;
@@ -296,7 +297,7 @@ class Router
         );
 
         /**
-         * @var string   $uri
+         * @var string $uri
          * @var \Footup\Routing\Route $route
          */
         foreach ($routes as $uri => $route) {
@@ -374,79 +375,33 @@ class Router
 
                 // Pass the variables to the route instance
                 $route = $route->withArgs($variables);
-
-                // Add the URI arguments to the request
-                foreach ($route->getArgs() as $key => $value) {
-                    # code...
-                    $this->request->{$key} = $value;
-                }
                 
-                $this->request->controllerName = $route->getHandler();
-                $this->request->controllerMethod = $route->getMethod();
                 $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
-
-                return $route;
+                
+                // Add the URI arguments to the request
+                return $this->populateRequest($route);
             }
-        }
-
-        AUTO:
-        if($this->autoRoute() === true)
-        {
-            $uri = explode('/', trim($requestUri, "/"));
-            $uri = array_filter($uri);
-
-            $config = new Config;
-            
-            if(!empty($uri))
-            {
-                [$class, $action] = count($uri) < 2 ? [array_shift($uri), null] : [array_shift($uri), array_shift($uri)];
-                $exist = file_exists(APP_PATH.'Controller/'.ucfirst($class).'.php');
-
-                if(ucfirst($class) === $config->config['default_controller'] || $exist)
-                {
-                    $controller = "App\\Controller\\".($exist ? ucfirst($class) : $config->config['default_controller']);
-                    $method = (!is_null($action) ? $action : $config->config['default_method']);
-
-                }else{
-                    // discoery of a dir
-                    $dir = ucfirst($class);
-                    if(is_dir(APP_PATH.'Controller/'.$dir))
-                    {
-                        $controller = isset($uri[0]) && $uri[0] != "/" ? ucfirst($class).'\\'.ucfirst($uri[0]) : ucfirst($class).'\\'.$config->config['default_controller'];
-                        
-                        array_shift($uri);
-
-                        if(file_exists(APP_PATH.'Controller/'.strtr($controller, ["\\" => "/"]).'.php')){
-                            $controller = "App\\Controller\\".$controller;
-                            $method = (isset($uri[0]) ? array_shift($uri) : $config->config['default_method']);
-                        }
-                    }else{
-                        $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
-                    }
-                }
-            }else{
-                $controller = "App\\Controller\\".ucfirst($config->config['default_controller']);
-                $method = $config->config['default_method'];
-            }
-
-            $route = new Route($requestUri,  $controller.'@'.$method);
-            
-            $route->withArgs($uri ?? []);
-
-            // Add the URI arguments to the request
-            foreach ($route->getArgs() as $key => $value) {
-                # code...
-                $this->request->{$key} = $value;
-            }
-            
-            $this->request->controllerName = $route->getHandler();
-            $this->request->controllerMethod = $route->getMethod();
-            $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
-
-            return $route;
         }
 
         $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
+    }
+
+    /**
+     * Populate matched arguments => value to the request
+     *
+     * @param Route $route
+     * @return Route
+     */
+    private function populateRequest(Route $route)
+    {
+        foreach ($route->getArgs() as $key => $value) {
+            # code...
+            $this->request->{$key} = $value;
+        }
+        $this->request->controllerName = $route->getHandler();
+        $this->request->controllerMethod = $route->getMethod();
+
+        return $route;
     }
 
     /**

@@ -513,7 +513,7 @@ class Form
     
     public function __toString()
     {
-        $this->build()->print();
+        return $this->build()->print();
     }
     
 }

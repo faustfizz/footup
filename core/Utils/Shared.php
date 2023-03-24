@@ -1,12 +1,12 @@
 <?php
 
 /**
- * FOOTUP - 0.1.5 - 03.2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Config
- * @version 0.1
+ * @package Footup/Utils
+ * @version 0.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup\Utils;
@@ -15,6 +15,7 @@ use Footup\Http\{Request, Session};
 use Footup\Orm\BaseModel;
 use Footup\Routing\Router;
 use Footup\Config\Config;
+use Footup\Utils\Validator\Validator;
 
 class Shared{
     
@@ -45,6 +46,13 @@ class Shared{
      * @var Session
      */
     protected static $session;
+
+    /**
+     * Validator instance
+     * 
+     * @var Validator
+     */
+    protected static $validator;
 
     /**
      * Load a shared Model
@@ -110,6 +118,21 @@ class Shared{
             return self::$session;
         }
         return self::$session = new Session();
+    }
+
+    /**
+     * Load a shared Config
+     *
+     * @param boolean $shared
+     * @throws \Exception
+     * @return Validator
+     */
+    public static function loadValidator($shared = true)
+    {
+        if(isset(self::$validator) && $shared){
+            return self::$validator;
+        }
+        return self::$validator = new Validator();
     }
 
 }
