@@ -267,7 +267,7 @@ class Router
         $requestUri = $this->request->path();
 
         // If the request method doesn't exist, something seems to be fucked up.
-        if (! isset($this->routes[$requestMethod])) {
+        if (!isset($this->routes[$requestMethod]) && !isset($this->routes[static::METHOD_ANY])) {
             // throw a fucking Exception
             throw new Exception(text("Http.routeMethodNotFound", [$requestMethod]));
         }
@@ -279,11 +279,11 @@ class Router
         );
         
         // Check for direct matches
-        if (isset($this->routes[$requestMethod][$requestUri])) {
+        if (isset($this->routes[$requestMethod][$requestUri]) || isset($this->routes[static::METHOD_ANY][$requestUri])) {
             /**
              * @var Route
              */
-            $route = $this->routes[$requestMethod][$requestUri];
+            $route = $this->routes[$requestMethod][$requestUri] ?? $this->routes[static::METHOD_ANY][$requestUri];
             
             return $route;
         }
