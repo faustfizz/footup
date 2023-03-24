@@ -336,8 +336,6 @@ class QueryBuilder
             $this->where .= trim($link . $key . ' ' . trim($operator ?? '=') . ' ' . $val);
         }
 
-        var_dump($this->where);
-
         return $this;
     }
 
