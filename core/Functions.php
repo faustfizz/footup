@@ -579,7 +579,7 @@ if (! function_exists('base_url'))
      * @param string|null $scheme
      * @return string
      */
-	function base_url(array|string $uri = '', bool $withQuery = false, string $scheme = null): string
+	function base_url($uri = '', bool $withQuery = false, string $scheme = null): string
 	{
 		$base_url = trim((string) request()->url(false, true), " \n\r\t\v\x00\/")."/";
 		$query = "";
@@ -712,7 +712,7 @@ if (! function_exists('setLang'))
 	 * @param string|null $locale
 	 * @return string|bool
 	 */
-	function setLang(string|array $indice, string $value, string $locale = null): string
+	function setLang($indice, string $value, string $locale = null): string
 	{
 		$lang = new Lang($locale);
 		if(is_array($indice))
@@ -734,7 +734,7 @@ if (! function_exists('setText'))
 	 * @param string|null $locale
 	 * @return string|bool
 	 */
-	function setText(string|array $indice, string $value, string $locale = null): string
+	function setText($indice, string $value, string $locale = null): string
 	{
 		$lang = new Lang($locale);
 		if(is_array($indice))
@@ -759,7 +759,7 @@ if (! function_exists('unsetLang'))
 	 * @param string|null $locale
 	 * @return string|bool
 	 */
-	function unsetLang(string $file, string|array $key = null, string $locale = null): string
+	function unsetLang(string $file, $key = null, string $locale = null): string
 	{
 		$lang = new Lang($locale);
 		return $lang->removeLine($file, $key);
@@ -777,7 +777,7 @@ if (! function_exists('unsetText'))
 	 * @param string|null $locale
 	 * @return string|bool
 	 */
-	function unsetText(string $file, string|array $key = null, string $locale = null): string
+	function unsetText(string $file, $key = null, string $locale = null): string
 	{
 		$lang = new Lang($locale);
 		return $lang->removeLine($file, $key);
@@ -796,7 +796,7 @@ if (! function_exists('redirect'))
      */
 	function redirect(string $route = '/')
 	{
-		return response()->redirect($route);
+		return response()->redirect(url($route));
 	}
 }
 
@@ -824,7 +824,7 @@ if (! function_exists('to'))
      */
 	function to(string $route = '/')
 	{
-		return response()->to($route);
+		return response()->to(url($route));
 	}
 }
 
@@ -1043,7 +1043,7 @@ if (! function_exists('url_is'))
 	 * @param string|array $path
 	 * @return boolean
 	 */
-	function url_is(array|string $path): bool
+	function url_is($path): bool
 	{
 		return request()->is($path);
 	}
