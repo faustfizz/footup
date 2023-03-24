@@ -14,7 +14,6 @@ namespace Footup\Routing;
 
 use Footup\Http\Request;
 use Footup\Http\Response;
-use Footup\Http\Session;
 
 abstract class Middle
 {
@@ -24,8 +23,8 @@ abstract class Middle
      *
      * @param Request $request
      * @param Response $response
-     * @param Session $session
+     * 
      * @return Response|boolean
      */
-    abstract public function execute(Request $request, Response $response, Session $session);
+    abstract public function execute(Request $request, Response $response);
 }
