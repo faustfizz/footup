@@ -63,7 +63,7 @@ class Autoload{
     {
         foreach ($this->psr4 as $namespace => $match) {
             # code...
-            $file = strtr($class, [$namespace."\\" => $match, "\\" => DS]);
+            $file = strtr($class, [rtrim($namespace, "\\")."\\" => rtrim($match, DS).DS, "\\" => DS]);
     
             if(file_exists($file. ".php"))
             {
