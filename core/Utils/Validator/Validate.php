@@ -9,19 +9,14 @@
  * Ce fichier fait partie du framework
  * 
  * @package Footup/Utils/Validator
- * @version 0.0.2
+ * @version 0.0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
-
-
 namespace Footup\Utils\Validator;
 
 use Countable;
 use Footup\Utils\Arrays\ArrDots;
 use Footup\Utils\Str;
-
-// Add polyfill in case where running in < PHP 7.3
-
 
 class Validate
 {
@@ -76,7 +71,6 @@ class Validate
             ->addRule('regex', [static::class, 'regex'])
             ->addRule('not-regex', [static::class, 'notRegex']);
     }
-
 
     /**
      * Checks whether or not $value is filled, 
@@ -138,7 +132,7 @@ class Validate
     }
 
     /**
-     * required-if:another-field(,value)+
+     * required-if:another-field,value
      *
      * @param Validator $validator
      * @param array $data
@@ -148,10 +142,12 @@ class Validate
      */
     public static function requiredIf(Validator $validator, $data, $pattern, $rule, $parameters)
     {
-        $field  = $parameters[0];
         $values = array_slice($parameters, 1);
-        $isWild  = strpos($field, $validator::WILD) !== false;
-        $overlap = Str::overlapLeft($field, $pattern);
+        print_r($parameters);
+        print_r($values);
+        
+        // Calculate comparability
+        list($field, $isWild, $overlap) = static::_isComparable($validator, $parameters, $pattern);
 
         // If pattern is not present
         if (!ArrDots::has($data, $pattern, $validator::WILD)) {
@@ -194,14 +190,8 @@ class Validate
      */
     public static function requiredWith(Validator $validator, $data, $pattern, $rule, $parameters)
     {
-        $field   = $parameters[0];
-        $isWild  = strpos($field, $validator::WILD) !== false;
-        $overlap = Str::overlapLeft($field, $pattern);
-
-        // Check that the pattern and field can be compared
-        if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
-        }
+        // Calculate comparability
+        list($field, $isWild, $overlap) = static::_isComparable($validator, $parameters, $pattern);
 
         // If the required with field exists and the pattern field does not
         if (ArrDots::has($data, $field, $validator::WILD) && !ArrDots::has($data, $pattern, $validator::WILD)) {
@@ -239,11 +229,11 @@ class Validate
         $overlaps = [];
         $longest  = 0;
         foreach ($parameters as $k => $field) {
-            $isWild       = strpos($field, $validator::WILD) !== false;
-            $overlaps[$k] = $isWild ? Str::overlapLeft($field, $pattern) : null;
-            if ($isWild && $overlaps[$k] === false) {
-                throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
-            }
+        
+            // Calculate comparability
+            list($isWild, $overlap) = static::_isComparable($validator, $field, $pattern);
+            $overlaps[$k] = $overlap;
+            
             // Store the longest overlap
             $longest = $isWild && strlen($overlaps[$k]) > strlen($overlaps[$longest]) ? $k : $longest;
         }
@@ -272,8 +262,6 @@ class Validate
             }
             return;
         }
-
-
 
         // Check value is required and not null
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
@@ -310,11 +298,11 @@ class Validate
         $overlaps = [];
         $longest  = 0;
         foreach ($parameters as $k => $field) {
-            $isWild       = strpos($field, $validator::WILD) !== false;
-            $overlaps[$k] = $isWild ? Str::overlapLeft($field, $pattern) : null;
-            if ($isWild && $overlaps[$k] === false) {
-                throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
-            }
+        
+            // Calculate comparability
+            list($isWild, $overlap) = static::_isComparable($validator, $field, $pattern);
+            $overlaps[$k] = $overlap;
+            
             // Store the longest overlap
             $longest = $isWild && strlen($overlaps[$k]) > strlen($overlaps[$longest]) ? $k : $longest;
         }
@@ -337,8 +325,6 @@ class Validate
             }
             return;
         }
-
-
 
         // Check value is required and not null
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
@@ -371,14 +357,8 @@ class Validate
      */
     public static function requiredWithout(Validator $validator, $data, $pattern, $rule, $parameters)
     {
-        $field   = $parameters[0];
-        $isWild  = strpos($field, $validator::WILD) !== false;
-        $overlap = Str::overlapLeft($field, $pattern);
-
-        // Check that the pattern and field can be compared
-        if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
-        }
+        // Calculate comparability
+        list($field, $isWild, $overlap) = static::_isComparable($validator, $parameters, $pattern);
 
         // If the required with field exists and the pattern field does not
         if (!ArrDots::has($data, $field, $validator::WILD) && !ArrDots::has($data, $pattern, $validator::WILD)) {
@@ -413,14 +393,8 @@ class Validate
      */
     public static function equals(Validator $validator, $data, $pattern, $rule, $parameters)
     {
-        $field   = $parameters[0];
-        $isWild  = strpos($field, $validator::WILD) !== false;
-        $overlap = Str::overlapLeft($field, $pattern);
-
-        // Check that the pattern and field can be compared
-        if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
-        }
+        // Calculate comparability
+        list($field, $isWild, $overlap) = static::_isComparable($validator, $parameters, $pattern);
 
         // Check values are equal
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
@@ -446,14 +420,8 @@ class Validate
      */
     public static function notEquals(Validator $validator, $data, $pattern, $rule, $parameters)
     {
-        $field   = $parameters[0];
-        $isWild  = strpos($field, $validator::WILD) !== false;
-        $overlap = Str::overlapLeft($pattern, $field);
-
-        // Check that the pattern and field can be compared
-        if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
-        }
+        // Calculate comparability
+        list($field, $isWild, $overlap) = static::_isComparable($validator, $parameters, $pattern);
 
         // Check values are equal
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
@@ -479,14 +447,8 @@ class Validate
      */
     public static function identical(Validator $validator, $data, $pattern, $rule, $parameters)
     {
-        $field   = $parameters[0];
-        $isWild  = strpos($field, $validator::WILD) !== false;
-        $overlap = Str::overlapLeft($pattern, $field);
-
-        // Check that the pattern and field can be compared
-        if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
-        }
+        // Calculate comparability
+        list($field, $isWild, $overlap) = static::_isComparable($validator, $parameters, $pattern);
 
         // Check values are equal
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
@@ -512,14 +474,8 @@ class Validate
      */
     public static function notIdentical(Validator $validator, $data, $pattern, $rule, $parameters)
     {
-        $field   = $parameters[0];
-        $isWild  = strpos($field, $validator::WILD) !== false;
-        $overlap = Str::overlapLeft($pattern, $field);
-
-        // Check that the pattern and field can be compared
-        if ($isWild && $overlap === false) {
-            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
-        }
+        // Calculate comparability
+        list($field, $isWild, $overlap) = static::_isComparable($validator, $parameters, $pattern);
 
         // Check values are equal
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
@@ -533,7 +489,6 @@ class Validate
             $validator->addError($attribute, $rule, [':field' => $fieldAttribute]);
         }
     }
-
 
     /**
      * in:<value>(,<value>)*
@@ -679,7 +634,6 @@ class Validate
         }
     }
 
-
     /**
      * min:<minimum-value>
      *
@@ -784,7 +738,6 @@ class Validate
             $validator->addError($attribute, $rule, [':value' => $value]);
         }
     }
-
 
     /**
      * alpha
@@ -928,7 +881,6 @@ class Validate
             $validator->addError($attribute, $rule);
         }
     }
-
 
     /**
      * is:<type>
@@ -1083,7 +1035,6 @@ class Validate
         }
     }
 
-
     /**
      * card-number
      *
@@ -1193,5 +1144,27 @@ class Validate
             
             $validator->addError($attribute, $rule);
         }
+    }
+
+    /**
+     * Check if we can match the pattern with field
+     *
+     * @param Validator $validator
+     * @param array $parameters
+     * @param string $pattern
+     * @return array
+     */
+    private static function _isComparable($validator, $parameters, $pattern)
+    {
+        $field   = $parameters[0];
+        $isWild  = strpos($field, $validator::WILD) !== false;
+        $overlap = Str::overlapLeft($field, $pattern);
+
+        // Check that the pattern and field can be compared
+        if ($isWild && $overlap === false) {
+            throw new \InvalidArgumentException(text("validator.cannotMatch", [$pattern, $field]));
+        }
+
+        return [$field, $isWild, $overlap];
     }
 }
