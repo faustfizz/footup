@@ -21,7 +21,7 @@ class Footup
     protected $router;
     protected $name = "FootUP Framework";
 
-    protected $_version = "0.1.5";
+    protected $_version = "0.1.6";
 
     protected $_code = 00105;
 
