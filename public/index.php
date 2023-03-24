@@ -34,4 +34,4 @@ require realpath(BASE_PATH . '../app/Config/Fuel.php');
 // Change this accordingly to your app directory
 
 // Load our friend FootUP.
-(require (rtrim(App\Config\Fuel::$sysDir, '\\/ ') . DS . 'Boot.php'))->terminate();
+(require (rtrim(App\Config\Fuel::sysDir, '\\/ ') . DS . 'Boot.php'))->terminate();

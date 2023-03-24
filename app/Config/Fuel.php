@@ -26,20 +26,20 @@ class Fuel{
      *
      * @var string
      */
-    public static $appDir = __DIR__."/../";
+    const appDir = __DIR__."/../";
 
     /**
      * The directory of the core files
      *
      * @var string
      */
-    public static $sysDir = __DIR__."/../../core/";
+    const sysDir = __DIR__."/../../core/";
 
     /**
      * Yo ! Where you hold your view files
      *
      * @var string
      */
-    public static $viewDir = __DIR__."/../View/";
+    const viewDir = __DIR__."/../View/";
 }
 

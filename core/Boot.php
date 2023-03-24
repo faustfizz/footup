@@ -21,7 +21,7 @@ use Footup\Utils\Shared;
 /**
  * APP_PATH is the contant of the app directory
  */
-defined('APP_PATH') or define('APP_PATH', realpath(Fuel::$appDir).DS);
+defined('APP_PATH') or define('APP_PATH', realpath(Fuel::appDir).DS);
 /**
  * CONFIG_PATH is the contant of the config directory
  */
@@ -63,7 +63,7 @@ defined('ENVIRONMENT') or define('ENVIRONMENT', $config->environment);
  * - chemin vers le dossier des vues (app/view)
  * - chemin vers le dossier de téléversement
  */
-defined('VIEW_PATH') or define('VIEW_PATH', realpath(Fuel::$viewDir).DS);
+defined('VIEW_PATH') or define('VIEW_PATH', realpath(Fuel::viewDir).DS);
 defined('VIEW_EXT') or define('VIEW_EXT', trim($config->view_ext, "."));
 defined('STORE_DIR') or define('STORE_DIR', realpath(BASE_PATH. trim($config->store_dir, "\\/")).DS);
 defined('ASSETS_DIR') or define('ASSETS_DIR', realpath(BASE_PATH. trim($config->assets_dir, "\\/")).DS);
