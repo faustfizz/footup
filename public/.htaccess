@@ -2,7 +2,7 @@
 Options All -Indexes
 
 # ----------------------------------------------------------------------
-# Rewrite engine
+# Rewrite engine // this file is a copy of the CodeIgniter's .htaccess
 # ----------------------------------------------------------------------
 
 # Turning on the rewrite engine is necessary for the following rules and features.
@@ -11,10 +11,10 @@ Options All -Indexes
 	Options +FollowSymlinks
 	RewriteEngine On
 
-	# If you installed CodeIgniter in a subfolder, you will need to
+	# If you installed this in a subfolder, you will need to
 	# change the following line to match the subfolder you need.
 	# http://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewritebase
-	# RewriteBase /
+	RewriteBase /
 
 	# Redirect Trailing Slashes...
 	RewriteCond %{REQUEST_FILENAME} !-d
