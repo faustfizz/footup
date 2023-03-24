@@ -382,8 +382,78 @@ class Router
                 return $this->populateRequest($route);
             }
         }
+        /**
+         * Sorry but nothing match, so we go with autodiscovery if enabled
+         */
+        if ($this->autoRoute())
+        {
+            return $this->doAutoRoute($requestUri);
+        }
 
         $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
+    }
+
+    /**
+     * Go with auto discovery
+     * 
+     * @param string
+     * @return Route
+     */
+    public function doAutoRoute($requestUri)
+    {
+        $uri = explode('/', trim($requestUri, "/"));
+        $uri = array_filter($uri);
+
+        $config = new Config;
+
+        if (!empty($uri))
+        {
+            list($class, $action )= count($uri) < 2 ? [array_shift($uri), null] : [array_shift($uri), array_shift($uri)];
+            $exist = file_exists(APP_PATH . 'Controller/' . ucfirst($class) . '.php');
+
+            if (ucfirst($class) === $config->config['default_controller'] || $exist)
+            {
+                $controller = "App\Controller\\" . ($exist ? ucfirst($class) : $config->config['default_controller']);
+                $method = (!is_null($action) ? $action : $config->config['default_method']);
+            }
+            else
+            {
+                // discovery of a dir
+                $dir = ucfirst($class);
+                if (is_dir(APP_PATH . 'Controller/' . $dir))
+                {
+                    $controller = isset($uri[0]) && $uri[0] != "/" ? ucfirst($class) . '\\' . ucfirst($uri[0]) : ucfirst($class) . '\\' . $config->config['default_controller'];
+
+                    array_shift($uri);
+
+                    if (file_exists(APP_PATH . 'Controller/' . strtr($controller, ["\\" => "/"]) . '.php'))
+                    {
+                        $controller = "App\Controller\\" . $controller;
+                        $method = (isset($uri[0]) ? array_shift($uri) : $config->config['default_method']);
+                    }
+                }
+                else
+                {
+                    $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
+                }
+            }
+        }
+        else
+        {
+            $controller = "App\Controller\\" . ucfirst($config->config['default_controller']);
+            $method = $config->config['default_method'];
+        }
+
+        $route = new Route($requestUri, $controller . '@' . $method);
+
+        $route->withArgs($uri ?? []);
+
+        // Add the URI arguments to the request
+        $this->populateRequest($route);
+
+        $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
+
+        return $route;
     }
 
     /**
