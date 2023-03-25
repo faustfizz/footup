@@ -12,7 +12,7 @@
 
 namespace Footup\Orm;
 
-use Footup\Config\Config;
+use Footup\Utils\Shared;
 use PDO;
 use Exception;
 
@@ -56,7 +56,10 @@ class DbConnection
             }
             // Connection information
             else if (is_array($config) || is_null($config)) {
-                $Config = (new Config($config))->config;
+                /**
+                 * @var array
+                 */
+                $Config = Shared::loadConfig()->config;
 
                 if(!in_array($Config['db_type'], self::$db_types))
                 {
