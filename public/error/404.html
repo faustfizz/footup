@@ -5,11 +5,10 @@
    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="icon" href="./favicon.svg" />
+   <link rel="icon" href="/favicon.svg" />
    <title>{status} - {title}</title>
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
    <style type="text/css">
-      @import url("https://fonts.googleapis.com/css?family=Merriweather+Sans");
+      @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
       main {
          height: 100vh;
@@ -19,13 +18,20 @@
          flex-direction: column;
          justify-content: center;
          align-items: center;
-         font-family: "Merriweather Sans", sans-serif;
+         font-family: Roboto, sans-serif;
+      }
+
+      main #errorTitle {
+         font-weight: 400;
+         text-align: center;
+         margin-top: 45px;
       }
 
       main #errorText {
-         font-size: 22px;
+         font-size: 18px;
          text-align: center;
-         margin: 34px 0;
+         margin-top: 25px;
+         margin-bottom: 45px;
       }
 
       main #errorLink {
@@ -371,7 +377,8 @@
          </g>
       </svg>
 
-      <p id="errorText">Ooops ! {message}</p>
+      <h1 id="errorTitle">Ooops ! {title}</h1>
+      <p id="errorText">{message}</p>
       <a id="errorLink" href="{link}">Revenir à l'accueil</a>
    </main>
    <!-- partial -->
