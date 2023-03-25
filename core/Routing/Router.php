@@ -443,7 +443,7 @@ class Router
 
         if(!file_exists($file = strtr($controller, ["App\\" => APP_PATH, "\\" => DS]) . '.php'))
         {
-            $this->die('500', "Fichier Introuvable", text("file.fileNotFound", [$file]));
+            $this->die('500', "Fichier Introuvable", text("file.fileNotFound", [strtr($file, [ROOT_PATH => ""])]));
         }
 
         if(!method_exists($controller, $method))
