@@ -441,11 +441,6 @@ class Router
             $method = $config->default_method;
         }
 
-        if(!file_exists($file = strtr($controller, ["App\\" => APP_PATH, "\\" => DS]) . '.php'))
-        {
-            $this->die('500', "Fichier Introuvable", text("file.fileNotFound", [strtr($file, [ROOT_PATH => ""])]));
-        }
-
         if(!method_exists($controller, $method))
         {
             $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
