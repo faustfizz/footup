@@ -27,7 +27,7 @@ class DbConnection
      * @var string[] $db_type Type de connexion à la base
      */
     protected static $db_types = array(
-        'pdomysql', 'pdopgsql', 'pdosqlite'
+        'mysql', 'pgsql', 'sqlite'
     );
 
     /**
@@ -64,7 +64,7 @@ class DbConnection
                 }
 
                 switch ($Config['db_type']) {
-                    case 'pdopgsql':
+                    case 'pgsql':
                         $dsn = sprintf(
                             'pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s',
                             $Config['db_host'],
@@ -76,10 +76,10 @@ class DbConnection
 
                         return self::$db = new PDO($dsn);
 
-                    case 'pdosqlite':
+                    case 'sqlite':
                         return self::$db = new PDO('sqlite:/' . $Config['db_name']);
 
-                    case 'pdomysql':
+                    case 'mysql':
                     default:
                         $dsn = sprintf(
                             'mysql:host=%s;port=%d;dbname=%s',
