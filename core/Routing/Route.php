@@ -117,8 +117,7 @@ class Route
         }
 
         // Split the handler string at the delimiter character, so we receive class and method
-        [$controller, $method] = explode(static::CONTROLLER_DELIMITER, $handler);
-        //die('CNT '.$method);
+        list($controller, $method) = explode(static::CONTROLLER_DELIMITER, $handler);
 
         // Set class name and method. If no method has been specified
         $method = $method ?? $config->config['default_method'];
@@ -127,9 +126,6 @@ class Route
         if (! class_exists($controller)) {
             throw new Exception(text("Http.controllerNotFound", [$controller]));
         }
-
-        // Create a new instance of the controller
-        //$controller = new $controller();
 
         // No such method - bail.
         if (! method_exists($controller, $method)) {

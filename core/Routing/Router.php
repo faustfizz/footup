@@ -110,18 +110,10 @@ class Router
      * @param boolean $active
      * @return Router
      */
-    public function addDefaultRoute(bool $active = true)
+    public function shouldAutoRoute(bool $active = true)
     {
-        if (! isset($this->routes[static::METHOD_GET]))
+        if (!isset($this->routes[static::METHOD_GET]) && !isset($this->routes[static::METHOD_ANY]))
         {
-            /**
-             * @var Config
-             */
-            $config = Shared::loadConfig();
-            $controller = "App\\Controller\\".ucfirst($config->config['default_controller']);
-            $method = $config->config['default_method'];
-            $this->get('/', "$controller@$method");
-
             return $this->setAutoRoute($active);
         }
         return $this;
@@ -267,7 +259,7 @@ class Router
         $requestUri = $this->request->path();
 
         // If the request method doesn't exist, something seems to be fucked up.
-        if (!isset($this->routes[$requestMethod]) && !isset($this->routes[static::METHOD_ANY])) {
+        if (!isset($this->routes[$requestMethod]) && !isset($this->routes[static::METHOD_ANY]) && !$this->autoRoute()) {
             // throw a fucking Exception
             throw new Exception(text("Http.routeMethodNotFound", [$requestMethod]));
         }
@@ -401,52 +393,65 @@ class Router
      */
     public function doAutoRoute($requestUri)
     {
-        $uri = explode('/', trim($requestUri, "/"));
-        $uri = array_filter($uri);
+        $uriSegments = explode('/', $requestUri);
+        $directory = '';
+        // When we filter filter, first index can remain 1 as index 0 removed
+        // so we use array_values for our 0 index 
+        $uriSegments = array_values(array_filter($uriSegments));
+        
+        // Searh directories and concatenate with $directory
+        array_walk($uriSegments, function($segment, $index, $uri) use (&$directory, &$uriSegments){
+            $counter                 = count($uri);
 
-        $config = new Config;
+            // Loop through our uri segments, is there a folder or just controller ?
+            while ($counter-- > 0)
+            {
+                $controller = $directory . ucfirst($uri[0]);
 
-        if (!empty($uri))
+                // if it is not a file, it's should be a directory or what ?
+                if (! is_file(APP_PATH . 'Controller/' . $controller . '.php') && is_dir(APP_PATH . 'Controller/' . $directory . ucfirst($uri[0])))
+                {
+                    // As array_walk don't work with reference, we passed it into the closure
+                    array_shift($uriSegments);
+                    $directory .= ucfirst(array_shift($uri)).DS;
+                    continue;
+                }
+                // if we are here, that mean the rest are controller and/or method
+                return $uri;
+            }
+            // We are because of $counter was 1 and inside the loop, we shifted that as directory
+            return $uri;
+        }, $uriSegments);
+
+        $config = Shared::loadConfig();
+
+        if (!empty($uriSegments))
         {
-            list($class, $action )= count($uri) < 2 ? [array_shift($uri), null] : [array_shift($uri), array_shift($uri)];
-            $exist = file_exists(APP_PATH . 'Controller/' . ucfirst($class) . '.php');
+            // We shift all so only parameters will stay in $uriSegments
+            list($class, $action) = count($uriSegments) < 2 ? [array_shift($uriSegments), $config->default_method] : [array_shift($uriSegments), array_shift($uriSegments)];
 
-            if (ucfirst($class) === $config->config['default_controller'] || $exist)
-            {
-                $controller = "App\Controller\\" . ($exist ? ucfirst($class) : $config->config['default_controller']);
-                $method = (!is_null($action) ? $action : $config->config['default_method']);
-            }
-            else
-            {
-                // discovery of a dir
-                $dir = ucfirst($class);
-                if (is_dir(APP_PATH . 'Controller/' . $dir))
-                {
-                    $controller = isset($uri[0]) && $uri[0] != "/" ? ucfirst($class) . '\\' . ucfirst($uri[0]) : ucfirst($class) . '\\' . $config->config['default_controller'];
-
-                    array_shift($uri);
-
-                    if (file_exists(APP_PATH . 'Controller/' . strtr($controller, ["\\" => "/"]) . '.php'))
-                    {
-                        $controller = "App\Controller\\" . $controller;
-                        $method = (isset($uri[0]) ? array_shift($uri) : $config->config['default_method']);
-                    }
-                }
-                else
-                {
-                    $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
-                }
-            }
+            // Why we add DS => "\\" because of when we ride on a foolish system like Windows (a fucking system)
+            $controller = "App\\Controller\\" . strtr($directory . ucfirst($class), ["/" => "\\", DS => "\\"]);
+            $method = $action;
         }
         else
         {
-            $controller = "App\Controller\\" . ucfirst($config->config['default_controller']);
-            $method = $config->config['default_method'];
+            // We use $directory here as it can be shifted before or empty
+            $controller = "App\\Controller\\" . strtr($directory . ucfirst($config->default_controller), ["/" => "\\", DS => "\\"]);
+            $method = $config->default_method;
         }
 
-        $route = new Route($requestUri, $controller . '@' . $method);
+        if(!file_exists($file = strtr($controller, ["App\\" => APP_PATH, "\\" => DS]) . '.php'))
+        {
+            $this->die('500', "Fichier Introuvable", text("file.fileNotFound", [$file]));
+        }
 
-        $route->withArgs($uri ?? []);
+        if(!method_exists($controller, $method))
+        {
+            $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
+        }
+
+        $route = (new Route($requestUri, $controller . '@' . $method))->withArgs($uriSegments ?? []);
 
         // Add the URI arguments to the request
         $this->populateRequest($route);

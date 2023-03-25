@@ -94,7 +94,7 @@ include_once CONFIG_PATH.'Routes.php';
  * Recupère l'objet variable $router
  * @var Router
  */
-$router = Shared::loadRouter()->addDefaultRoute();
+$router = Shared::loadRouter()->shouldAutoRoute();
 
 /**
  * Return le Kernel de Footup Framework
