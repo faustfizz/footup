@@ -94,10 +94,10 @@ db_name   = test
 db_port   = 3306
 
 #
-# Nom de la base de données
-# 'pdomysql', 'pdopgsql', 'pdosqlite'
+# Database type for PDO
+# 'mysql', 'pgsql', 'sqlite'
 #
-db_type   = pdomysql
+db_type   = mysql
 
 
 # ================================================================ #

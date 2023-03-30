@@ -13,7 +13,7 @@ A Rich Featured LightWeight PHP MVC Framework :
 * Request
 * Response
 * Validator (Form Validation - Not validating UploadedFile) Thanks to [pdscopes/php-form-validator](https://github.com/pdscopes/php-form-validator)
-* Pagination (Pagination and Pagination View) Thanks to [iranianpep/paginator](https://github/iranianpep/paginator)
+* Pagination (Pagination and Pagination View) Thanks to [iranianpep/paginator](https://github.com/iranianpep/paginator)
 * Session
 * Email (CodeIgniter 4 Email Class)
 * Routing

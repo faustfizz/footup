@@ -90,9 +90,9 @@ class Config
         "db_port"   => "3306",
         /**
          * Nom de la base de données
-         * 'pdomysql', 'pdopgsql', 'pdosqlite'
+         * 'mysql', 'pgsql', 'sqlite'
          */
-        "db_type"   => "pdomysql"
+        "db_type"   => "mysql"
     ];
 
     public function __construct(?array $config = null, ?array $page_error = null, ?array $locale = null)
