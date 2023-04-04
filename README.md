@@ -48,8 +48,10 @@ FOOTUP MVC Framework
 │   ├── Libs
 │   ├── Middle
 │   │   └── Maintenance.php
+│   ├── Migration
 │   ├── Model
 │   │   └── Contact.php
+│   ├── Seed
 │   └── View
 │       └── home.php
 ├── composer.json
@@ -60,9 +62,16 @@ FOOTUP MVC Framework
 │   │   │   ├── Assets.php
 │   │   │   ├── Controller.php
 │   │   │   ├── Middle.php
+│   │   │   ├── Migfree.php
+│   │   │   ├── Migrate.php
+│   │   │   ├── MigrateTrait.php
+│   │   │   ├── Migrown.php
+│   │   │   ├── Migrup.php
 │   │   │   ├── Model.php
 │   │   │   ├── Multiple.php
 │   │   │   ├── Scaffold.php
+│   │   │   ├── Seeder.php
+│   │   │   ├── Seed.php
 │   │   │   └── View.php
 │   │   ├── Exception
 │   │   │   ├── Exception.php
@@ -86,6 +95,7 @@ FOOTUP MVC Framework
 │   │   │   └── Interactor.php
 │   │   ├── Konsole.php
 │   │   ├── logo
+│   │   ├── logo_txt
 │   │   ├── Output
 │   │   │   ├── Color.php
 │   │   │   ├── Cursor.php
@@ -94,7 +104,9 @@ FOOTUP MVC Framework
 │   │   └── Tpl
 │   │       ├── Controller.tpl
 │   │       ├── Middle.tpl
+│   │       ├── Migrate.tpl
 │   │       ├── Model.tpl
+│   │       ├── Seed.tpl
 │   │       └── View.tpl
 │   ├── Config
 │   │   ├── Autoload.php
@@ -107,6 +119,56 @@ FOOTUP MVC Framework
 │   │   ├── Email.php
 │   │   └── Mime.php
 │   ├── Controller.php
+│   ├── Database
+│   │   ├── DbConnection.php
+│   │   ├── Migration
+│   │   │   └── Migration.php
+│   │   ├── Migration.php
+│   │   ├── Schema
+│   │   │   ├── Column.php
+│   │   │   ├── ForeignKey.php
+│   │   │   ├── IndexColumn.php
+│   │   │   ├── Index.php
+│   │   │   ├── Schema.php
+│   │   │   └── Table.php
+│   │   ├── Seeder
+│   │   │   └── Seeder.php
+│   │   └── Seeder.php
+│   ├── Debug
+│   │   ├── Contracts
+│   │   │   └── HandlersInterface.php
+│   │   ├── Exceptions
+│   │   │   ├── CompileErrorException.php
+│   │   │   ├── CompileWarningException.php
+│   │   │   ├── CoreErrorException.php
+│   │   │   ├── CoreWarningException.php
+│   │   │   ├── DepricatedException.php
+│   │   │   ├── NoticeException.php
+│   │   │   ├── ParseErrorException.php
+│   │   │   ├── RecoverableErrorException.php
+│   │   │   ├── StrictErrorException.php
+│   │   │   ├── UserDeprecatedException.php
+│   │   │   ├── UserErrorException.php
+│   │   │   ├── UserNoticeException.php
+│   │   │   ├── UserWarningException.php
+│   │   │   └── WarningException.php
+│   │   ├── Handlers.php
+│   │   ├── HandlersSetter.php
+│   │   ├── Reporter.php
+│   │   ├── resources
+│   │   │   ├── assets
+│   │   │   │   ├── css
+│   │   │   │   │   ├── custom.min.css
+│   │   │   │   │   ├── enlighterjs.min.css
+│   │   │   │   │   └── spectre.min.css
+│   │   │   │   └── js
+│   │   │   │       ├── custom.min.js
+│   │   │   │       └── enlighterjs.min.js
+│   │   │   └── views
+│   │   │       └── 500.php
+│   │   ├── Support
+│   │   │   └── functions.php
+│   │   └── View.php
 │   ├── Files
 │   │   ├── File.php
 │   │   └── FileSystem.php
@@ -140,7 +202,6 @@ FOOTUP MVC Framework
 │   ├── Model.php
 │   ├── Orm
 │   │   ├── BaseModel.php
-│   │   ├── DbConnection.php
 │   │   └── QueryBuilder.php
 │   ├── Paginator
 │   │   ├── AbstractPaginator.php
@@ -148,7 +209,7 @@ FOOTUP MVC Framework
 │   │   ├── PaginatorException.php
 │   │   ├── PaginatorInterface.php
 │   │   ├── Paginator.php
-│   │   └── Views
+│   │   └── View
 │   │       └── default.php
 │   ├── Routing
 │   │   ├── Middle.php
