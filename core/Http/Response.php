@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP - 0.1.6-Alpha - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -12,10 +12,11 @@
 
 namespace Footup\Http;
 
-use App\Config\Config;
+use Footup\Config\Config;
 use ArrayObject;
 use DateTime;
 use Exception;
+use Footup\Utils\Shared;
 use JsonSerializable;
 
 class Response
@@ -456,8 +457,10 @@ class Response
         $status = is_int($status) ? strval($status) : $status;
         $short = substr($status, 0, 1);
         $message = empty($message) ? $this->message[(int)$status] : $message;
-
-        $config = new Config();
+/**
+         * @var Config
+         */
+        $config = Shared::loadConfig();
         if(isset($config->page_error[$status."s"]))
         {
             $content = file_exists($config->page_error[$status."s"]) ? file_get_contents($config->page_error[$status."s"]) : $message;

@@ -1,36 +1,32 @@
 <?php
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP - 0.1.6-Alpha - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1.5
+ * @version 0.1.6-Alpha
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
 
 use Exception;
 use Footup\Http\Request;
-use Footup\Http\Session, Footup\Http\Response;
+use Footup\Http\Response;
 use Footup\Routing\Router;
-use Footup\Utils\Shared;
 
 class Footup
 {
     protected $router;
-    protected $name = "FootUP Framework";
+    public const NAME = "FootUP Framework";
 
-    protected $_version = "0.1.6";
-
-    protected $_code = 00105;
+    public const VERSION = "0.1.6-Alpha";
 
     public function __construct(Router &$router)
     {
         $this->router = &$router;
         $this->router->setFrameworkName($this->name())
-            ->setFrameworkVersion($this->version())
-            ->setFrameworkVersionCode($this->code());
+            ->setFrameworkVersion($this->version());
         $router->getRequest()->setEnv("start_time", microtime(true));
     }
 
@@ -42,7 +38,7 @@ class Footup
      * @return void
      */
     public function terminate()
-    {
+    { 
         return $this->go();
     }
 
@@ -69,16 +65,12 @@ class Footup
 
         $request = $this->router->request;
         $response = new Response();
-        /**
-         * @var Session
-         */
-        $session = Shared::loadSession();
 
-        $this->router->getRequest()->setEnv("end_time",  microtime(true));
+        $request->setEnv("end_time",  microtime(true));
 
-        list($start_time, $end_time) = [(float)$this->router->getRequest()->env("start_time"), (float)$this->router->getRequest()->env("end_time")];
+        list($start_time, $end_time) = [(float)$request->env("start_time"), (float)$request->env("end_time")];
 
-        $this->router->getRequest()->setEnv("delayed_time",  (float) number_format($end_time - $start_time, 4));
+        $request->setEnv("delayed_time",  (float) number_format($end_time - $start_time, 4));
 
         try {
             if($handler instanceof \Closure)
@@ -93,7 +85,7 @@ class Footup
             /**
              * @var \Footup\Controller $controller
              */
-            $controller = $this->runMiddles(new $handler(), $method, $request, $response, $session);
+            $controller = $this->runMiddles(new $handler(), $method, $request, $response);
             $return = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
 
             if($return instanceof Response){
@@ -101,9 +93,9 @@ class Footup
             }
             return;
 
-        } catch (Exception $exception) {
+        } catch (\ErrorException $exception) {
             // Erreur 500.
-            throw new Exception(text("Http.error500", [$exception->getMessage()]));
+            throw new \ErrorException(text("Http.error500", [self::NAME, $exception->getMessage()]), $exception->getCode(), $exception->getSeverity(), $exception->getFile(), $exception->getLine(), $exception);
         }
     }
 
@@ -114,10 +106,9 @@ class Footup
      * @param string $method
      * @param Request $request
      * @param Response $response
-     * @param Session $session
      * @return \Footup\Controller|mixed
      */
-    protected function runMiddles($controller, $method, Request $request, Response $response, Session $session)
+    protected function runMiddles($controller, $method, Request $request, Response $response)
     {
         /**
          * For globaux Middles
@@ -130,7 +121,7 @@ class Footup
                  * @var \Footup\Routing\Middle
                  */
                 $middle = new $value();
-                $return = $middle->execute($request, $response, $session);
+                $return = $middle->execute($request, $response);
 
                 if($return instanceof Response)
                 {
@@ -159,7 +150,7 @@ class Footup
                  * @var \Footup\Routing\Middle
                  */
                 $middle = (new $middleware);
-                $return = $middle->execute($request, $response, $session);
+                $return = $middle->execute($request, $response);
 
                 if($return instanceof Response)
                 {
@@ -182,7 +173,7 @@ class Footup
                          * @var \Footup\Routing\Middle
                          */
                         $middle = new $mid();
-                        $return = $middle->execute($request, $response, $session);
+                        $return = $middle->execute($request, $response);
 
                         if($return instanceof Response)
                         {
@@ -204,26 +195,18 @@ class Footup
 
 
     /**
-     * Get the value of _version
+     * Get the value of VERSION
      */ 
     public function version()
     {
-        return $this->_version;
+        return self::VERSION;
     }
 
     /**
-     * Get the value of name
+     * Get the value of NAME
      */ 
     public function name()
     {
-        return $this->name;
-    }
-
-    /**
-     * Get the value of _code
-     */ 
-    public function code()
-    {
-        return $this->_code;
+        return self::NAME;
     }
 }

@@ -18,7 +18,7 @@ class View extends Command
         );
     protected $generated = [];
 
-    public function __construct(App $cli, $filename = null, $extension = VIEW_EXT)
+    public function __construct(App $cli)
     {
         $this
 			->argument('<filename>', 'The name of the file to generate')
@@ -51,15 +51,10 @@ class View extends Command
 
     // When app->handle() locates `init` command it automatically calls `execute()`
     // with correct $ball and $apple values
-    public function execute($filename)
+    public function execute()
     {
         $io = $this->app()->io();
         $this->extension = $this->ext ? $this->ext : $this->extension;
-        
-        if($filename)
-        {
-            $this->filename = $filename;
-        }
 
         // more codes ...
         $this->generate();

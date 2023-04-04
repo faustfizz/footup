@@ -76,7 +76,7 @@ class Konsole
      * @param string|array $namespaces
      * @return void
      */
-    public function discoverCommands(string|array $namespaces)
+    public function discoverCommands($namespaces)
     {
         $namespaces = is_array($namespaces) ? $namespaces : [$namespaces];
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP - 0.1.6-Alpha - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -30,8 +30,8 @@ defined('BASE_PATH') or define('BASE_PATH', __DIR__ .DS);
 chdir(__DIR__);
 
 // Let's put the fuel and boot our amazing app.
-require realpath(BASE_PATH . '../app/Config/Fuel.php');
 // Change this accordingly to your app directory
+require realpath(BASE_PATH . '../app/Config/Fuel.php');
 
 // Load our friend FootUP.
 (require (rtrim(App\Config\Fuel::sysDir, '\\/ ') . DS . 'Boot.php'))->terminate();

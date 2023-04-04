@@ -1,16 +1,16 @@
 <?php 
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP - 0.1.6-Alpha - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Orm
+ * @package Footup/Database
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
-namespace Footup\Orm;
+namespace Footup\Database;
 
 use Footup\Utils\Shared;
 use PDO;
@@ -113,7 +113,7 @@ class DbConnection
      */
     public static function getDb()
     {
-        return self::$db;
+        return self::$db ?? self::setDb();
     }
 
     /**

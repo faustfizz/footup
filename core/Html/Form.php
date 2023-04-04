@@ -133,7 +133,7 @@ class Form
      * @param array|null $data
      * @param [bool] ...$config
      */
-    public function __construct(string $action = "#", array $fields = [], array $data = []) {
+    public function __construct(string $action = "#", array $fields = null, array $data = []) {
         $this->config = array_merge($this->config, ConfigForm::$config);
         $this->submitText = trim(ConfigForm::$submitText);
         $this->class = array_merge($this->class, ConfigForm::$class);
@@ -508,7 +508,7 @@ class Form
     {
         $this->output .= Html::{$name}($arguments);
 
-        throw new \Exception(text("Core.classNoMethod", [__CLASS__, $name]));
+        throw new \Exception(text("Core.classNoMethod", [$name, get_class()]));
     }
     
     public function __toString()

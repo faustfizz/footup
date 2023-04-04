@@ -8,15 +8,14 @@ use Footup\Cli\Konsole as App;
 
 class Multiple extends Command
 {
-    protected $classname;
     protected $generated = [];
 
-    public function __construct(App $cli, $classname = null, $namespace = null)
+    public function __construct(App $cli)
     {
         $this
 			->argument('<classname> [...]', 'The name of classes to generate')
             ->option('-n --namespace', 'The namespace of these classes')
-            ->option('-T --type', 'The type can be controller, model, middle or view class')
+            ->option('-T --type', 'The type can be controller, model, middle, migration, seeder or view class')
             ->option('-t --table', 'The table name if you generate Model class')
             ->option('-r --returnType', 'The return type of the fetched data of the model')
             ->option('-p --primaryKey', 'The primary key name if you generate Model class')
@@ -45,7 +44,7 @@ class Multiple extends Command
             $this->set("namespace", $io->prompt("Please give the namespace "));
         }
         if ($this->type && !is_string($this->type)) {
-            $this->set("type", $io->choice("Choose the type of file [controller, model, middle, view]; default: controller ", ["controller", "model", "middle", "view"], "controller"));
+            $this->set("type", $io->choice("Choose the type of file [controller, model, middle, migration, seeder, view]; default: controller ", ["controller", "model", "middle", "migration", "seeder", "view"], "controller"));
         }
         if ($this->returnType && !is_string($this->returnType)) {
             $this->set("returnType", $io->choice("You can't add empty returnType, Please choose one : ", ["self", "object", "array"], "self"));
@@ -61,48 +60,63 @@ class Multiple extends Command
 
     // When app->handle() locates `init` command it automatically calls `execute()`
     // with correct $ball and $apple values
-    public function execute($classname)
+    public function execute()
     {
         $io = $this->app()->io();
         
-        if($classname)
-        {
-            $this->classname = $classname;
-        }
         if(!$this->returnType)
         {
             $this->returnType = "self";
         }
 
+        $classnames = array_unique($this->values(0)["classname"]);
         // more codes ...
-        foreach ($this->values(0)["classname"] as $value) {
+        foreach ($classnames as $value) {
             switch($this->type)
             {
                 case "controller":
                 case "middle":
-                        # code...
-                        $contrMiddleCommand = $this->type === "middle" ? new Middle($this->app(), $value, $this->namespace) : new Controller($this->app(), $value, $this->namespace);
-                        $this->force && $contrMiddleCommand->set("force", true);
-                        $contrMiddleCommand->execute($value);
+                    # code...
+                    $contrMiddleCommand = $this->type === "middle" ? new Middle($this->app()) : new Controller($this->app());
+                    $this->force && $contrMiddleCommand->set("force", true);
+                    $value && $contrMiddleCommand->set("classname", $value);
+                    $this->namespace && $contrMiddleCommand->set("namespace", $this->namespace);
+                    $contrMiddleCommand->execute();
                     break;
                 case "model":
-                        # code...
-                        $modelCommand = new Model($this->app(), $value, $this->namespace);
-                        $this->table && $modelCommand->set("table", $this->table);
-                        $this->primaryKey && $modelCommand->set("primaryKey", $this->primaryKey);
-                        $this->returnType && $modelCommand->set("returnType", $this->returnType);
-                        $this->force && $modelCommand->set("force", true);
-                        $modelCommand->execute($value);
+                    # code...
+                    $modelCommand = new Model($this->app());
+                    $this->table && $modelCommand->set("table", $this->table);
+                    $value && $modelCommand->set("classname", $value);
+                    $this->namespace && $modelCommand->set("namespace", $this->namespace);
+                    $this->primaryKey && $modelCommand->set("primaryKey", $this->primaryKey);
+                    $this->returnType && $modelCommand->set("returnType", $this->returnType);
+                    $this->force && $modelCommand->set("force", true);
+                    $modelCommand->execute();
                     break;
                 case "view":
-                        # code...
-                        $viewCommand = new View($this->app(), $value);
-                        $this->extension && $viewCommand->set("ext", $this->extension);
-                        $this->force && $viewCommand->set("ext", true);
-                        $viewCommand->execute($value);
+                    # code...
+                    $viewCommand = new View($this->app());
+                    $this->extension && $viewCommand->set("ext", $this->extension);
+                    $value && $viewCommand->set("filename", $value);
+                    $this->force && $viewCommand->set("force", true);
+                    $viewCommand->execute();
                     break;
+                case "migration":
+                    # code...
+                    $migrateCommand = new Migrate($this->app());
+                    $value && $migrateCommand->set("filename", $value);
+                    $this->force && $migrateCommand->set("force", true);
+                    $migrateCommand->execute();
+                    break;
+                case "seeder":
+                    # code...
+                    $seederCommand = new Seeder($this->app());
+                    $value && $seederCommand->set("classname", $value);
+                    $this->force && $seederCommand->set("force", true);
+                    $seederCommand->execute();
+                break;
             }
-            $io->eol();
         }
 
         // If you return integer from here, that will be taken as exit error code

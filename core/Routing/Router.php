@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP - 0.1.6-Alpha - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -35,36 +35,29 @@ use Footup\Utils\Shared;
  * correspond juste au nombre. Soyez juste sûr que le regex est valid et correct.
  *
  * @package Footup\Routing
+ * 
+ * @method self get(string $uri, Closure|string $handler, string|array $options = null)
+ * @method self post(string $uri, Closure|string $handler, string|array $options = null)
+ * @method self put(string $uri, Closure|string $handler, string|array $options = null)
+ * @method self patch(string $uri, Closure|string $handler, string|array $options = null)
+ * @method self delete(string $uri, Closure|string $handler, string|array $options = null)
+ * @method self head(string $uri, Closure|string $handler, string|array $options = null)
  */
 class Router
 {
-    public const MATCH_DELIMITER_CLOSING = '}';
-
     public const MATCH_DELIMITER_OPENING = '{';
+
+    public const MATCH_DELIMITER_CLOSING = '}';
 
     public const MATCH_DELIMITER_SEPARATOR = ':';
 
-    public const METHOD_ANY = 'ANY';
-
-    public const METHOD_DELETE = 'DELETE';
-
-    public const METHOD_GET = 'GET';
-
-    public const METHOD_HEAD = 'HEAD';
-
-    public const METHOD_PATCH = 'PATCH';
-
-    public const METHOD_POST = 'POST';
-
-    public const METHOD_PUT = 'PUT';
+    public const METHOD_ALL = 'GET|POST|PUT|PATCH|DELETE|HEAD';
 
     public static $auto_route = false;
 
     protected $framework_name = "";
 
     protected $framework_version = "";
-
-    protected $framework_codeVersion = 0;
 
     protected $controllerName = "App\\Controller\Home";
 
@@ -105,6 +98,37 @@ class Router
     }
 
     /**
+     * Set the name of the recently added one route
+     * 
+     * @param string $name
+     * @return self
+     */
+    public function name($name)
+    {
+        $lastRoutes = end($this->routes);
+        $verb = key($this->routes);
+        /**
+         * @var Route
+         */
+        $route = end($lastRoutes);
+        $this->routes[$verb][$route->getUri()] = $route->setName($name);
+        reset($this->routes);
+        
+        return $this;
+    }
+
+    /**
+     * Alias of name
+     * 
+     * @param string $name
+     * @return self
+     */
+    public function as($name)
+    {
+        return $this->name($name);
+    }
+
+    /**
      * Activate auto-routing if no route defined
      * 
      * @param boolean $active
@@ -112,7 +136,7 @@ class Router
      */
     public function shouldAutoRoute(bool $active = true)
     {
-        if (!isset($this->routes[static::METHOD_GET]) && !isset($this->routes[static::METHOD_ANY]))
+        if (!isset($this->routes[$this->request->method(true)]))
         {
             return $this->setAutoRoute($active);
         }
@@ -138,7 +162,7 @@ class Router
      */
     public function getPrefix(): string
     {
-        return $this->prefix;
+        return rtrim($this->prefix, "/");
     }
 
     /**
@@ -178,111 +202,121 @@ class Router
     }
 
     /**
-     * @param string $uri
-     * @param callable|\Closure|string $handler
+     * Enregistrer une route dans le routeur
+     *
+     * @param string    $method  HTTP request method
+     * @param string    $uri     HTTP request URI
+     * @param callable|\Closure|string $handler Route handler. May be a
+     *  callable, a controller instance or a fully qualified class path
+     * @param string|array    $options     the format is ["as" => "route_name", "name" => "route_name"] 
+     * // You use as or name to define your name_route or simply a string
      * @return self
      */
-    public function any(string $uri, $handler): self
+    protected function register(string $method, string $uri, $handler, $options = null): self
     {
-        return $this->register(static::METHOD_ANY, $uri, $handler);
+        $route = new Route($this->getPrefix() . $uri, $handler, $options);
+
+        // METHOD_ALL stand for all method so
+        $method = ($method === self::METHOD_ALL) ? explode('|', self::METHOD_ALL) : [$method];
+        foreach ($method as $verb) {
+            if (! isset($this->routes[$verb])) {
+                $this->routes[$verb] = [];
+            }
+    
+            $this->routes[$verb][$route->getUri()] = $route;
+        }
+
+        return $this;
     }
 
     /**
-     * @param string $uri
-     * @param callable|\Closure|string $handler
+     * Magic Method to register a route
+     *
+     * @param string $method
+     * @param array $arguments
      * @return self
      */
-    public function get(string $uri, $handler): self
+    public function __call($method, $arguments)
     {
-        return $this->register(static::METHOD_GET, $uri, $handler);
+        $method = strtoupper($method); $allMethod = explode("|", self::METHOD_ALL);
+        $registerMethod = strtolower($method) === "any" ? self::METHOD_ALL : (in_array($method, $allMethod) ? $method : null);
+
+        if(is_null($registerMethod))
+        {
+            throw new Exception(text("Core.classNoMethod", [strtolower($method), get_class()]));
+        }
+        return $this->register($registerMethod, ...$arguments);
     }
 
     /**
+     * Replace {lang} or {locale} by {locale:\w{2}}
+     *
      * @param string $uri
-     * @param callable|\Closure|string $handler
-     * @return self
+     * @param int $charNumber max number of chars - default 2
+     * @return string
      */
-    public function post(string $uri, $handler): self
+    public static function localePlaceholder(string $uri, $charNumber = 2)
     {
-        return $this->register(static::METHOD_POST, $uri, $handler);
+        return  stripos($uri, self::MATCH_DELIMITER_OPENING. "lang" .self::MATCH_DELIMITER_CLOSING) || stripos($uri, self::MATCH_DELIMITER_OPENING. "locale" .self::MATCH_DELIMITER_CLOSING) ? strtr($uri, ["lang" => "locale:\w{{$charNumber}}", "locale" => "locale:\w{{$charNumber}}"]) : (stripos($uri, self::MATCH_DELIMITER_OPENING. "lang:") ? strtr($uri, ["lang" => "locale"]) : $uri);
     }
 
     /**
-     * @param string $uri
-     * @param callable|\Closure|string $handler
-     * @return self
-     */
-    public function put(string $uri, $handler): self
-    {
-        return $this->register(static::METHOD_PUT, $uri, $handler);
-    }
-
-    /**
-     * @param string $uri
-     * @param callable|\Closure|string $handler
-     * @return self
-     */
-    public function delete(string $uri, $handler): self
-    {
-        return $this->register(static::METHOD_DELETE, $uri, $handler);
-    }
-
-    /**
-     * @param string $uri
-     * @param callable|\Closure|string $handler
-     * @return self
-     */
-    public function patch(string $uri, $handler): self
-    {
-        return $this->register(static::METHOD_PATCH, $uri, $handler);
-    }
-
-    /**
-     * @param string $uri
-     * @param callable|\Closure|string $handler
-     * @return self
-     */
-    public function head(string $uri, $handler): self
-    {
-        return $this->register(static::METHOD_HEAD, $uri, $handler);
-    }
-
-    /**
-     * Recherche de correspondantes de routes
+     * Return a url that match the route's name given in parameter
      * 
      * @throws Exception
-     * @return Route|void
+     * @param string $route_name
+     * @param array $params
+     * @return string|null
      */
-    public function match()
+    public function url(string $route_name, $params = [])
     {
-        $requestMethod = strtoupper($this->request->method());
+        $method = $this->request->method(true);
+        /**
+         * @var Route|null
+         */
+        $route = null;
+
+        // we search for the route with $route_name as name
+        if (isset($this->routes[$method])) {
+            // I used foreach instead of array_* function because of speed performance
+            foreach ($this->routes[$method] as $uri => $needle) {
+                /**
+                 * @var string $uri
+                 * @var Route $needle
+                 */
+                if($needle->getName() === $route_name){
+                    $route = $needle;
+                    break;
+                }
+            }
+        }
+        // if no route so return null
+        if(is_null($route)) return null;
+
+        //Oh Yeah we got a route, so
+        $uri = $route->getUri();
+
+        if(strpos($uri, static::MATCH_DELIMITER_OPENING) === false) return  $this->request->url(false, true).$uri;
+
+        return $this->internalMatch([$route->getUri() => $route], $params, true);
+    }
+
+    /**
+     * Match a route
+     *
+     * @param Route[] $routes
+     * @param array $params
+     * @param boolean $reverse
+     * @return Route|string|null
+     */
+    private function internalMatch($routes, $params = [], $reverse = false)
+    {
+        // The actual path
         $requestUri = $this->request->path();
-
-        // If the request method doesn't exist, something seems to be fucked up.
-        if (!isset($this->routes[$requestMethod]) && !isset($this->routes[static::METHOD_ANY]) && !$this->autoRoute()) {
-            // throw a fucking Exception
-            throw new Exception(text("Http.routeMethodNotFound", [$requestMethod]));
-        }
-
-        // Merge the any-method-routes and those matching the current request method
-        $routes = array_merge(
-            $this->routes[static::METHOD_ANY] ?? [],
-            $this->routes[$requestMethod] ?? []
-        );
-        
-        // Check for direct matches
-        if (isset($this->routes[$requestMethod][$requestUri]) || isset($this->routes[static::METHOD_ANY][$requestUri])) {
-            /**
-             * @var Route
-             */
-            $route = $this->routes[$requestMethod][$requestUri] ?? $this->routes[static::METHOD_ANY][$requestUri];
-            
-            return $route;
-        }
 
         // Build the placeholder regex from the delimiter characters
         $placeholderExpression = sprintf(
-            '#(?:\%s(.+?)(?:%s.*)?\%s)#',
+            '#(?:\%s(\w+?)(?:%s[^/]+)?\%s)#',
             static::MATCH_DELIMITER_OPENING,
             static::MATCH_DELIMITER_SEPARATOR,
             static::MATCH_DELIMITER_CLOSING
@@ -290,9 +324,12 @@ class Router
 
         /**
          * @var string $uri
-         * @var \Footup\Routing\Route $route
+         * @var Route $route
          */
         foreach ($routes as $uri => $route) {
+            // A hack to replace lang
+            $uri = self::localePlaceholder($uri);
+
             // If the current route doesn't contain any placeholder delimiters, we can skip it
             if (strpos($uri, static::MATCH_DELIMITER_OPENING) === false) {
                 continue;
@@ -306,10 +343,10 @@ class Router
             ) {
                 continue;
             }
-
+            
             // Store the found placeholders
             $placeholders = [];
-
+            
             // Match all placeholders in the current URI
             preg_match_all(
                 $placeholderExpression,
@@ -323,6 +360,14 @@ class Router
 
             // Create a list of placeholder names
             $placeholderNames = [];
+
+            // Pop the last params if params's size bigger than placeholders size
+            if(count($params) > count($placeholders))
+            {
+                $params = array_chunk($params, 2)[0];
+            }
+            // We continue as we have placeholder so create parameters
+            $parameters = !empty($params) ? implode("/", $params) : "";
 
             foreach ($placeholders as $item) {
                 $replacement = '[^/]+?';
@@ -342,38 +387,92 @@ class Router
                     // This should probably account for the closing delimiter length.
                     $replacement = substr($placeholder, $offset, -1);
                 }
-
                 // Replace the full placeholder with a match-anything rule
                 $expression = str_replace($placeholder, "($replacement)", $expression);
-        
-            // print_r($expression);die;
             }
 
             // Keep the matched variable values
             $matches = [];
 
             // Try to match the compiled regular expression against the request URI
-            if (preg_match("~^$expression\$~", $requestUri, $matches)) {
+            if (preg_match("~^$expression\$~", ($reverse ? "/".ltrim($parameters, "/") : $requestUri), $matches)) {
                 // Remove the useless full matches
-                array_shift($matches);
-
+                $o = array_shift($matches);
+                
                 // Assign the placeholder names to the matched values from the URI
                 $variables = array_combine($placeholderNames, $matches);
 
-                // Remove lang from parameters
-                $lang = strpos(trim($uri, "/"), "{lang}") !== false || strpos(trim($uri, "/"), "{locale}") !== false ? array_shift($variables) : config()->lang;
-                $route->setLang($lang);
-                $this->request->setLang($lang);
+                if(!$reverse)
+                {
+                    // Remove lang from parameters
+                    if(array_key_exists("locale", $variables) && !empty($variables["locale"]))
+                    {
+                        $route->setLang($variables["locale"]);
+                        $this->request->setLang($variables["locale"]);
+                        unset($variables["locale"]);
+                    }
 
-                // Pass the variables to the route instance
-                $route = $route->withArgs($variables);
-                
-                $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
-                
-                // Add the URI arguments to the request
-                return $this->populateRequest($route);
+                    // Pass the variables to the route instance
+                    $route = $route->withArgs($variables);
+                    
+                    $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
+    
+                    // Add the URI arguments to the request
+                    return $this->populateRequest($route);
+                }else{
+
+                    $finalUri = preg_replace(array_map(function($placeholderName){
+                        return "/{".$placeholderName."}/";
+                    }, array_keys($variables)), array_values($variables), strtr($route->getUri(), ["lang" => "locale"]));
+
+                    return $this->request->url(false, true). $finalUri;
+                }
             }
         }
+
+        return null;
+    }
+
+    /**
+     * Recherche de correspondantes de routes
+     * 
+     * @throws Exception
+     * @return Route|void
+     */
+    public function match()
+    {
+        $requestMethod = $this->request->method(true);
+        $requestUri = $this->request->path();
+
+        // If the request method doesn't exist, something seems to be fucked up.
+        if (!isset($this->routes[$requestMethod]) && !$this->autoRoute()) {
+            // throw a fucking Exception
+            throw new Exception(text("Http.routeMethodNotFound", [$requestMethod]));
+        }
+
+        // Merge the any-method-routes and those matching the current request method
+        $routes = $this->routes[$requestMethod];
+        
+        // Check for direct matches
+        if (isset($this->routes[$requestMethod][$requestUri])) {
+            /**
+             * @var Route
+             */
+            $route = $this->routes[$requestMethod][$requestUri];
+            
+            return $route;
+        }
+
+        /**
+         * @var Route|null
+         */
+        $route = $this->internalMatch($routes);
+
+        if($route instanceof Route)
+        {
+            return $route;
+        }
+
         /**
          * Sorry but nothing match, so we go with autodiscovery if enabled
          */
@@ -382,7 +481,7 @@ class Router
             return $this->doAutoRoute($requestUri);
         }
 
-        $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
+        $this->notFound(null, text("Http.pageNotFoundMessage", [$requestUri]));
     }
 
     /**
@@ -443,10 +542,10 @@ class Router
 
         if(!method_exists($controller, $method))
         {
-            $this->die('404', null, text("Http.pageNotFoundMessage", [$requestUri]));
+            $this->notFound(null, text("Http.pageNotFoundMessage", [$requestUri]));
         }
 
-        $route = (new Route($requestUri, $controller . '@' . $method))->withArgs($uriSegments ?? []);
+        $route = (new Route($requestUri, $controller . Route::CONTROLLER_DELIMITER . $method))->withArgs($uriSegments ?? []);
 
         // Add the URI arguments to the request
         $this->populateRequest($route);
@@ -479,36 +578,12 @@ class Router
      * @param string $message
      * @return void
      */
-    public function die($status = '404', $title = null, $message = "")
+    public function notFound($title = null, $message = "")
     {
-        $status = $status ?? '404';
         $title = $title ?? text("Http.pageNotFound");
-        echo (new Response())->die($status, $title, $message);
+        echo (new Response())->die("404", $title, $message);
         exit;
     }
-
-    /**
-     * Enregistrer une route dans le routeur
-     *
-     * @param string    $method  HTTP request method
-     * @param string    $uri     HTTP request URI
-     * @param callable|\Closure|string $handler Route handler. May be a
-     *  callable, a controller instance or a fully qualified class path
-     * @return self
-     */
-    protected function register(string $method, string $uri, $handler): self
-    {
-        $route = new Route($this->getPrefix() . $uri, $handler);
-
-        if (! isset($this->routes[$method])) {
-            $this->routes[$method] = [];
-        }
-
-        $this->routes[$method][$route->getUri()] = $route;
-
-        return $this;
-    }
-
 
     /**
      * Get the value of controllerName
@@ -598,27 +673,6 @@ class Router
     public function setFrameworkVersion($framework_version)
     {
         $this->framework_version = $framework_version;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of framework_codeVersion
-     */ 
-    public function getFrameworkVersionCode()
-    {
-        return $this->framework_codeVersion;
-    }
-
-    /**
-     * Set the value of framework_codeVersion
-     *
-     * @param int
-     * @return  self
-     */ 
-    public function setFrameworkVersionCode($framework_codeVersion)
-    {
-        $this->framework_codeVersion = $framework_codeVersion;
 
         return $this;
     }

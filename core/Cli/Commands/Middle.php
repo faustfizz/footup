@@ -8,7 +8,6 @@ use Footup\Cli\Konsole as App;
 
 class Middle extends Command
 {
-    protected $classname;
     public $scaffold = false;
     protected $name_space = "App\\Middle";
 
@@ -18,7 +17,7 @@ class Middle extends Command
         );
     protected $generated = [];
 
-    public function __construct(App $cli, $classname = null, $namespace = null)
+    public function __construct(App $cli)
     {
         $this
 			->argument('<classname>', 'The name of the class to generate')
@@ -50,14 +49,9 @@ class Middle extends Command
 
     // When app->handle() locates `init` command it automatically calls `execute()`
     // with correct $ball and $apple values
-    public function execute($classname)
+    public function execute()
     {
         $io = $this->app()->io();
-        
-        if($classname)
-        {
-            $this->classname = $classname;
-        }
 
         // more codes ...
         $this->generate();
@@ -158,6 +152,6 @@ class Middle extends Command
             $this->generated[] =  end($expl)."/Middle/".ucfirst($this->classname).'.php';
         }
 
-        $this->generated;
+        return $this->generated;
     }
 }

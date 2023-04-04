@@ -390,7 +390,7 @@ class Paginator extends AbstractPaginator
 			ob_start();
 			eval('?>' . $view);
 			return ob_get_clean() ?: '';
-		})(file_get_contents(__DIR__.'/Views/'. $template .'.php'));
+		})(file_get_contents(__DIR__.'/View/'. $template .'.php'));
 
         return $output;
     }
