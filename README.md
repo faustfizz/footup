@@ -7,7 +7,7 @@
 
 A Rich Featured LightWeight PHP MVC Framework :
 
-* CLI support for generating Controller, Model, Middle, Assets and View files ( [adhocore/php-cli](https://github.com/adhocore/php-cli) modified and used thanks :) )
+* CLI support for generating **Controller**, **Model**, **Middle**, **Migration**, **Seeder**, **Assets** and **View** files ( [adhocore/php-cli](https://github.com/adhocore/php-cli) modified and used thanks :) )
 * Translation support
 * Config using PHP File or .env (Rename env to .env)
 * Request
