@@ -46,57 +46,12 @@ FOOTUP MVC Framework
 │   ├── Functions.php
 │   ├── Lang
 │   ├── Libs
-│   │   ├── Auth.php
-│   │   ├── GroceryCrud.php
-│   │   ├── Latte
-│   │   │   ├── CompileException.php
-│   │   │   ├── Compiler.php
-│   │   │   ├── Engine.php
-│   │   │   ├── Helpers.php
-│   │   │   ├── HtmlNode.php
-│   │   │   ├── Loader.php
-│   │   │   ├── Loaders
-│   │   │   │   ├── FileLoader.php
-│   │   │   │   └── StringLoader.php
-│   │   │   ├── MacroNode.php
-│   │   │   ├── Macro.php
-│   │   │   ├── Macros
-│   │   │   │   ├── BlockMacros.php
-│   │   │   │   ├── CoreMacros.php
-│   │   │   │   └── MacroSet.php
-│   │   │   ├── MacroTokens.php
-│   │   │   ├── Parser.php
-│   │   │   ├── PhpHelpers.php
-│   │   │   ├── PhpWriter.php
-│   │   │   ├── Policy.php
-│   │   │   ├── Runtime
-│   │   │   │   ├── Blueprint.php
-│   │   │   │   ├── CachingIterator.php
-│   │   │   │   ├── FilterExecutor.php
-│   │   │   │   ├── FilterInfo.php
-│   │   │   │   ├── Filters.php
-│   │   │   │   ├── Html.php
-│   │   │   │   ├── HtmlStringable.php
-│   │   │   │   ├── SnippetBridge.php
-│   │   │   │   ├── SnippetDriver.php
-│   │   │   │   └── Template.php
-│   │   │   ├── Sandbox
-│   │   │   │   └── SecurityPolicy.php
-│   │   │   ├── Strict.php
-│   │   │   ├── TokenIterator.php
-│   │   │   ├── Tokenizer.php
-│   │   │   └── Token.php
-│   │   └── Latter.php
 │   ├── Middle
 │   │   └── Maintenance.php
 │   ├── Migration
-│   │   ├── 230404_123002_Video.php
-│   │   └── 230404_123134_Platform.php
 │   ├── Model
 │   │   └── Contact.php
 │   ├── Seed
-│   │   ├── Platform.php
-│   │   └── Video.php
 │   └── View
 │       └── home.php
 ├── composer.json
