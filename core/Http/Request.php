@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP - 0.1.6-Alpha - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -147,13 +147,14 @@ class Request
     }
 
     /**
-     * Choose the GET data to validate
+     * Validate data
      *
-     * @param mixed $key
-     * @param mixed $default
+     * @param array $ruleSet
+     * @param array|null $values
+     * @param string $prefix
      * @return bool true if everything is ok
      */
-    public function validate(array $ruleSet, array|null|object $values = [], string $prefix = null)
+    public function validate(array $ruleSet, array $values = null, string $prefix = null)
     {
         if(empty($values) && !empty($this->data))
         {
@@ -414,7 +415,7 @@ class Request
      */
     public function url($withQuery = true, $base = false): string
     {
-        $base_url = $this->env("base_url") ?? (new Config())->base_url;
+        $base_url = $this->env("base_url") ?? Shared::loadConfig()->base_url;
         $base_url = trim((string) $base_url, " \n\r\t\v\x00\/");
 
         if($base === true)
@@ -535,7 +536,7 @@ class Request
      * @param  string|array $patterns
      * @return bool
      */
-    public function is(string|array $patterns)
+    public function is($patterns)
     {
         $path = rawurldecode($this->path());
         $pattern = strtr( (is_array($patterns) ? implode("/", $patterns) : $patterns), [$this->url(false, true) => ""]);

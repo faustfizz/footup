@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP - 0.1.6-Alpha - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -11,8 +11,9 @@
  */
 
 namespace Footup\Routing;
-use App\Config\Config;
+use Footup\Config\Config;
 use Exception;
+use Footup\Utils\Shared;
 
 class Route
 {
@@ -47,6 +48,13 @@ class Route
     protected $method;
 
     /**
+     * Méthode
+     *
+     * @var string
+     */
+    protected $name = '';
+
+    /**
      * Arguments de l'url pour cette route
      *
      * @var array
@@ -58,11 +66,17 @@ class Route
      *
      * @param string $uri
      * @param string|\Closure|\callable $handler
+     * @param string|array    $options     the format is ["as" => "route_name", "name" => "route_name"]
+     * // You use as or name to define your name_route or simply a string
      */
-    public function __construct(string $uri, $handler)
+    public function __construct(string $uri, $handler, $options = null)
     {
         $this->uri = rtrim($uri, '/') ?: '/';
         $this->loadHandler($handler);
+        if(!empty($options))
+        {
+            $this->setName((is_string($options) ? $options : $options[0]));
+        }
     }
 
     /**
@@ -102,7 +116,10 @@ class Route
      */
     public function loadHandler($handler): void
     {
-        $config = new Config;
+        /**
+         * @var Config
+         */
+        $config = Shared::loadConfig();
         // If we received a callable, convert it into a controller
         if (is_callable($handler)) {
             $this->handler = $handler;
@@ -177,6 +194,29 @@ class Route
     public function setLang(string $lang)
     {
         $this->lang = $lang;
+
+        return $this;
+    }
+
+    /**
+     * Get méthode
+     *
+     * @return  string
+     */ 
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set méthode
+     *
+     * @param  string  $name  Méthode
+     * @return  self
+     */ 
+    public function setName(string $name)
+    {
+        $this->name = $name;
 
         return $this;
     }

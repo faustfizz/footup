@@ -49,14 +49,9 @@ class Assets extends Command
 
     // When app->handle() locates `init` command it automatically calls `execute()`
     // with correct $ball and $apple values
-    public function execute($filename)
+    public function execute()
     {
         $io = $this->app()->io();
-        
-        if($filename)
-        {
-            $this->filename = $filename;
-        }
         
         // more codes ...
         $this->generate();

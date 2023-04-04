@@ -8,12 +8,25 @@
  * @uses Html::h1("Content !", ["attr" => "value", "..." => "..."]) | where h1 is in $pairs or $impairs arrays
  * 
  * @package Footup\Html
- * @version 0.1
+ * @version 0.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
 namespace Footup\Html;
 
+/**
+ * HTML Class
+ * 
+ * @method static string a(string text, array attributes = [])
+ * @method static string abbr(string text, array attributes = [])
+ * @method static string address(string htmlContent, attributes = [])
+ * @method static string article(string html, array attributes = [])
+ * @method static string aside(string html, array attributes = [])
+ * @method static string audio(string html, array attributes = [])
+ * @method static string b(string text, array attributes = [])
+ * 
+ * @see Html::$pairs and Html::$impairs
+ */
 class Html
 {
     /**
@@ -174,7 +187,7 @@ class Html
             return "<{$name} {$attributes}  />";
         }
 
-        throw new \Exception(text("Core.classNoMethod", [__CLASS__, $name]));
+        throw new \Exception(text("Core.classNoMethod", [$name, get_called_class()]));
     }
 
     public static function attributes(array $attr)

@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP - 0.1.6-Alpha - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -11,6 +11,7 @@
 namespace Footup\Config;
 
 use Footup\Config\DotEnv\DotEnv;
+use Footup\Debug\Reporter;
 use Locale;
 
 class Config
@@ -128,6 +129,8 @@ class Config
             ini_set("display_errors", "On");
             ini_set("display_startup_errors", "On");
         }
+
+        (new Reporter())->enableErrorHandler($this->config["environment"]);
         
         
         @date_default_timezone_set($this->locale['timezone']);

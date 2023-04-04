@@ -8,10 +8,9 @@ use Footup\Cli\Konsole as App;
 
 class Scaffold extends Command
 {
-    protected $classname;
     protected $generated = [];
 
-    public function __construct(App $cli, $classname = null, $namespace = null)
+    public function __construct(App $cli)
     {
         $this
 			->argument('<classname>', 'The name of classes to generate')
@@ -57,14 +56,10 @@ class Scaffold extends Command
 
     // When app->handle() locates `init` command it automatically calls `execute()`
     // with correct $ball and $apple values
-    public function execute($classname)
+    public function execute()
     {
         $io = $this->app()->io();
         
-        if($classname)
-        {
-            $this->classname = $classname;
-        }
         if(!$this->returnType)
         {
             $this->returnType = "self";
@@ -73,39 +68,61 @@ class Scaffold extends Command
         $generated = [];
         // more codes ...
         # assets...
-        $assetsCommand = new Assets($this->app(), $this->classname);
-        $assetsCommand->set('all', 1);
+        $assetsCommand = new Assets($this->app());
         $assetsCommand->scaffold = true;
+        $assetsCommand->set('all', 1);
+        $this->classname && $assetsCommand->set("filename", $this->classname);
         $this->force && $assetsCommand->set("force", true);
-        $generated = array_merge($generated, $assetsCommand->execute($this->classname));
+        $generated = array_merge($generated, $assetsCommand->execute());
 
         # controller...
-        $controllerCommand = new Controller($this->app(), $this->classname, $this->namespace);
+        $controllerCommand = new Controller($this->app());
         $controllerCommand->scaffold = true;
+        $this->classname && $controllerCommand->set("classname", $this->classname);
+        $this->namespace && $controllerCommand->set("namespace", $this->namespace);
         $this->force && $controllerCommand->set("force", true);
-        $generated = array_merge($generated, $controllerCommand->execute($this->classname));
+        $generated = array_merge($generated, $controllerCommand->execute());
 
         # middle...
-        $middleCommand = new Middle($this->app(), $this->classname, $this->namespace);
+        $middleCommand = new Middle($this->app());
         $middleCommand->scaffold = true;
+        $this->classname && $middleCommand->set("classname", $this->classname);
+        $this->namespace && $middleCommand->set("namespace", $this->namespace);
         $this->force && $middleCommand->set("force", true);
-        $generated = array_merge($generated, $middleCommand->execute($this->classname));
+        $generated = array_merge($generated, $middleCommand->execute());
 
         # model...
-        $modelCommand = new Model($this->app(), $this->classname, $this->namespace);
+        $modelCommand = new Model($this->app());
+        $modelCommand->scaffold = true;
         $this->table && $modelCommand->set("table", $this->table);
+        $this->classname && $modelCommand->set("classname", $this->classname);
+        $this->namespace && $modelCommand->set("namespace", $this->namespace);
         $this->primaryKey && $modelCommand->set("primaryKey", $this->primaryKey);
         $this->returnType && $modelCommand->set("returnType", $this->returnType);
-        $modelCommand->scaffold = true;
         $this->force && $modelCommand->set("force", true);
-        $generated = array_merge($generated, $modelCommand->execute($this->classname));
+        $generated = array_merge($generated, $modelCommand->execute());
+
+        # migration...
+        $migrateCommand = new Migrate($this->app());
+        $this->classname && $migrateCommand->set("filename", $this->classname);
+        $migrateCommand->scaffold = true;
+        $this->force && $migrateCommand->set("force", true);
+        $generated = array_merge($generated, $migrateCommand->execute());
+
+        # seeder...
+        $seederCommand = new Seeder($this->app());
+        $this->classname && $seederCommand->set("classname", $this->classname);
+        $seederCommand->scaffold = true;
+        $this->force && $seederCommand->set("force", true);
+        $generated = array_merge($generated, $seederCommand->execute());
         
         # view...
-        $viewCommand = new View($this->app(), $this->classname);
-        $this->extension && $viewCommand->set("ext", $this->extension);
+        $viewCommand = new View($this->app());
         $viewCommand->scaffold = true;
+        $this->extension && $viewCommand->set("ext", $this->extension);
         $this->force && $viewCommand->set("force", true);
-        $generated = array_merge($generated, $viewCommand->execute($this->classname));
+        $this->classname && $viewCommand->set("filename", $this->classname);
+        $generated = array_merge($generated, $viewCommand->execute());
         // If you return integer from here, that will be taken as exit error code
 
         !empty($generated) && $io->info("All generated files :", true);

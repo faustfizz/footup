@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP - 0.1.6-Alpha - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -13,6 +13,7 @@
 namespace Footup\Orm;
 
 use Exception;
+use Footup\Database\DbConnection;
 use Footup\Html\Form;
 use Footup\Paginator\Paginator;
 use PDO;
@@ -290,7 +291,7 @@ class BaseModel
     /**
      * Class constructor.
      */
-    public function __construct($data = [], $config = null, $init = true)
+    public function __construct(array $data = null, $config = null, $init = true)
     {
         DbConnection::setDb($config, $init);
         $this->setBuilder(new QueryBuilder($this));

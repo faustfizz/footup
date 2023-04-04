@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP - 0.1.6-Alpha - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -13,6 +13,7 @@
 namespace Footup\Orm;
 
 use Exception;
+use Footup\Database\DbConnection;
 use PDO;
 use PDOException;
 use PDOStatement;

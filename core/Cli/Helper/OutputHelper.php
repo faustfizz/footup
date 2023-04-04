@@ -196,6 +196,7 @@ class OutputHelper
         foreach ($this->sortItems($items, $padLen) as $item) {
             $name  = $this->getName($item);
             if ($for === 'Commands' && $lastGroup !== $group = $item->group()) {
+                $this->writer->eol();
                 $this->writer->boldYellow($group ?: '*', true);
                 $lastGroup = $group;
             }
