@@ -1,8 +1,9 @@
 *.local.php
-/app/Libs/
-/app/Migration/
-/app/Seed/
+/app/Libs/*
+/app/Migration/*
+/app/Seed/*
 /*/*.gitignore
 /.env
 /public/uploads/
 /vendor/
+!/**/.gitkeep
