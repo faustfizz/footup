@@ -1,7 +1,7 @@
 *.local.php
 /app/Libs/
-/app/Migration/*
-/app/Seed/*
+/app/Migration/
+/app/Seed/
 /*/*.gitignore
 /.env
 /public/uploads/
