@@ -12,6 +12,7 @@
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
+use Footup\Footup;
 use Footup\Html\Html;
 use Footup\Http\Request;
 use Footup\Http\Response;
@@ -455,7 +456,7 @@ if(!function_exists("frameworkName"))
      */
     function frameworkName()
     {
-        return router()->getFrameworkName();
+        return Footup::NAME;
     }
 }
 
@@ -468,20 +469,7 @@ if(!function_exists("frameworkVersion"))
      */
     function frameworkVersion()
     {
-        return router()->getFrameworkVersion();
-    }
-}
-
-if(!function_exists("frameworkVersionCode"))
-{
-    /**
-     * Exposition de la version
-     *
-     * @return int
-     */
-    function frameworkVersionCode()
-    {
-        return router()->getFrameworkVersionCode();
+        return Footup::VERSION;
     }
 }
 
