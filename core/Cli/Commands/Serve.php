@@ -65,7 +65,7 @@ class Serve extends Command
 		if ($status && $this->portOffset < $this->retries)
 		{
 			$this->portOffset++;
-            $io->eol()->warn("The port $port may be in use, we restart with port ". ($this->port + 1), true)->eol();
+            $io->warn("The port $port may be in use, we restart with port ". ($this->port + 1), true)->eol();
             // Yo retry the serve command
 			$this->execute();
 		}
