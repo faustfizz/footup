@@ -45,7 +45,7 @@ class Serve extends Command
         /**
          * @var int
          */
-        $port = (int)$this->port;
+        $port = ((int)$this->port + $this->portOffset);
 
 		// Get the party started.
 		$io->info($this->app()->name()." development server start for the attempt : ".($this->portOffset + 1)." on http://$host:$port", true)
@@ -59,13 +59,13 @@ class Serve extends Command
 		$server = escapeshellarg(ROOT_PATH."server.php");
 
 		// Call PHP's built-in webserver, making sure to set our environment is set and it simulates basic mod_rewrite.
-		passthru(PHP_BINARY . " -S " . $host . ":" . ($port + $this->portOffset) . " -t $docroot $server", $status);
+		passthru(PHP_BINARY . " -S $host:$port -t $docroot $server", $status);
 
         // If the code reach here is that the server didn't start
 		if ($status && $this->portOffset < $this->retries)
 		{
 			$this->portOffset++;
-            $io->eol()->warn("The port $port may be on use, we restart with port ". ($this->port + 1))->eol();
+            $io->eol()->warn("The port $port may be in use, we restart with port ". ($this->port + 1), true)->eol();
             // Yo retry the serve command
 			$this->execute();
 		}
