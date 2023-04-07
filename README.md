@@ -5,6 +5,31 @@
   <h2 class="name_title">FOOTUP MVC FRAMEWORK - 0.1.6</h2>
 </div>
 
+<p align="center">
+    <a href="https://twitter.com/intent/follow?screen_name=JohnnyFaustfizz">
+        <img src="https://img.shields.io/twitter/follow/JohnnyFaustfizz?style=social&logo=twitter" alt="follow on Twitter">
+    </a>
+    <a href="https://github.com/faustfizz/footup/">
+        <img src="https://img.shields.io/github/stars/faustfizz/footup?style=social">
+    </a>
+    <a href="https://github.com/badges/shields/pulse" alt="Activity">
+        <img src="https://img.shields.io/github/commit-activity/m/faustfizz/footup" />
+    </a>
+    <a href="https://github.com/faustfizz/footup/releases">
+        <img src="https://img.shields.io/github/v/release/faustfizz/footup">
+    </a>
+    <a href="https://github.com/faustfizz/footup/releases">
+        <img src="https://img.shields.io/github/release-date/faustfizz/footup">
+    </a>
+    <a href="https://github.com/faustfizz/footup">
+        <img src="https://img.shields.io/badge/php-^7.4-green">
+    </a>
+    <a href="https://github.com/faustfizz/footup">
+        <img src="https://img.shields.io/github/license/faustfizz/footup">
+    </a>
+</p>
+
+
 A Rich Featured LightWeight PHP MVC Framework :
 
 * CLI support for generating **Controller**, **Model**, **Middle**, **Migration**, **Seeder**, **Assets** and **View** files ( [adhocore/php-cli](https://github.com/adhocore/php-cli) modified and used thanks :) )
