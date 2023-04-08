@@ -38,7 +38,7 @@ class DbConnection
      * @throws \Exception For connection error
      * @return \PDO
      */
-    public static function setDb($config = null, $init = true)
+    public static function setDb($config = null, $init = false)
     {
         if($config instanceof PDO)
         {
@@ -52,7 +52,7 @@ class DbConnection
         if ($init && self::$db == null) {
             // Connection string
             if (is_string($config)) {
-                return self::setDb(self::parseConnection($config));
+                return self::setDb(self::parseConnection($config), $init);
             }
             // Connection information
             else if (is_array($config) || is_null($config)) {
@@ -113,7 +113,7 @@ class DbConnection
      */
     public static function getDb()
     {
-        return self::$db ?? self::setDb();
+        return self::$db;
     }
 
     /**

@@ -38,9 +38,9 @@ class Schema
 
     /**
      * Конструктор.
-     * @param PDO 
+     * @param PDO|null
      */
-    public function __construct(PDO $db)
+    public function __construct(PDO $db = null)
     {
         $this->db = &$db;
     }

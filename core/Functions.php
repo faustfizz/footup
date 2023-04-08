@@ -12,6 +12,7 @@
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
+use Footup\Footup;
 use Footup\Html\Html;
 use Footup\Http\Request;
 use Footup\Http\Response;
@@ -455,7 +456,7 @@ if(!function_exists("frameworkName"))
      */
     function frameworkName()
     {
-        return router()->getFrameworkName();
+        return Footup::NAME;
     }
 }
 
@@ -468,20 +469,7 @@ if(!function_exists("frameworkVersion"))
      */
     function frameworkVersion()
     {
-        return router()->getFrameworkVersion();
-    }
-}
-
-if(!function_exists("frameworkVersionCode"))
-{
-    /**
-     * Exposition de la version
-     *
-     * @return int
-     */
-    function frameworkVersionCode()
-    {
-        return router()->getFrameworkVersionCode();
+        return Footup::VERSION;
     }
 }
 
@@ -1073,11 +1061,14 @@ if(! function_exists("json"))
      *
      * @param array $data
      * @param boolean $echo
-     * @return Response|mixed
+     * @param integer $status
+     * @param array $headers
+	 * 
+     * @return Response|void
      */
-    function json(array $data, $echo = true)
+    function json(array $data, $echo = true, $status = 200, $headers = [])
     {
-        return response()->json($data, $echo, 200);
+        return response()->json($data, $echo, $status, $headers);
     }
 }
 

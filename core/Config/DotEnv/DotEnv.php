@@ -128,9 +128,11 @@ class DotEnv extends \ArrayObject
             {
                 $value = (array) $value;
             }
+            if(isset($value["base_url"]) && isset($_SERVER["BASE_URL"]))
+            {
+                $value["base_url"] = $_SERVER["BASE_URL"];
+            }
             $_ENV[$variable] = $value;
-            is_string($value) && $_SERVER[strtoupper($variable)] = $value;
-            
             foreach ($value as $key => $val) {
                 # code...
                 $_SERVER[strtoupper($key)] = $val;

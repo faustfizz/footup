@@ -3,7 +3,7 @@
     "description": "FootUp MVC Framework: A Rich Featured LightWeight PHP MVC Framework",
     "keywords": ["MVC", "FootUp Framework", "PHP Framework", "POO"],
     "type": "project",
-    "license": "BSD-3",
+    "license": "BSD-3-Clause",
     "autoload": {
         "psr-4": {
             "Footup\\": "core/"
@@ -19,7 +19,7 @@
     "prefer-stable": true,
     "minimum-stability": "dev",
     "require": {
-        "php": "^7.4||^8.0",
+        "php": ">=7.4||^8.0",
         "ext-pdo": "*",
         "ext-intl": "*",
         "ext-json": "*",
