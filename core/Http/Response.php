@@ -1,12 +1,12 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6-Alpha - 2021 - 2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Http
- * @version 0.2
+ * @version 0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 

@@ -16,10 +16,10 @@
         <img src="https://img.shields.io/github/commit-activity/m/faustfizz/footup" />
     </a>
     <a href="https://github.com/faustfizz/footup/releases">
-        <img src="https://img.shields.io/github/v/release/faustfizz/footup">
+        <img src="https://img.shields.io/github/v/release/faustfizz/footup?include_prereleases">
     </a>
     <a href="https://github.com/faustfizz/footup/releases">
-        <img src="https://img.shields.io/github/release-date/faustfizz/footup">
+        <img src="https://img.shields.io/github/release-date/faustfizz/footup?include_prereleases">
     </a>
     <a href="https://github.com/faustfizz/footup">
         <img src="https://img.shields.io/badge/php-^7.4-green">
