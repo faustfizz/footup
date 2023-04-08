@@ -1,11 +1,11 @@
 <?php
 /**
- * FOOTUP - 0.1.6-Alpha - 2021 - 2023
+ * FOOTUP - 0.1.6 - 2021 - 2023
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1.6-Alpha
+ * @version 0.1.6
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
@@ -20,7 +20,7 @@ class Footup
     protected $router;
     public const NAME = "FootUP Framework";
 
-    public const VERSION = "0.1.6-Alpha";
+    public const VERSION = "0.1.6";
 
     public function __construct(Router &$router)
     {
