@@ -83,7 +83,7 @@ if (!function_exists('unpackError')) {
      *
      * @param array $array
      *
-     * @return string
+     * @return void
      */
     function unpackError($array)
     {
