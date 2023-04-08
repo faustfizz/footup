@@ -581,7 +581,7 @@ class Router
     public function notFound($title = null, $message = "")
     {
         $title = $title ?? text("Http.pageNotFound");
-        echo (new Response())->die("404", $title, $message);
+        (new Response())->die("404", $title, $message)->send(true);
         exit;
     }
 

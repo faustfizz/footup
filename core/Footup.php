@@ -77,10 +77,10 @@ class Footup
             {
                 $return = $handler(...array_values($route->getArgs()));
 
-                if($return instanceof Response){
-                    echo $return;
+                if(!$return instanceof Response){
+                    return $response->body($return)->send(true);
                 }
-                return;
+                return $return->send(true);
             }
             /**
              * @var \Footup\Controller $controller
@@ -88,10 +88,10 @@ class Footup
             $controller = $this->runMiddles(new $handler(), $method, $request, $response);
             $return = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
 
-            if($return instanceof Response){
-                echo $return;
+            if(!$return instanceof Response){
+                return $response->body($return)->send(true);
             }
-            return;
+            return $return->send(true);
 
         } catch (\ErrorException $exception) {
             // Erreur 500.
@@ -125,12 +125,12 @@ class Footup
 
                 if($return instanceof Response)
                 {
-                    echo $return;
+                    $return->send(true);
                     exit;
                 }
                 if($return !== true)
                 {
-                    echo $response->die(401, "Non Autorisé à visualiser ce site", "Non Autorisé à visualiser ce site sur ce lien <span style='color:red'>".$request->path()."</span>");
+                    $response->die(401, "Non Autorisé à visualiser ce site", "Non Autorisé à visualiser ce site sur ce lien <span style='color:red'>".$request->path()."</span>")->send(true);
                     exit;
                 }
             }
@@ -154,12 +154,12 @@ class Footup
 
                 if($return instanceof Response)
                 {
-                    echo $return;
+                    $return->send(true);
                     exit;
                 }
                 if($return !== true)
                 {
-                    echo $response->die(401, "Non Autorisé à visualiser ce site", "Non Autorisé à visualiser ce site sur ce lien <span style='color:red'>".$request->path()."</span>");
+                    $response->die(401, "Non Autorisé à visualiser ce site", "Non Autorisé à visualiser ce site sur ce lien <span style='color:red'>".$request->path()."</span>")->send(true);
                     exit;
                 }
             }
@@ -177,12 +177,12 @@ class Footup
 
                         if($return instanceof Response)
                         {
-                            echo $return;
+                            $return->send(true);
                             exit;
                         }
                         if($return !== true)
                         {
-                            echo $response->die(401, "Non Autorisé à visualiser ce site", "Non Autorisé à visualiser ce site sur ce lien <span style='color:red'>".$request->path()."</span>");
+                            $response->die(401, "Non Autorisé à visualiser ce site", "Non Autorisé à visualiser ce site sur ce lien <span style='color:red'>".$request->path()."</span>")->send(true);
                             exit;
                         }
                     }

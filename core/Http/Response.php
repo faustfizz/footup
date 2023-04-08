@@ -19,7 +19,7 @@ use Exception;
 use Footup\Utils\Shared;
 use JsonSerializable;
 
-class Response
+class Response implements JsonSerializable
 {
 
     /**
@@ -139,20 +139,16 @@ class Response
         }
 
         if (! isset($this->header['Date'])) {
-            $this->header('Date', (new DateTime())->format('D, d M Y H:i:s') . ' GMT');
+            $this->header('Date', (new DateTime("now", new \DateTimeZone(date_default_timezone_get())))->format('D, d M Y H:i:s') . ' GMT');
         }
 
-        $this->status = $status;
+        $this->status($status);
 
-        try {
-            if(empty($data))
-            {
-                $data = $this->message[$status];
-            }
-            $this->body($data);
-        } catch (Exception $exception) {
-            throw new Exception(text("Http.invalidBodyType", [gettype($data)]));
+        if(empty($data))
+        {
+            $data = $this->message[$status];
         }
+        $this->body($data);
     }
 
     public function __call($name, $arguments)
@@ -176,6 +172,11 @@ class Response
     public function __toString()
     {
         return $this->send();
+    }
+
+    public function jsonSerialize()
+    {
+        return empty($data) ? ["message" => $this->reason] : $data;
     }
 
     /**
@@ -277,7 +278,7 @@ class Response
         $this->status($status)->header(array_merge($header, ['Content-Type' => 'application/json; charset=UTF-8']));
 
         $data = json_encode(
-            empty($data) ? ["message" => $this->message[$status]] : $data,
+            $this,
             $option
         );
 
@@ -422,21 +423,21 @@ class Response
     public function send($echo = false)
     {
         if (! headers_sent()) {
-            $status = $this->status;
             $server = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
+
+            http_response_code($this->status);
 
             foreach ($this->headers() as $name => $values) {
                 if(is_array($values))
                 {
                     foreach ($values as $value) {
-                        header($name . ':' . $value, strcasecmp($name, 'Content-Type') === 0, $status);
+                        header($name . ':' . $value, (strcasecmp($name, 'Content-Type') === 0 || strcasecmp($name, 'Date')), $this->status);
                     }
                 }else{
-                    header($name . ':' . $values, strcasecmp($name, 'Content-Type') === 0, $status);
+                    header($name . ':' . $values, (strcasecmp($name, 'Content-Type') === 0 || strcasecmp($name, 'Date')), $this->status);
                 }
             }
-
-            header(sprintf('%s %s %s', $server, $status, $this->reason), true, $status);
+            header(sprintf('%s %s %s', $server, $this->status, $this->reason), true, $this->status);
         }
 
         if($echo)

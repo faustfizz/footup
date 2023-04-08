@@ -80,14 +80,25 @@ class Controller
 
     /**
      * @param array $data
-     * @param bool $echo send data
-     * @return void|Response
+     * @param boolean $echo
+     * @param integer $status
+     * @param array $headers
+     * 
+     * @return Response|void
      */
-    protected function json($data, $echo = true)
+    protected function json($data = [], $echo = true, $status = 200, $headers = [])
     {
-        return $this->response->json($data, $echo);
+        return $this->response->json($data, $echo, $status, $headers);
     }
 
+    /**
+     * Render a view
+     *
+     * @param string $path
+     * @param array|object $data
+     * @param string $ext
+     * @return Response
+     */
     function view( $path , $data = null, $ext = VIEW_EXT )
     {
         extract($data);
@@ -97,7 +108,10 @@ class Controller
         {
             throw new Exception(text("View.missedFile", [$path . ".". $ext]));
         }
-        return include_once(VIEW_PATH . $path . ".". $ext);
+        ob_start();
+        include_once(VIEW_PATH . $path . ".". $ext);
+        $body = ob_get_clean();
+        return $this->response->body($body);
     }
 
 
