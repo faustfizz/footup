@@ -37,13 +37,16 @@ class Migrate extends Command
 
         parent::__construct('migrate:create', 'Generate migration file', false, $cli);
 
-        DbConnection::getDb()->query("CREATE TABLE IF NOT EXISTS ". Schema::quoteIdentifier(Migration::$table) ."(
-            `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-            `version` VARCHAR(250) NOT NULL,
-            `class` VARCHAR(250) NOT NULL,
-            `status` ENUM('pending', 'applied', 'dropped', 'emptied') NOT NULL DEFAULT 'pending',
-            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP()
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+        if(DbConnection::getDb())
+        {
+            DbConnection::getDb()->query("CREATE TABLE IF NOT EXISTS ". Schema::quoteIdentifier(Migration::$table) ."(
+                `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                `version` VARCHAR(250) NOT NULL,
+                `class` VARCHAR(250) NOT NULL,
+                `status` ENUM('pending', 'applied', 'dropped', 'emptied') NOT NULL DEFAULT 'pending',
+                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP()
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+        }
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance

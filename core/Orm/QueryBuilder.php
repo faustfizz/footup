@@ -139,12 +139,12 @@ class QueryBuilder
      * QueryBuilder constructor
      *
      * @param BaseModel $model the model that use the query builder
-     * @param DbConnection $DbConnection
+     * @param PDO $DbConnection
      */
-    public function __construct(BaseModel $model, PDO $DbConnection = null)
+    public function __construct(BaseModel $model, $DbConnection = null)
     {
         $this->class = $model;
-        self::$db = !is_null($DbConnection) ? $DbConnection : DbConnection::getDb();
+        self::$db = $DbConnection instanceof PDO ? $DbConnection : DbConnection::getDb();
 
         $this->getTable();
         $this->getPrimaryKey();
@@ -803,7 +803,7 @@ class QueryBuilder
      */
     public function execute(array $params = [])
     {
-        if (!self::$db && !$this->setDb()) {
+        if (!self::$db) {
             throw new Exception(text("Db.undefinedDB"));
         }
 
