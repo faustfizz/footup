@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
  * Hard Coded by Faustfizz Yous
  * 

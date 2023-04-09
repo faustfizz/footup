@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -17,70 +17,69 @@ use Footup\Database\DbConnection;
 use Footup\Html\Form;
 use Footup\Paginator\Paginator;
 use PDO;
-use ReflectionClass;
 
 /**
  * BaseModel of FOOTUP
  * 
- * @method QueryBuilder reset()
- * @method QueryBuilder from($table, $reset = true)
- * @method QueryBuilder join($table, $fields, $type = 'INNER', $operator = '=')
- * @method QueryBuilder eftJoin($table, $fields, $operator = '=')
- * @method QueryBuilder rightJoin($table, $fields, $operator = '=')
- * @method QueryBuilder fullJoin($table, $fields, $operator = '=')
- * @method QueryBuilder where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
- * @method QueryBuilder whereOr(array|string $key, $val = null, $operator = null, $escape = true)
- * @method QueryBuilder whereIn($key, array $val, $escape = true)
- * @method QueryBuilder whereNotIn($key, array $val, $escape = true)
- * @method QueryBuilder whereRaw($str)
- * @method QueryBuilder whereNotNull($key)
- * @method QueryBuilder whereNull($key)
- * @method QueryBuilder whereOrIn(array|string $key, array $val, $escape = true)
- * @method QueryBuilder whereOrNotIn(array|string $key, array $val, $escape = true)
- * @method QueryBuilder whereOrRaw($str)
- * @method QueryBuilder whereOrNotNull($key)
- * @method QueryBuilder whereOrNull($key)
- * @method QueryBuilder asc($field)
- * @method QueryBuilder desc($field)
- * @method QueryBuilder orderBy($field, $direction = 'ASC')
- * @method QueryBuilder groupBy($field)
- * @method QueryBuilder having($field, $value = null)
- * @method QueryBuilder limit($limit = null, $offset = null)
- * @method QueryBuilder offset($offset, $limit = null)
- * @method QueryBuilder distinct($value = true)
- * @method QueryBuilder between($field, $value1, $value2)
- * @method QueryBuilder select($fields = '*', $limit = null, $offset = null)
+ * @method ModelQueryBuilder reset()
+ * @method ModelQueryBuilder from($table, $reset = true)
+ * @method ModelQueryBuilder join($table, $fields, $type = 'INNER', $operator = '=')
+ * @method ModelQueryBuilder leftJoin($table, $fields, $operator = '=')
+ * @method ModelQueryBuilder rightJoin($table, $fields, $operator = '=')
+ * @method ModelQueryBuilder fullJoin($table, $fields, $operator = '=')
+ * @method ModelQueryBuilder where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
+ * @method ModelQueryBuilder orWhere(array|string $key, $val = null, $operator = null, $escape = true)
+ * @method ModelQueryBuilder whereIn($key, array $val, $escape = true)
+ * @method ModelQueryBuilder whereNotIn($key, array $val, $escape = true)
+ * @method ModelQueryBuilder whereRaw($str)
+ * @method ModelQueryBuilder whereNotNull($key)
+ * @method ModelQueryBuilder whereNull($key)
+ * @method ModelQueryBuilder orWhereIn(array|string $key, array $val, $escape = true)
+ * @method ModelQueryBuilder orWhereNotIn(array|string $key, array $val, $escape = true)
+ * @method ModelQueryBuilder orWhereRaw($str)
+ * @method ModelQueryBuilder orWhereNotNull($key)
+ * @method ModelQueryBuilder orWhereNull($key)
+ * @method ModelQueryBuilder asc(string|array $field)
+ * @method ModelQueryBuilder desc(string|array $field)
+ * @method ModelQueryBuilder orderBy(string|array $field, $direction = 'ASC')
+ * @method ModelQueryBuilder groupBy(string|array $field)
+ * @method ModelQueryBuilder having(string|array $field, $value = null)
+ * @method ModelQueryBuilder limit($limit = null, $offset = null)
+ * @method ModelQueryBuilder offset($offset, $limit = null)
+ * @method ModelQueryBuilder distinct($value = true)
+ * @method ModelQueryBuilder between(string $field, $value1, $value2)
+ * @method ModelQueryBuilder select($fields = '*', $limit = null, $offset = null)
  * @method bool|int insert(array $data = [])
  * @method boll update($data)
  * @method bool delete($where = null)
- * @method QueryBuilder|string sql($sql = null)
- * @method QueryBuilder setDb($config = null, $init = true)
+ * @method ModelQueryBuilder|string sql($sql = null)
+ * @method ModelQueryBuilder setDb($config = null, $init = true)
  * @method \PDO getDb()
  * @method object execute(array $params = [])
  * @method BaseModel[]|null get($select = "*", $where = null, $limit = null, $offset = null)
  * @method BaseModel|null one($fields = null, $where = null)
- * @method BaseModel|null first($field = null, $where = null)
- * @method BaseModel|null last($field = null, $where = null)
+ * @method BaseModel|null first(string $field = null, $where = null)
+ * @method BaseModel|null last(string $field = null, $where = null)
  * @method mixed value($name)
- * @method mixed min($field, $key = null)
- * @method mixed max($field, $key = null)
- * @method mixed sum($field, $key = null)
- * @method mixed avg($field, $key = null)
- * @method int|null count($field = '*')
+ * @method mixed min(string $field, $key = null)
+ * @method mixed max(string $field, $key = null)
+ * @method mixed sum(string $field, $key = null)
+ * @method mixed avg(string $field, $key = null)
+ * @method int|null count(string $field = '*')
  * @method mixed quote($value)
- * @method BaseModel|BaseModel[]|null find($value = null, $field = null)
+ * @method BaseModel|BaseModel[]|null find($value = null, string $field = null)
  * @method bool save(BaseModel $object = null, array $fields = null)
  * @method bool remove($object = null)
  * @method array getTableInfo()
  * @method bool create(array $properties)
  * @method BaseModel[]|bool findOrCreate(array $properties = null)
  * @method string getLastQuery()
- * @method QueryBuilder setLastQuery(string $last_query)
+ * @method ModelQueryBuilder setLastQuery(string $last_query)
  * @method int getNumRows()
  * @method int|string getInsertID()
  * @method int getAffectedRows()
  */
-class BaseModel
+class BaseModel implements \Countable
 {
     /**
      * @var string $table
@@ -90,7 +89,7 @@ class BaseModel
     /**
      * @var string
      */
-    protected $primaryKey = 'id';
+    protected $primaryKey;
 
     /**
      * @var string can be self | object | array -- self for BaseModel and it's the default
@@ -274,7 +273,7 @@ class BaseModel
     protected $belongsToMany = [];
 
     /**
-     * @var QueryBuilder
+     * @var ModelQueryBuilder
      */
     protected $builder;
     
@@ -294,7 +293,8 @@ class BaseModel
     public function __construct(array $data = null, $config = null, $init = true)
     {
         DbConnection::setDb($config, $init);
-        $this->setBuilder(new QueryBuilder($this));
+        
+        $this->setBuilder(new ModelQueryBuilder($this, DbConnection::getDb()));
 
         if(!empty($data))
         {
@@ -302,6 +302,15 @@ class BaseModel
         }
         // allow callbacks
         $this->tmp_callbacks = $this->allow_callbacks;
+    }
+
+    /**
+     * @param string $columns
+     * @return int
+     */
+    public function count($columns = "*")
+    {
+        return $this->getBuilder()->count($columns);
     }
 
     /**
@@ -570,13 +579,10 @@ class BaseModel
      */
     public function getTable()
     {
-        $class = new ReflectionClass($this);
-        $classVar = $class->getDefaultProperties();
-        
-        if (isset($classVar['table']))
-            return $this->table = $classVar['table'];
-
-        return $this->table = strtolower($class->getShortName());
+        if (empty($this->table))
+            return $this->table = strtolower(basename(strtr(get_class($this), ['\\' => '/'])));
+            
+        return $this->table;
     }
 
     /**
@@ -586,12 +592,9 @@ class BaseModel
      */
     public function getPrimaryKey()
     {
-        $classVar = get_class_vars(get_class($this));
-        
-        if (isset($classVar['primaryKey']))
+        if (empty($this->primaryKey))
         {
-            $this->primaryKey = $classVar['primaryKey'];
-            return $this->primaryKey;
+            $this->primaryKey = "id_".strtolower(basename(strtr(get_class($this), ['\\' => '/'])));
         }
             
         return $this->primaryKey;
@@ -604,11 +607,10 @@ class BaseModel
      */
     public function getReturnType()
     {
-        $classVar = get_class_vars(get_class($this));
-
-        if (isset($classVar['returnType']))
+        if (empty($this->returnType))
         {
-            $this->returnType = $classVar['returnType'];
+            // We use our default 
+            $this->returnType = "self";
         }
             
         return $this->returnType;
@@ -616,6 +618,10 @@ class BaseModel
 
     public function __get($name)
     {
+        if(property_exists($this, $name))
+        {
+            return $this->{$name};
+        }
         if(in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany))))
         {
             return $this->loadRelations($name);
@@ -638,22 +644,26 @@ class BaseModel
      */
     public function __call($name, $arguments)
     {
+        if (method_exists($this, $name)) {
+            return $this->{$name}(...$arguments);
+        }
+
         // Note: value of $name is case sensitive.
         if (!method_exists($this, $name) && preg_match('/^findBy/', $name) == 1) {
-            // it's a find_by_{fieldname} dynamic method
+            // it's a findBy{fieldname} dynamic method
             $fieldname = substr($name, 6); // remove find by
             $match     = isset($arguments[0]) ? $arguments[0] : null;
             return $this->getBuilder()->find($match, strtolower($fieldname));
         }
 
         if (!method_exists($this, $name) && preg_match('/^firstBy/', $name) == 1) {
-            // it's a find_by_{fieldname} dynamic method
+            // it's a findBy{fieldname} dynamic method
             $fieldname = substr($name, 7);
             return $this->getBuilder()->first(strtolower($fieldname));
         }
 
         if (!method_exists($this, $name) && preg_match('/^lastBy/', $name) == 1) {
-            // it's a find_by_{fieldname} dynamic method
+            // it's a findBy{fieldname} dynamic method
             $fieldname = substr($name, 6);
             return $this->getBuilder()->last(strtolower($fieldname));
         }
@@ -677,9 +687,9 @@ class BaseModel
             return $this->loadRelations($name, (isset($arguments[0]) ? $arguments[0] : $this->per_page), (isset($arguments[1]) ? $arguments[1] : 0));
         }
 
-        // Load the method from the QueryBuilder magically
+        // Load the method from the ModelQueryBuilder magically
         if (method_exists($this->builder, $name)) {
-            // it's a find_by_{fieldname} dynamic method
+            // it's a findBy{fieldname} dynamic method
             return $this->getBuilder()->{$name}(...$arguments);
         }
 
@@ -693,7 +703,7 @@ class BaseModel
      */
     public static function __callStatic($method, $args)
     {
-        $model = (new ReflectionClass(\get_called_class()))->newInstance();
+        $model = (new static);
         return $model->{$method}(...$args);
     }
 
@@ -898,7 +908,7 @@ class BaseModel
         /**
          * @var BaseModel
          */
-        $model = (new ReflectionClass(\get_called_class()))->newInstance();
+        $model = (new static);
         return $model->get($select, $where, $limit, $offset);
     }
 
@@ -944,7 +954,7 @@ class BaseModel
      * @param array $relationConfig
      * @return BaseModel Model instance
      */
-    public function hasOne($relationConfig)
+    protected function hasOne($relationConfig)
     {
         /**
          * @var BaseModel
@@ -963,7 +973,7 @@ class BaseModel
      * @param array $relationConfig
      * @return BaseModel[] Models
      */
-    public function manyMany($relationConfig, $limit = null, $offset = null)
+    protected function manyMany($relationConfig, $limit = null, $offset = null)
     {
         /**
          * @var BaseModel
@@ -992,7 +1002,7 @@ class BaseModel
      * @param array $relationConfig
      * @return BaseModel[] Models
      */
-    public function hasMany($relationConfig, $limit = null, $offset = null)
+    protected function hasMany($relationConfig, $limit = null, $offset = null)
     {
         /**
          * @var BaseModel
@@ -1011,7 +1021,7 @@ class BaseModel
      * @param array $relationConfig
      * @return BaseModel Model instance
      */
-    public function belongsTo($relationConfig)
+    protected function belongsTo($relationConfig)
     {
         /**
          * @var BaseModel
@@ -1031,7 +1041,7 @@ class BaseModel
      * @param array $relationConfig
      * @return BaseModel[] Models
      */
-    public function belongsToMany($relationConfig, $limit = null, $offset = null)
+    protected function belongsToMany($relationConfig, $limit = null, $offset = null)
     {
         /**
          * @var BaseModel
@@ -1097,7 +1107,7 @@ class BaseModel
     /**
      * Get the value of builder
      *
-     * @return  QueryBuilder
+     * @return  ModelQueryBuilder
      */ 
     public function getBuilder()
     {
@@ -1107,11 +1117,11 @@ class BaseModel
     /**
      * Set the value of builder
      *
-     * @param  QueryBuilder  $builder
+     * @param  ModelQueryBuilder  $builder
      *
      * @return  self
      */ 
-    public function setBuilder(QueryBuilder $builder)
+    public function setBuilder(ModelQueryBuilder $builder)
     {
         $this->builder = $builder;
 
@@ -1141,4 +1151,5 @@ class BaseModel
 
         return $this;
     }
+
 }
