@@ -412,7 +412,7 @@ class BaseModel implements \Countable
             $data = isset($eventData['data']) && !empty($eventData['data']) ? $eventData['data'] : $data;
 		}
 
-        $executed = $this->getBuilder()->update($data);
+        $executed = $this->getBuilder()->update($id, $data);
 
 		$eventData = [
 			'id'     => $id,

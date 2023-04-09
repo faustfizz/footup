@@ -840,7 +840,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $fields
      * @param string|array $where
      *
-     * @return \stdClass|null Row
+     * @return \stdClass|\Footup\Orm\BaseModel|null Row
      */
     public function one($fields = null, $where = null)
     {
@@ -861,7 +861,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $field
      * @param string|array $where
      *
-     * @return \stdClass|null Row
+     * @return \stdClass|\Footup\Orm\BaseModel|null Row
      */
     public function first($field = null, $where = null)
     {
@@ -877,7 +877,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $field
      * @param string|array $where
      *
-     * @return \stdClass|null Row
+     * @return \stdClass|\Footup\Orm\BaseModel|null Row
      */
     public function last($field = null, $where = null)
     {
