@@ -190,9 +190,9 @@ class Form
         $opt = [];
         foreach ($field->options as $key => $value) {
             # code...
-            if(is_array($value))
+            if(is_numeric($key))
             {
-                $attr = array("value" => $value['value']);
+                $attr = array("value" => strtolower($value));
 
                 if($field->default && strtolower($field->default) == strtolower($value['value']) || (isset($data[$field->name]) && $value['value'] == $data[$field->name]))
                 {
@@ -201,9 +201,9 @@ class Form
 
                 $attr = array_filter($attr);
 
-                $opt[] = Html::option(ucfirst($value['label']), $attr);
+                $opt[] = Html::option(ucfirst($value), $attr);
             }else{
-                $attr = array("value" => $value);
+                $attr = array("value" => strtolower($key));
                 if($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name]))
                 {
                     $attr['selected'] = true;
