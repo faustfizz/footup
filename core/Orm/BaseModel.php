@@ -119,7 +119,7 @@ class BaseModel implements \Countable, \IteratorAggregate
 
     
     /**
-     * Permet de passer un array de la forme $data = [ 'data' => [] ] avant insertion
+     * Permet de passer un array de la forme `$data = [ 'data' => [] ]` avant insertion
      * les callbacks doivent obligatoirement retourner $data
      * 
      * @var array
@@ -127,16 +127,15 @@ class BaseModel implements \Countable, \IteratorAggregate
     protected $beforeInsert         = [];
 
     /**
-     * Permet de passer un array de la forme $data = [ 'data' => [], 'where'    => ,'limit' =>, 'offset'    =>  ] 
-     * avant recuperation
-     * les callbacks doivent obligatoirement retourner $data
+     * Permet de passer un array de la forme `$data = [ 'data' => [], 'where'    => ,'limit' =>, 'offset'    =>  ]`
+     * avant recuperation les callbacks doivent obligatoirement retourner $data
      * 
      * @var array
      */
 	protected $beforeFind           = [];
 
     /**
-     * Permet de passer un array de la forme $data = [ 'id' => $primaryKeyValue ] avant suppression
+     * Permet de passer un array de la forme `$data = [ 'id' => $primaryKeyValue ]` avant suppression
      * les callbacks doivent obligatoirement retourner $data
      * 
      * @var array
@@ -144,21 +143,21 @@ class BaseModel implements \Countable, \IteratorAggregate
 	protected $beforeDelete         = [];
     
     /**
-     * Permet de passer un array de la forme $data = [ 'id' =>  $primaryKeyValue, 'data' => [] ] avant modification
+     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [] ]` avant modification
      * 
      * @var array
      */
 	protected $beforeUpdate         = [];
     
     /**
-     * Permet de passer un array de la forme $data = [ 'id' =>  $primaryKeyValue, 'data' => [] ] après insertion
+     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [] ]` après insertion
      * 
      * @var array
      */
 	protected $afterInsert          = [];
 
     /**
-     * Permet de passer un array de la forme $data = [ 'data' => [ ModelObjectFetched ] ] après recupération
+     * Permet de passer un array de la forme `$data = [ 'data' => [ ModelObjectFetched ] ]` après recupération
      * les callbacks doivent obligatoirement retourner $data
      * 
      * @var array
@@ -166,7 +165,7 @@ class BaseModel implements \Countable, \IteratorAggregate
 	protected $afterFind            = [];
 
     /**
-     * Permet de passer un array de la forme $data = [ 'id' => $primaryKeyValue, 'result'   => bool ] 
+     * Permet de passer un array de la forme `$data = [ 'id' => $primaryKeyValue, 'result'   => bool ]`
      * après suppression
      * 
      * @var array
@@ -174,7 +173,7 @@ class BaseModel implements \Countable, \IteratorAggregate
 	protected $afterDelete          = [];
     
     /**
-     * Permet de passer un array de la forme $data = [ 'id' =>  $primaryKeyValue, 'data' => [], 'result'  => bool ] 
+     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [], 'result'  => bool ]` 
      * après modification
      * 
      * @var array
@@ -184,43 +183,51 @@ class BaseModel implements \Countable, \IteratorAggregate
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ``` 
+     * <?php
+     * # Use with arrays:
      *
      *      protected $hasOne = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field'
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $hasOne        = [];
 
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      * 
      *      protected $hasMany = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field'
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $hasMany       = [];
 
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      *
      *      protected $manyMany = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'pivot' => 'Pivot_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field',
@@ -229,6 +236,7 @@ class BaseModel implements \Countable, \IteratorAggregate
      *                             ]
      *          ....................
      *      ];
+     * ```
      *
      */
     protected $manyMany      = [];
@@ -236,27 +244,32 @@ class BaseModel implements \Countable, \IteratorAggregate
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      *
      *     protected $belongsTo = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field'
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $belongsTo     = [];
 
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      * 
      *      protected $belongsToMany = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'pivot' => 'Pivot_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field',
@@ -265,6 +278,7 @@ class BaseModel implements \Countable, \IteratorAggregate
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $belongsToMany = [];
 
@@ -393,9 +407,7 @@ class BaseModel implements \Countable, \IteratorAggregate
     {
         if (empty($data)) return false;
 
-        $pk = $this->getPrimaryKey();
-
-        $this->{$pk} = $id = isset($data[$pk]) ? $data[$pk] : $this->{$pk};
+        $id = isset($data[$this->getPrimaryKey()]) ? $data[$this->getPrimaryKey()] : $this->id();
 
         if(empty($id) && empty($this->builder->where)){
             throw new Exception("No primary key value to use as reference & no where specified !");
@@ -440,15 +452,13 @@ class BaseModel implements \Countable, \IteratorAggregate
      */
     public function delete($where = null)
     {
-        $pk = $this->getPrimaryKey();
-        $id = $this->{$pk};
-        if(empty($where) && $id)
+        if(empty($where) && $this->id())
         {
-            $where = $pk." = ".$this->getBuilder()->quote($id);
+            $where = $this->getPrimaryKey()." = ".$this->getBuilder()->quote($this->id());
         }
 
         $eventData = [
-            'id'    => $id
+            'id'    => $this->id()
         ];
 
 		if ($this->tmp_callbacks)
@@ -476,7 +486,7 @@ class BaseModel implements \Countable, \IteratorAggregate
      * Return the PK for this record.
      * 
      * @access public
-     * @return integer
+     * @return int|string
      */
     public function id()
     {
@@ -714,7 +724,7 @@ class BaseModel implements \Countable, \IteratorAggregate
     public function fieldTypes()
     {
         $fields = array();
-        foreach ($this->getBuilder()->getDb()->query("SHOW COLUMNS FROM `{$this->getTable()}`")->fetchAll(PDO::FETCH_OBJ) as $field) {
+        foreach ($this->getBuilder()->getTableInfo(PDO::FETCH_OBJ) as $field) {
             $type = explode("(", $field->Type);
             
             $_type = $type[0];
@@ -732,28 +742,24 @@ class BaseModel implements \Countable, \IteratorAggregate
 
             if(in_array(strtolower($_type), ['set', 'enum']))
             {   $opt = strtr($length, ["'" => ""]);
-                $fields[$field->Field]['options'] = explode(",", $opt);
+                $field->options = explode(",", $opt);
             }
 
-            $fields[$field->Field]['maxLength'] = (int)$length;
-            $fields[$field->Field]['label'] = ucwords(strtr($field->Field, ["_" => " "]));
-            $fields[$field->Field]['name'] = $field->Field;
-            $fields[$field->Field]['id'] = $field->Field;
-            $fields[$field->Field]['isPrimaryKey'] = $field->Key == "PRI" ? true : false;
-            $fields[$field->Field]['type'] = $_type;
-            $fields[$field->Field]['null'] = $field->Null == 'YES' ? true : false;
-            $fields[$field->Field]['extra'] = $field->Extra;
-            $fields[$field->Field]['default'] = $field->Default;
-            $fields[$field->Field]['crudType'] = $this->getCrudType($_type, $length);
-        }
-        $results = $this->getBuilder()->getTableInfo();
-        $flds = array();
-        foreach ($results as $num => $row) {
-            $row = (array)$row;
-            $flds[$row['Field']] = (object)(array_merge($row, $fields[$row['Field']]));
+            $field->maxLength       = (int)$length;
+            $field->label           = ucwords(strtr($field->Field, ["_"     => " "]));
+            $field->name            = $field->Field;
+            $field->id              = $field->Field;
+            $field->isPrimaryKey    = $field->Key == "PRI" ? true : false;
+            $field->type            = $_type;
+            $field->null            = $field->Null == 'YES' ? true : false;
+            $field->extra           = $field->Extra;
+            $field->default         = $field->Default;
+            $field->crudType        = $this->getCrudType($_type, $length);
+
+            $fields[$field->Field] = $field;
         }
 
-        return $flds;
+        return $fields;
     }
 
     /**

@@ -1081,9 +1081,10 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @return array|string|false $tableInfo
+     * @param int $fetchType
+     * @return array $tableInfo
      */
-    public function getTableInfo()
+    public function getTableInfo($fetchType = PDO::FETCH_ASSOC)
     {
         if (empty($this->tableInfo)) {
             $stmt = self::$db->prepare(
@@ -1092,7 +1093,10 @@ class QueryBuilder implements \IteratorAggregate
             $stmt->execute();
             $this->tableInfo = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
-        return $this->tableInfo;
+        
+        return $fetchType === PDO::FETCH_OBJ ? array_map(function($field){
+            return (object)$field;
+        }, $this->tableInfo) : $this->tableInfo;
     }
 
     /**

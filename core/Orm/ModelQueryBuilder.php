@@ -6,7 +6,7 @@
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Orm
- * @version 0.1
+ * @version 0.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -62,9 +62,9 @@ class ModelQueryBuilder extends QueryBuilder
      */
     public function delete($where = null)
     {
-        if($this->model->{$this->getPrimaryKey()} && empty($where))
+        if($this->model->id() && empty($where))
         {
-            return parent::delete($this->getPrimaryKey()." = ".$this->model->{$this->getPrimaryKey()});
+            return parent::delete($this->getPrimaryKey()." = ".$this->model->id());
         }
         return parent::delete($where);
     }
@@ -207,21 +207,6 @@ class ModelQueryBuilder extends QueryBuilder
         if(empty($this->returnType)) $this->returnType = $this->model->getReturnType();
         
         return $this->returnType;
-    }
-
-    /**
-     * @return array|string|false $tableInfo
-     */
-    public function getTableInfo()
-    {
-        if (empty($this->tableInfo)) {
-            $stmt = self::$db->prepare(
-                "SHOW COLUMNS FROM " . ($this->getTable()) . ";"
-            );
-            $stmt->execute();
-            $this->tableInfo = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
-        return $this->tableInfo;
     }
 
     /**
