@@ -203,7 +203,7 @@ class QueryBuilder implements \IteratorAggregate
      * @return QueryBuilder Self reference
      * @throws Exception For invalid join type
      */
-    public function join($table, $fields, $type = 'INNER', $operator = '=')
+    public function join($table, $fields, $type = ' INNER ', $operator = " = ")
     {
         static $joins = array(
             'INNER',
@@ -238,9 +238,9 @@ class QueryBuilder implements \IteratorAggregate
      * @param array|string $fields Fields to join on
      * @return QueryBuilder Self reference
      */
-    public function leftJoin($table, $fields, $operator = '=')
+    public function leftJoin($table, $fields, $operator = " = ")
     {
-        return $this->join($table, $fields, 'LEFT OUTER', $operator);
+        return $this->join($table, $fields, ' LEFT OUTER ', $operator);
     }
 
     /**
@@ -250,9 +250,9 @@ class QueryBuilder implements \IteratorAggregate
      * @param array|string $fields Fields to join on
      * @return QueryBuilder Self reference
      */
-    public function rightJoin($table, $fields, $operator = '=')
+    public function rightJoin($table, $fields, $operator = " = ")
     {
-        return $this->join($table, $fields, 'RIGHT OUTER', $operator);
+        return $this->join($table, $fields, ' RIGHT OUTER ', $operator);
     }
 
     /**
@@ -262,9 +262,9 @@ class QueryBuilder implements \IteratorAggregate
      * @param array $fields Fields to join on
      * @return QueryBuilder Self reference
      */
-    public function fullJoin($table, $fields, $operator = '=')
+    public function fullJoin($table, $fields, $operator = " = ")
     {
-        return $this->join($table, $fields, 'FULL OUTER', $operator);
+        return $this->join($table, $fields, ' FULL OUTER ', $operator);
     }
 
     /**
@@ -276,36 +276,36 @@ class QueryBuilder implements \IteratorAggregate
      */
     public function where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
     {
-        $this->where .= (empty($this->where)) ? 'WHERE ' : '';
+        $this->where .= (empty($this->where)) ? ' WHERE ' : '';
 
         if (is_array($key)) {
             $key = array_filter($key);
             $counter = count($key);
             foreach ($key as $k => $v) {
-                $glue = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where']) ? $link : '';
+                $glue = !empty($this->where) && trim(strtolower($this->where)) != 'where' ? $link : '';
                 $this->where .= $counter > 1 ? ' (' : '';
                 $counter--;
-                $this->where .= $glue . $k . ' ' . trim($operator ?? '=') . ' ' . ($escape && !is_numeric($v) ? $this->quote($v) : $v);
+                $this->where .= $glue . $k . ' ' . trim($operator ?? " = ") . ' ' . ($escape && !is_numeric($v) ? $this->quote($v) : $v);
                 $this->where .= $counter == 0 && count($key) > 1 ? ') ' : '';
             }
         } else if (is_string($key) && is_null($val)) {
-            $link = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where'])  ? $link : '';
+            $link = !empty($this->where) && trim(strtolower($this->where)) != 'where'  ? $link : '';
             $this->where .= $link . $key;
         } else {
-            $link = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where'])  ? $link : '';
-            if (trim($operator) != 'IS' && trim($operator) != 'is') {
-                if (is_array($val) && !empty($val)) {
-                    $val = '(' . implode(',', array_map(array($this, 'quote'), $val)) . ')';
-                    $operator = ' IN ';
-                }
+            $link = !empty($this->where) && trim(strtolower($this->where)) != 'where'  ? $link : '';
+            if (trim(strtolower($operator)) != 'is') {
                 if (is_null($val)) {
                     $operator = "IS NOT NULL";
                 }
                 if (is_string($val) && !empty($val)) {
                     $val = ($escape && !is_numeric($val) ? $this->quote($val) : $val);
                 }
+                if (is_array($val) && !empty($val)) {
+                    $val = '(' . implode(',', array_map(array($this, 'quote'), $val)) . ')';
+                    $operator = ' IN ';
+                }
             }
-            $this->where .= trim($link . $key . ' ' . trim($operator ?? '=') . ' ' . $val);
+            $this->where .= trim($link . $key . ' ' . trim($operator ?? " = ") . ' ' . $val);
         }
 
         return $this;
@@ -329,7 +329,7 @@ class QueryBuilder implements \IteratorAggregate
      */
     public function whereIn($key, array $val, $escape = true)
     {
-        return $this->where($key, $val, ' IN ', 'AND', $escape);
+        return $this->where($key, $val, ' IN ', ' AND ', $escape);
     }
 
     /**
@@ -339,7 +339,7 @@ class QueryBuilder implements \IteratorAggregate
      */
     public function whereNotIn($key, array $val, $escape = true)
     {
-        return $this->where($key, $val, ' NOT IN ', 'AND', $escape);
+        return $this->where($key, $val, ' NOT IN ', ' AND ', $escape);
     }
 
     /**
@@ -499,12 +499,12 @@ class QueryBuilder implements \IteratorAggregate
         if(is_array($field))
         {   $thisModel = $this;
             $fields = array_map(function($key, $value) use ($thisModel){
-                $chain = is_numeric($key) ? $thisModel->primaryKey."=".$thisModel->quote($value) : "$key = ".$thisModel->quote($value);
+                $chain = is_numeric($key) ? $thisModel->primaryKey." = ".$thisModel->quote($value) : "$key = ".$thisModel->quote($value);
                 return $chain;
             }, array_keys($field), array_values($field));
             $join .= implode(',', $fields);
         }else{
-            $join .= !empty($value) ? $field."=".$this->quote($value) : $field;
+            $join .= !empty($value) ? $field." = ".$this->quote($value) : $field;
         }
         $this->having .= $join;
 
@@ -646,18 +646,18 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Builds an update query.
      *
-     * @param int $id 
      * @param array|\stdClass $data Array of keys and values or object of type \stdClass
+     * @param int|null $id 
      * @return bool 
      */
-    public function update($id, $data)
+    public function update($data, $id = null)
     {
         $this->checkTable();
         $data = is_object($data) ? get_object_vars($data) : $data;
 
         $values = array();
         
-        $this->where($this->getPrimaryKey() . " = " . $id);
+        $id && $this->where($this->getPrimaryKey() . " = " . $id);
         
         if (empty($this->where)) {
             throw new Exception(text("Db.dontUse", ["UPDATE"]));
@@ -668,7 +668,7 @@ class QueryBuilder implements \IteratorAggregate
             {
                 throw new Exception("Data array should be in format [field => value] !");
             }
-            $value[] = $key . '=' . $this->quote($value);
+            $values[] = $key . " = " . $this->quote($value);
         }
         
         $this->sql(array(
@@ -695,7 +695,7 @@ class QueryBuilder implements \IteratorAggregate
     {
         $this->checkTable();
 
-        $this->where(is_int($where) ? $this->getPrimaryKey()."=".$where : $where);
+        $where && $this->where(is_int($where) ? $this->getPrimaryKey()." = ".$where : $where);
 
         if (empty($this->where)) {
             throw new Exception(text("Db.dontUse", ["DELETE"]));
@@ -722,9 +722,10 @@ class QueryBuilder implements \IteratorAggregate
     {
         if ($sql !== null) {
             $this->sql = trim(
-                (is_array($sql)) ?
-                    array_reduce($sql, array($this, 'build')) :
-                    $sql
+                strtr(
+                    is_array($sql) ? array_reduce($sql, array($this, 'build')) : $sql,
+                    ["  " => " "]
+                )
             );
 
             return $this;

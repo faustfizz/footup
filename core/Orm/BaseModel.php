@@ -23,10 +23,10 @@ use PDO;
  * 
  * @method ModelQueryBuilder reset()
  * @method ModelQueryBuilder from($table, $reset = true)
- * @method ModelQueryBuilder join($table, $fields, $type = 'INNER', $operator = '=')
- * @method ModelQueryBuilder leftJoin($table, $fields, $operator = '=')
- * @method ModelQueryBuilder rightJoin($table, $fields, $operator = '=')
- * @method ModelQueryBuilder fullJoin($table, $fields, $operator = '=')
+ * @method ModelQueryBuilder join($table, $fields, $type = 'INNER', $operator = " = ")
+ * @method ModelQueryBuilder leftJoin($table, $fields, $operator = " = ")
+ * @method ModelQueryBuilder rightJoin($table, $fields, $operator = " = ")
+ * @method ModelQueryBuilder fullJoin($table, $fields, $operator = " = ")
  * @method ModelQueryBuilder where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
  * @method ModelQueryBuilder orWhere(array|string $key, $val = null, $operator = null, $escape = true)
  * @method ModelQueryBuilder whereIn($key, array $val, $escape = true)
@@ -50,7 +50,6 @@ use PDO;
  * @method ModelQueryBuilder between(string $field, $value1, $value2)
  * @method ModelQueryBuilder select($fields = '*', $limit = null, $offset = null)
  * @method bool|int insert(array $data = [])
- * @method boll update($data)
  * @method bool delete($where = null)
  * @method ModelQueryBuilder|string sql($sql = null)
  * @method ModelQueryBuilder setDb($config = null, $init = true)
@@ -69,17 +68,14 @@ use PDO;
  * @method mixed quote($value)
  * @method BaseModel|BaseModel[]|null find($value = null, string $field = null)
  * @method bool save(BaseModel $object = null, array $fields = null)
- * @method bool remove($object = null)
  * @method array getTableInfo()
- * @method bool create(array $properties)
- * @method BaseModel[]|bool findOrCreate(array $properties = null)
  * @method string getLastQuery()
  * @method ModelQueryBuilder setLastQuery(string $last_query)
  * @method int getNumRows()
  * @method int|string getInsertID()
  * @method int getAffectedRows()
  */
-class BaseModel implements \Countable
+class BaseModel implements \Countable, \IteratorAggregate
 {
     /**
      * @var string $table
@@ -401,6 +397,10 @@ class BaseModel implements \Countable
 
         $this->{$pk} = $id = isset($data[$pk]) ? $data[$pk] : $this->{$pk};
 
+        if(empty($id) && empty($this->builder->where)){
+            throw new Exception("No primary key value to use as reference & no where specified !");
+        }
+
         $eventData = [
 			'id'   => $id,
 			'data' => $data,
@@ -412,7 +412,7 @@ class BaseModel implements \Countable
             $data = isset($eventData['data']) && !empty($eventData['data']) ? $eventData['data'] : $data;
 		}
 
-        $executed = $this->getBuilder()->update($id, $data);
+        $executed = $this->getBuilder()->update($data, $id);
 
 		$eventData = [
 			'id'     => $id,
@@ -441,10 +441,14 @@ class BaseModel implements \Countable
     public function delete($where = null)
     {
         $pk = $this->getPrimaryKey();
-        $id = $this->{$pk} ?? $this->getBuilder()->getInsertID();
+        $id = $this->{$pk};
+        if(empty($where) && $id)
+        {
+            $where = $pk." = ".$this->getBuilder()->quote($id);
+        }
 
         $eventData = [
-            'id'    => is_int($where) ? $where : $id
+            'id'    => $id
         ];
 
 		if ($this->tmp_callbacks)
@@ -842,46 +846,6 @@ class BaseModel implements \Countable
         return $type;
     }
 
-    /**
-     * Try to match property value to the table column type
-     *
-     * @param string $field
-     * @param mixed  $value  to be matched
-     * @return mixed $value  with converted type
-     *
-     * @todo match all possible types properly
-     */
-    protected function matchType($field, $value)
-    {
-        $type = $this->getFieldType($field);
-        $type = explode('(', $type);
-        switch ($type[0]) {
-            case 'tinyint':
-            case 'smallint':
-            case 'mediumint':
-            case 'int':
-            case 'bigint':
-                $value = (int)$value;
-                break;
-            case 'char':
-            case 'varchar':
-            case 'tinytext':
-            case 'text':
-            case 'mediumtext':
-            case 'longtext':
-                $value = (string)$value;
-                break;
-            case 'double':
-            case 'float':
-            case 'decimal':
-                $value = (float)$value;
-                break;
-            default:
-                break;
-        }
-        return $value;
-    }
-
     public function getForm($action = "#", $data = [], $print = false)
     {
         if(empty($data))
@@ -1150,6 +1114,11 @@ class BaseModel implements \Countable
         $this->paginator = $paginator;
 
         return $this;
+    }
+
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->paginate());
     }
 
 }

@@ -54,7 +54,6 @@ class ModelQueryBuilder extends QueryBuilder
 
     /*** Core Methods ***/
 
-    
     /**
      * Builds a delete query.
      *
@@ -63,9 +62,9 @@ class ModelQueryBuilder extends QueryBuilder
      */
     public function delete($where = null)
     {
-        if($this->getInsertID() && $this->getInsertID() === $this->model->{$this->getPrimaryKey()})
+        if($this->model->{$this->getPrimaryKey()} && empty($where))
         {
-            return parent::delete($this->getPrimaryKey()."=".$this->getInsertID());
+            return parent::delete($this->getPrimaryKey()." = ".$this->model->{$this->getPrimaryKey()});
         }
         return parent::delete($where);
     }
