@@ -747,13 +747,15 @@ class BaseModel implements \Countable, \IteratorAggregate
 
             $field->maxLength       = (int)$length;
             $field->label           = ucwords(strtr($field->Field, ["_"     => " "]));
+            $field->placeholder     = ucwords(strtr($field->Field, ["_"     => " "]));
             $field->name            = $field->Field;
-            $field->id              = $field->Field;
+            $field->id              = 'field_'.$field->Field;
             $field->isPrimaryKey    = $field->Key == "PRI" ? true : false;
             $field->type            = $_type;
             $field->null            = $field->Null == 'YES' ? true : false;
+            $field->required        = !$field->null;
             $field->extra           = $field->Extra;
-            $field->default         = $field->Default;
+            $field->default         = $field->Default === "current_timestamp()" ? date("Y-m-d H:i:s") : $field->Default;
             $field->crudType        = $this->getCrudType($_type, $length);
 
             $fields[$field->Field] = $field;
@@ -859,7 +861,7 @@ class BaseModel implements \Countable, \IteratorAggregate
             $data = $this->getAttributes();
         }
 
-        $form = new Form($action, $this->fieldTypes(), $data);
+        $form = new Form($action ?? "#", $this->fieldTypes(), $data);
         return $form->build()->print($print);
     }
 

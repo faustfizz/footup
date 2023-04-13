@@ -45,7 +45,7 @@ class Form
         $this->prepareFields($fields, $data);
     }
 
-    public function addOutput($name, string $html)
+    public function addHtmlInput($name, string $html)
     {
         $this->fields[$name] = $html;
         return $this;
@@ -155,7 +155,7 @@ class Form
             }
             $html = $this->ConfigForm::getHtmlInput($field);
             
-            $this->addOutput(
+            $this->addHtmlInput(
                     $field->name,
                     $html
                 );
@@ -164,20 +164,32 @@ class Form
         return $this;
     }
 
-    private function inlineAttributes(object $field)
+    public function inputAttributes()
+    {
+        return [
+            "name",
+            "id",
+            "accept",
+            "placeholder",
+            "required",
+            "value",
+            "checked"
+        ];
+    }
+
+    public function inlineAttributes(object $field)
     {
         $attrsString = "";
-        $attrs = [
-            "required"      =>  !$field->null,
-            "checked"       =>  ($field->value && !$field->null || $field->value == $field->default) && in_array($field->type, ['radio', 'checkbox']),
-            "placeholder"   =>  $field->label,
-            "maxLength"     =>  $field->maxLength
-        ];
-
+        $acceptedAttrs = $this->inputAttributes();
+        $field->checked =  ($field->value && !$field->null || $field->value == $field->default) && in_array($field->type, ['radio', 'checkbox']);
         if($field->type == "file" && in_array($field->name, ['picture', 'cover', 'image', 'photo']))
         {
-            $attrs["accept"] = ".jpeg,.png,.jpg";
+            $field->accept = ".jpeg,.png,.jpg";
         }
+        $attrs = array_intersect_key((array)$field, array_flip($acceptedAttrs));
+        // filter values
+        $attrs = array_filter($attrs);
+
         foreach (array_filter($attrs) as $attr => $value) {
             # code...
             $attrsString .= " $attr='$value'";
