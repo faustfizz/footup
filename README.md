@@ -7,25 +7,28 @@
 
 <p align="center">
     <a href="https://twitter.com/intent/follow?screen_name=JohnnyFaustfizz">
-        <img src="https://img.shields.io/twitter/follow/JohnnyFaustfizz?style=social&logo=twitter" alt="follow on Twitter">
+      <img src="https://img.shields.io/twitter/follow/JohnnyFaustfizz?style=social&logo=twitter" alt="follow on Twitter">
     </a>
     <a href="https://github.com/faustfizz/footup/">
-        <img src="https://img.shields.io/github/stars/faustfizz/footup?style=social">
+      <img src="https://img.shields.io/github/stars/faustfizz/footup?style=social">
     </a>
     <a href="https://github.com/badges/shields/pulse" alt="Activity">
-        <img src="https://img.shields.io/github/commit-activity/m/faustfizz/footup" />
+      <img src="https://img.shields.io/github/commit-activity/m/faustfizz/footup" />
     </a>
     <a href="https://github.com/faustfizz/footup/releases">
-        <img src="https://img.shields.io/github/v/release/faustfizz/footup?include_prereleases">
+      <img src="https://img.shields.io/github/v/release/faustfizz/footup?include_prereleases">
     </a>
     <a href="https://github.com/faustfizz/footup/releases">
-        <img src="https://img.shields.io/github/release-date/faustfizz/footup?include_prereleases">
+      <img src="https://img.shields.io/github/release-date/faustfizz/footup?include_prereleases">
     </a>
     <a href="https://github.com/faustfizz/footup">
-        <img src="https://img.shields.io/badge/php-^7.4-green">
+      <img src="https://img.shields.io/badge/php-^7.4-green">
     </a>
     <a href="https://github.com/faustfizz/footup">
-        <img src="https://img.shields.io/github/license/faustfizz/footup">
+      <img src="https://img.shields.io/github/license/faustfizz/footup">
+    </a>
+    <a href="https://github.com/faustfizz/footup">
+      <img src="https://img.shields.io/github/languages/code-size/faustfizz/footup">
     </a>
 </p>
 

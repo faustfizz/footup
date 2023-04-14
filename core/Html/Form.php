@@ -45,9 +45,30 @@ class Form
         $this->prepareFields($fields, $data);
     }
 
-    public function addHtmlInput($name, string $html)
+    /**
+     * @param array|object $field
+     * @param array $data
+     * @return self
+     */
+    public function addHtmlInput($field, array $data)
     {
-        $this->fields[$name] = $html;
+        $field = is_array($field) ? (object)$field : $field; 
+        if(!empty($field->isPrimaryKey) && !empty($data[$field->name]))
+        {
+            $field->crudType = $field->type = "hidden";
+        }
+
+        $field->value = isset($data[$field->name]) && !in_array($field->name, ['password', 'pass', 'hash']) ? $data[$field->name] : $field->default;
+
+        $field->inline_attributes = $this->inlineAttributes($field);
+
+        if(!empty($field->options)){
+            $field->htmlOptions = $this->buildOptions($field, $data);
+        }
+        $html = $this->ConfigForm::getHtmlInput($field);
+            
+        $this->fields[$field->name] = $html;
+
         return $this;
     }
 
@@ -139,25 +160,12 @@ class Form
             $field = (object) $field;
             $field->type = $field->crudType;
             $field = $this->switchType($field);
-            
-            if($field->isPrimaryKey && (empty($data) || empty($data[$field->name])) ) continue;
-    
-            if($field->isPrimaryKey && !empty($data[$field->name]))
-            {
-                $field->crudType = $field->type = "hidden";
-            }
 
-            $field->value = isset($data[$field->name]) && !in_array($field->name, ['password', 'pass', 'hash']) ? $data[$field->name] : $field->default;
-
-            $field->inline_attributes = $this->inlineAttributes($field);
-            if(!empty($field->options)){
-                $field->htmlOptions = $this->buildOptions($field, $data);
-            }
-            $html = $this->ConfigForm::getHtmlInput($field);
+            if(!empty($field->isPrimaryKey) && (empty($data) || empty($data[$field->name])) ) continue;
             
             $this->addHtmlInput(
-                    $field->name,
-                    $html
+                    $field,
+                    $data
                 );
         }
 
@@ -173,6 +181,8 @@ class Form
             "placeholder",
             "required",
             "value",
+            "autocomplete",
+            "disabled",
             "checked"
         ];
     }
@@ -210,21 +220,17 @@ class Form
                 {
                     $attr['selected'] = true;
                 }
-
-                $attr = array_filter($attr);
-
-                $opt[] = Html::option(ucfirst($value), $attr);
             }else{
                 $attr = array("value" => strtolower($key));
+                
                 if($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name]))
                 {
                     $attr['selected'] = true;
                 }
-    
-                $attr = array_filter($attr);
-    
-                $opt[] = Html::option(ucfirst($value), $attr);
             }
+            $attr = array_filter($attr);
+
+            $opt[] = Html::option(ucfirst($value), $attr);
         }
         return $opt;
     }
