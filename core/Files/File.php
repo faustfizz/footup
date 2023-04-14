@@ -69,14 +69,14 @@ class File extends SplFileInfo
      */
     public function __get($name)
     {
-        if(isset($this->file[$name]))
-        {
-            return $this->file[$name];
-        }
-
         if(property_exists($this, $name))
         {
             return $this->{$name};
+        }
+
+        if(isset($this->file[$name]))
+        {
+            return $this->file[$name];
         }
 
         if($name === "random_name")
@@ -98,6 +98,14 @@ class File extends SplFileInfo
         {
             return $this->{$name} = $value;
         }
+    }
+
+    /**
+    * @return bool
+    */
+    public function isImage() : bool
+    {
+        return in_array($this->ext(), ["jpg", "jpeg", "jpe", "jif", "jfif", "jfi", "webp", "png"]);
     }
 
     /**
@@ -163,7 +171,7 @@ class File extends SplFileInfo
      */
     public function getExtension(): string
     {
-        return pathinfo($this->name(), PATHINFO_EXTENSION);
+        return pathinfo(mb_strtolower( $this->name() ), PATHINFO_EXTENSION);
     }
     
     public function rename(string $name)
@@ -228,7 +236,7 @@ class File extends SplFileInfo
         }
 
         if (is_null($destination)) {
-            $this->name = $this->random_name();
+            $this->name = $this->random_name()->name();
             $destination = STORE_DIR.$this->name();
         }
 
@@ -246,7 +254,6 @@ class File extends SplFileInfo
             $this->moved = move_uploaded_file($this->file['tmp_name'], $destination);
             $this->moved == true && $this->moved_file = new SplFileInfo($destination);
         } catch (Exception $exception) {
-            //throw $exception->getMessage();
             throw new Exception(text("File.cannotMove", [$this->name, $destination, $exception->getMessage()]));
         }
 

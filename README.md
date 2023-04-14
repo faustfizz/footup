@@ -100,6 +100,7 @@ FOOTUP MVC Framework
 │   │   │   ├── Scaffold.php
 │   │   │   ├── Seeder.php
 │   │   │   ├── Seed.php
+│   │   │   ├── Serve.php
 │   │   │   └── View.php
 │   │   ├── Exception
 │   │   │   ├── Exception.php
@@ -152,6 +153,7 @@ FOOTUP MVC Framework
 │   │   ├── Migration
 │   │   │   └── Migration.php
 │   │   ├── Migration.php
+│   │   ├── QueryBuilder.php
 │   │   ├── Schema
 │   │   │   ├── Column.php
 │   │   │   ├── ForeignKey.php
@@ -230,7 +232,7 @@ FOOTUP MVC Framework
 │   ├── Model.php
 │   ├── Orm
 │   │   ├── BaseModel.php
-│   │   └── QueryBuilder.php
+│   │   └── ModelQueryBuilder.php
 │   ├── Paginator
 │   │   ├── AbstractPaginator.php
 │   │   ├── Page.php
@@ -272,13 +274,13 @@ FOOTUP MVC Framework
 │   ├── favicon.svg
 │   ├── index.php
 │   └── uploads
-│       └── cache
-└── README.md
+├── README.md
+└── server.php
 ```
 
 ## Description
 
-FOOTUP MVC Framework focus primarily to speed and minimalistic. It's **220 Kb zip**, **140 kb gz**.
+FOOTUP MVC Framework focus primarily to speed and minimalistic. It's **250 Kb zip**, **148 kb xz**.
 It render withing **0.001 seconds** (I used a PHP 8.0.7 environment to write and test it).
 
 My goal is doing a thing that i'm the first person that use it with ease.
