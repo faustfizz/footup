@@ -1,12 +1,12 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Http
- * @version 0.3
+ * @version 0.4
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
@@ -21,6 +21,10 @@ use JsonSerializable;
 
 class Response implements JsonSerializable
 {
+    /**
+     * header Content-Length.
+     */
+    public bool $content_length = false;
 
     /**
      * @var array;
@@ -41,6 +45,11 @@ class Response implements JsonSerializable
      * @var string
      */
     protected $reason;
+
+    /**
+     * @var bool HTTP response sent
+     */
+    protected bool $sent = false;
 
     /**
      * @var array
@@ -125,9 +134,8 @@ class Response implements JsonSerializable
      * @param int   $status
      * @param array $header
      */
-    public function __construct($data = '', $status = 200, $header = [])
+    public function __construct($data = 'php://memory', $status = 200, $header = [])
     {
-
         $this->header($header);
 
         if (! isset($this->header['Content-Type'])) {
@@ -139,30 +147,29 @@ class Response implements JsonSerializable
         }
 
         if (! isset($this->header['Date'])) {
-            $this->header('Date', (new DateTime("now", new \DateTimeZone(date_default_timezone_get())))->format('D, d M Y H:i:s') . ' GMT');
+            $this->header('Date', (new DateTime('now', new \DateTimeZone(date_default_timezone_get())))->format('D, d M Y H:i:s') . ' GMT');
         }
-
-        $this->status($status);
 
         if(empty($data))
         {
             $data = $this->message[$status];
         }
-        $this->body($data);
+
+        $this->status($status)->body($data);
     }
 
     public function __call($name, $arguments)
     {
         $status = (int)substr($name, 4, 3);
         $method = substr($name, 0, 4);
-
+        
         if($method === 'call' && in_array($status, array_keys($this->message)))
         {
             if(isset($arguments[1]))
             {
                 $this->header($arguments[1]);
             }
-            return $this->status($status)->body($arguments[0] ?? $this->message[$status]);
+            return $this->status($status)->body($arguments[0] ?? $this->message[$status])->send(true);
         }
     }
 
@@ -176,7 +183,7 @@ class Response implements JsonSerializable
 
     public function jsonSerialize()
     {
-        return empty($data) ? ["message" => $this->reason] : $data;
+        return empty($this->body) ? ['message' => $this->reason] : (array)$this->body;
     }
 
     /**
@@ -186,33 +193,6 @@ class Response implements JsonSerializable
     public function __get(string $property)
     {
         return $this->$property ?? null;
-    }
-
-    /**
-     * @param  mixed $data
-     * @param  int   $status
-     * @param  array $header
-     * @return Response
-     */
-    public function make($data, $status = 200, array $header = [])
-    {
-        if (! is_int($status)) {
-            $status = 500;
-        }
-
-        if ($data instanceof Response) {
-            return $data;
-        }
-
-        if (is_array($data) || $data instanceof ArrayObject || $data instanceof JsonSerializable) {
-            return $this->json($data, false, $status, $header);
-        }
-
-        foreach ($header as $key => $value) {
-            $this->header($key, $value);
-        }
-
-        return $this->status($status)->body($data);
     }
 
     /**
@@ -255,14 +235,14 @@ class Response implements JsonSerializable
     private function check($body)
     {
         if (!is_null($body) && !is_string($body) && !is_numeric($body) && !is_callable([$body, '__toString'])) {
-            throw new Exception(text("Http.invalidBodyType", [gettype($body)]));
+            throw new Exception(text('Http.invalidBodyType', [gettype($body)]));
         }
 
         if (is_object($body) && is_callable([$body, '__toString'])) {
             $body = call_user_func($body);
         }
 
-        return $body;
+        return $body ?? $this->body;
     }
     
     /**
@@ -278,7 +258,7 @@ class Response implements JsonSerializable
         $this->status($status)->header(array_merge($header, ['Content-Type' => 'application/json; charset=UTF-8']));
 
         $data = json_encode(
-            $this,
+            empty($data) ? $this : $data,
             $option
         );
 
@@ -300,10 +280,10 @@ class Response implements JsonSerializable
             try {
                 $content = file_get_contents($filepath);
             } catch (Exception $exception) {
-                throw new Exception(text("File.unreadable", [$filepath]));
+                throw new Exception(text('File.unreadable', [$filepath]));
             }
         }else{
-            throw new Exception(text("File.fileNotFound", [$filepath]));
+            throw new Exception(text('File.fileNotFound', [$filepath]));
         }
 
         if (! $filename) {
@@ -316,7 +296,7 @@ class Response implements JsonSerializable
         $this->header([
             'Cache-Control'       => 'must-revalidate',
             'Content-Description' => 'File Transfer',
-            'Content-Disposition' => sprintf('%s; filename="%s"', $disposition, $filename),
+            'Content-Disposition' => sprintf("%s; filename='%s'", $disposition, $filename),
             'Content-Length'      => filesize($filepath),
             'Content-Type'        => mime_content_type($filepath),
             'Expires'             => 0,
@@ -338,10 +318,10 @@ class Response implements JsonSerializable
         {
             foreach($header as $key => $value)
             {
-                header("$key: $value", true);
+                header('$key: $value', true);
             }
         }
-        header("Location: $location", true, $status);
+        header('Location: $location', true, $status);
     }
 
     /**
@@ -369,8 +349,10 @@ class Response implements JsonSerializable
      */
     public function status(int $status, string $reason = null)
     {
-        $this->status = $status;
-        $this->reason = $reason ?? $this->reason($status);
+        if (\array_key_exists($status, $this->message)) {
+            $this->status = $status;
+            $this->reason = $reason ?? $this->reason($status);
+        }
 
         return $this;
     }
@@ -381,10 +363,6 @@ class Response implements JsonSerializable
      */
     public function reason(int $status) : string
     {
-        if ($status < 100 || $status > 599) {
-            $status = 500;
-        }
-
         return $this->message[$status] ?? 'Unknown';
     }
 
@@ -422,27 +400,14 @@ class Response implements JsonSerializable
      */
     public function send($echo = false)
     {
-        if (! headers_sent()) {
-            $server = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
-
-            http_response_code($this->status);
-
-            foreach ($this->headers() as $name => $values) {
-                if(is_array($values))
-                {
-                    foreach ($values as $value) {
-                        header($name . ':' . $value, (strcasecmp($name, 'Content-Type') === 0 || strcasecmp($name, 'Date')), $this->status);
-                    }
-                }else{
-                    header($name . ':' . $values, (strcasecmp($name, 'Content-Type') === 0 || strcasecmp($name, 'Date')), $this->status);
-                }
-            }
-            header(sprintf('%s %s %s', $server, $this->status, $this->reason), true, $this->status);
+        if (!headers_sent()) {
+            $this->sendHeaders();
         }
 
         if($echo)
         {
             echo $this->body;
+            $this->sent = true;
         }else{
             return $this->body;
         }
@@ -451,30 +416,141 @@ class Response implements JsonSerializable
     /**
      * @param string $status
      * @param string|int $message
-     * @return $this|void
+     * @return void
      */
-    public function die($status = '404', $title = "404: Not Found !", $message = "")
+    public function die($status = '404', $title = '404: Not Found !', $message = '')
     {
         $status = is_int($status) ? strval($status) : $status;
         $short = substr($status, 0, 1);
         $message = empty($message) ? $this->message[(int)$status] : $message;
-/**
+
+        /**
          * @var Config
          */
         $config = Shared::loadConfig();
-        if(isset($config->page_error[$status."s"]))
-        {
-            $content = file_exists($config->page_error[$status."s"]) ? file_get_contents($config->page_error[$status."s"]) : $message;
-            $content = strtr($content, ["{status}" => $status, "{title}" => $title, "{message}" => $message, "{link}" =>  '/']);
-            return $this->{"call{$status}"}($content, ['Content-Type' => 'text/html; charset=UTF-8']);
+        
+        $content = isset($config->page_error[$status.'s']) && file_exists($config->page_error[$status.'s']) ? file_get_contents($config->page_error[$status.'s']) : (isset($config->page_error[$short.'s']) && file_exists($config->page_error[$short.'s']) ? file_get_contents($config->page_error[$short.'s']) : $message);
+
+        $content = strtr($content, ['{status}' => $status, '{title}' => $title, '{message}' => $message, '{link}' =>  '/']);
+        $this->{"call{$status}"}($content, ['Content-Type' => 'text/html; charset=UTF-8']);
+    }
+
+    /**
+     * Clears the response.
+     *
+     * @return Response Self reference
+     */
+    public function clear(): self
+    {
+        $this->status = 200;
+        $this->header = [];
+        $this->body = '';
+
+        return $this;
+    }
+
+    /**
+     * Sets caching headers for the response.
+     *
+     * @param int|string $expires Expiration time
+     *
+     * @return Response Self reference
+     */
+    public function cache($expires = false): self
+    {
+        if (false === $expires) {
+            $this->header['Expires'] = 'Mon, 26 Jul 1997 05:00:00 GMT';
+            $this->header['Cache-Control'] = [
+                'no-store, no-cache, must-revalidate',
+                'post-check=0, pre-check=0',
+                'max-age=0',
+            ];
+            $this->header['Pragma'] = 'no-cache';
+        } else {
+            $expires = \is_int($expires) ? $expires : strtotime($expires);
+            $this->header['Expires'] = gmdate('D, d M Y H:i:s', $expires) . ' GMT';
+            $this->header['Cache-Control'] = 'max-age=' . ($expires - time());
+            if (isset($this->header['Pragma']) && 'no-cache' == $this->header['Pragma']) {
+                unset($this->header['Pragma']);
+            }
         }
 
-        if(isset($config->page_error[$short."s"]))
-        {
-            $content = file_exists($config->page_error[$short."s"]) ? file_get_contents($config->page_error[$short."s"]) : $message;
-            $content = strtr($content, ["{status}" => $status, "{title}" => $title, "{message}" => $message, "{link}" =>  '/']);
-            return $this->{"call{$status}"}($content, ['Content-Type' => 'text/html; charset=UTF-8']);
+        return $this;
+    }
+
+    /**
+     * Sends HTTP headers.
+     *
+     * @return Response Self reference
+     */
+    public function sendHeaders(): self
+    {
+        // Send status code header
+        if (false !== strpos(\PHP_SAPI, 'cgi')) {
+            header(
+                sprintf(
+                    'Status: %d %s',
+                    $this->status,
+                    $this->message[$this->status]
+                ),
+                true
+            );
+        } else {
+            header(
+                sprintf(
+                    '%s %d %s',
+                    $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1',
+                    $this->status,
+                    $this->message[$this->status]),
+                true,
+                $this->status
+            );
         }
+
+        // Send other headers
+        http_response_code($this->status);
+
+        foreach ($this->headers() as $name => $values) {
+            if(\is_array($values))
+            {
+                foreach ($values as $value) {
+                    header($name . ':' . $value, (strcasecmp($name, 'Content-Type') === 0 || strcasecmp($name, 'Date')), $this->status);
+                }
+            }else{
+                header($name . ':' . $values, (strcasecmp($name, 'Content-Type') === 0 || strcasecmp($name, 'Date')), $this->status);
+            }
+        }
+
+        if ($this->content_length) {
+            // Send content length
+            $length = $this->getContentLength();
+
+            if ($length > 0) {
+                header('Content-Length: ' . $length);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Gets the content length.
+     *
+     * @return int Content length
+     */
+    public function getContentLength(): int
+    {
+        return \extension_loaded('mbstring') ?
+            mb_strlen($this->body, 'latin1') :
+            \strlen($this->body);
+    }
+
+    /**
+     * Gets whether response was sent.
+     */
+    public function sent(): bool
+    {
+        return $this->sent;
     }
 
 }

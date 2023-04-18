@@ -7,25 +7,28 @@
 
 <p align="center">
     <a href="https://twitter.com/intent/follow?screen_name=JohnnyFaustfizz">
-        <img src="https://img.shields.io/twitter/follow/JohnnyFaustfizz?style=social&logo=twitter" alt="follow on Twitter">
+      <img src="https://img.shields.io/twitter/follow/JohnnyFaustfizz?style=social&logo=twitter" alt="follow on Twitter">
     </a>
     <a href="https://github.com/faustfizz/footup/">
-        <img src="https://img.shields.io/github/stars/faustfizz/footup?style=social">
+      <img src="https://img.shields.io/github/stars/faustfizz/footup?style=social">
     </a>
     <a href="https://github.com/badges/shields/pulse" alt="Activity">
-        <img src="https://img.shields.io/github/commit-activity/m/faustfizz/footup" />
+      <img src="https://img.shields.io/github/commit-activity/m/faustfizz/footup" />
     </a>
     <a href="https://github.com/faustfizz/footup/releases">
-        <img src="https://img.shields.io/github/v/release/faustfizz/footup?include_prereleases">
+      <img src="https://img.shields.io/github/v/release/faustfizz/footup?include_prereleases">
     </a>
     <a href="https://github.com/faustfizz/footup/releases">
-        <img src="https://img.shields.io/github/release-date/faustfizz/footup?include_prereleases">
+      <img src="https://img.shields.io/github/release-date/faustfizz/footup?include_prereleases">
     </a>
     <a href="https://github.com/faustfizz/footup">
-        <img src="https://img.shields.io/badge/php-^7.4-green">
+      <img src="https://img.shields.io/badge/php-^7.4-green">
     </a>
     <a href="https://github.com/faustfizz/footup">
-        <img src="https://img.shields.io/github/license/faustfizz/footup">
+      <img src="https://img.shields.io/github/license/faustfizz/footup">
+    </a>
+    <a href="https://github.com/faustfizz/footup">
+      <img src="https://img.shields.io/github/languages/code-size/faustfizz/footup">
     </a>
 </p>
 
@@ -97,6 +100,7 @@ FOOTUP MVC Framework
 │   │   │   ├── Scaffold.php
 │   │   │   ├── Seeder.php
 │   │   │   ├── Seed.php
+│   │   │   ├── Serve.php
 │   │   │   └── View.php
 │   │   ├── Exception
 │   │   │   ├── Exception.php
@@ -149,6 +153,7 @@ FOOTUP MVC Framework
 │   │   ├── Migration
 │   │   │   └── Migration.php
 │   │   ├── Migration.php
+│   │   ├── QueryBuilder.php
 │   │   ├── Schema
 │   │   │   ├── Column.php
 │   │   │   ├── ForeignKey.php
@@ -227,7 +232,7 @@ FOOTUP MVC Framework
 │   ├── Model.php
 │   ├── Orm
 │   │   ├── BaseModel.php
-│   │   └── QueryBuilder.php
+│   │   └── ModelQueryBuilder.php
 │   ├── Paginator
 │   │   ├── AbstractPaginator.php
 │   │   ├── Page.php
@@ -269,13 +274,13 @@ FOOTUP MVC Framework
 │   ├── favicon.svg
 │   ├── index.php
 │   └── uploads
-│       └── cache
-└── README.md
+├── README.md
+└── server.php
 ```
 
 ## Description
 
-FOOTUP MVC Framework focus primarily to speed and minimalistic. It's **220 Kb zip**, **140 kb gz**.
+FOOTUP MVC Framework focus primarily to speed and minimalistic. It's **250 Kb zip**, **148 kb xz**.
 It render withing **0.001 seconds** (I used a PHP 8.0.7 environment to write and test it).
 
 My goal is doing a thing that i'm the first person that use it with ease.

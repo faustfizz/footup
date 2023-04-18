@@ -13,6 +13,7 @@ namespace Footup;
 use Exception;
 use Footup\Http\Request;
 use Footup\Http\Response;
+use Footup\Routing\MiddleHandler;
 use Footup\Routing\Router;
 
 class Footup
@@ -66,18 +67,14 @@ class Footup
         $request = $this->router->request;
         $response = new Response();
 
-        $request->setEnv("end_time",  microtime(true));
-
-        list($start_time, $end_time) = [(float)$request->env("start_time"), (float)$request->env("end_time")];
-
-        $request->setEnv("delayed_time",  (float) number_format($end_time - $start_time, 4));
+        $this->endTime($request);
 
         try {
             if($handler instanceof \Closure)
             {
                 $return = $handler(...array_values($route->getArgs()));
 
-                if(!$return instanceof Response){
+                if(!$return instanceof Response && !empty($return)){
                     return $response->body($return)->send(true);
                 }
                 return $return->send(true);
@@ -86,9 +83,11 @@ class Footup
              * @var \Footup\Controller $controller
              */
             $controller = $this->runMiddles(new $handler(), $method, $request, $response);
+            // Recalculate endTime as we can run many Middles before
+            $this->endTime($request);
             $return = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
 
-            if(!$return instanceof Response){
+            if(!$return instanceof Response && !empty($return)){
                 return $response->body($return)->send(true);
             }
             return $return->send(true);
@@ -108,31 +107,17 @@ class Footup
      * @param Response $response
      * @return \Footup\Controller|mixed
      */
-    protected function runMiddles($controller, $method, Request $request, Response $response)
+    protected function runMiddles($controller, $method, Request $request, Response &$response)
     {
+        $middlesStack = [];
         /**
          * For globaux Middles
          */
         foreach($controller->getGlobalMiddles($method) as $key => $value)
         {
-            if(class_exists($value) || $method === $key)
+            if($value instanceof \Closure || class_exists($value) || $method === $key)
             {
-                /**
-                 * @var \Footup\Routing\Middle
-                 */
-                $middle = new $value();
-                $return = $middle->execute($request, $response);
-
-                if($return instanceof Response)
-                {
-                    $return->send(true);
-                    exit;
-                }
-                if($return !== true)
-                {
-                    $response->die(401, "Non Autorisé à visualiser ce site", "Non Autorisé à visualiser ce site sur ce lien <span style='color:red'>".$request->path()."</span>")->send(true);
-                    exit;
-                }
+                $middlesStack[] = $value;
             }
         }
 
@@ -140,59 +125,42 @@ class Footup
          * For spécifiques middles
          * @var string|string[]
          */
-        $middleware = $controller->getMiddles(trim(get_class($controller), '\\')) ?? $controller->getMiddles(rtrim(get_class($controller), '\\'));
+        $middles = $controller->getMiddles(trim(get_class($controller), '\\')) ?? $controller->getMiddles(rtrim(get_class($controller), '\\'));
 
-        if($middleware)
+        if($middles)
         {
-            if(!is_array($middleware) && class_exists($middleware))
+            if($value instanceof \Closure || !is_array($middles) && class_exists($middles))
             {
-                /**
-                 * @var \Footup\Routing\Middle
-                 */
-                $middle = (new $middleware);
-                $return = $middle->execute($request, $response);
-
-                if($return instanceof Response)
-                {
-                    $return->send(true);
-                    exit;
-                }
-                if($return !== true)
-                {
-                    $response->die(401, "Non Autorisé à visualiser ce site", "Non Autorisé à visualiser ce site sur ce lien <span style='color:red'>".$request->path()."</span>")->send(true);
-                    exit;
-                }
+                $middlesStack[] = $middles;
             }
-            elseif(is_array($middleware))
+            elseif(is_array($middles))
             {
-                foreach($middleware as $k => $mid)
+                foreach($middles as $key => $middle)
                 {
-                    if(class_exists($mid) && $method === $k)
+                    if($value instanceof \Closure || class_exists($middle) && $method === $key)
                     {
-                        /**
-                         * @var \Footup\Routing\Middle
-                         */
-                        $middle = new $mid();
-                        $return = $middle->execute($request, $response);
-
-                        if($return instanceof Response)
-                        {
-                            $return->send(true);
-                            exit;
-                        }
-                        if($return !== true)
-                        {
-                            $response->die(401, "Non Autorisé à visualiser ce site", "Non Autorisé à visualiser ce site sur ce lien <span style='color:red'>".$request->path()."</span>")->send(true);
-                            exit;
-                        }
+                        $middlesStack[] = $middle;
                     }
                 }
             }
         }
 
+        if(!empty($middlesStack))
+        {
+            $response = (new MiddleHandler($middlesStack))->dispatch($request, $response);
+        }
+        
         return $controller;
     }
+    
+    protected function endTime(Request $request)
+    {
+        $request->setEnv("end_time",  microtime(true));
 
+        list($start_time, $end_time) = [(float)$request->env("start_time"), (float)$request->env("end_time")];
+
+        $request->setEnv("delayed_time",  (float) number_format($end_time - $start_time, 4));
+    }
 
     /**
      * Get the value of VERSION

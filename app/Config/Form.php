@@ -13,101 +13,65 @@ class Form
         'close'     => true,
         'from_db'   => true
     ];
-    public static $submitText = "Envoyer";
 
-    /**
-     * Definir les class à appliquer dans champs ( inputs )
-     * @example - "inputType" => [
-     *  "wrapper"       =>  "col-lg-6",
-     *  "form_group"    =>  "input-group input-group-outline my-3",
-     *  "label"         =>  "form-label",
-     *  "input"         =>  "form-control form-control-lg"
-     * ]
-     * @var array
-     */
-    public static $class = array(
-        // for all input
-        'default'   =>  [
-            // div's class. e: col-lg-4
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg"
-        ],
-        'text'      =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg"
-        ],
-        'tel'       =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg"
-        ],
-        'textarea'   =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-static my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg"
-        ],
-        'select'   =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-static my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-select form-select-lg"
-        ],
-        'checkbox'   =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "form-check form-switch my-3",
-            "label"         =>  "form-check-label",
-            "input"         =>  "form-check-input"
-        ],
-        'radio'   =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "form-check my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-check-input"
-        ],
-        'date'      =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg date datepicker"
-        ],
-        'datetime'      =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg datetime datetimepicker"
-        ],
-        'time'      =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg time timepicker"
-        ],
-        'month'      =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg date datepicker"
-        ],
-        'file'       =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-control form-control-lg"
-        ],
-        'color'      =>  [
-            "wrapper"       =>  "",
-            "form_group"    =>  "input-group input-group-outline my-3",
-            "label"         =>  "form-label",
-            "input"         =>  "form-control-color form-control-lg"
-        ],
-        'submit'    =>  "btn btn-outline-primary"
-    );
+    public static function submitBtn()
+    {
+        return "<button type='submit' class='btn btn-success'> Envoyer </button>";
+    }
+
+    public static function getHtmlInput(object $field, string $validityClass = '')
+    {
+        switch ($field->type) {
+            case 'select':
+                return "<div class='form-group mb-3'>
+                            <div class='form-floating'>
+                                <select class='form-select $validityClass' name='{$field->name}' $field->inline_attributes>
+                                    ".implode('\n', $field->htmlOptions)."
+                                </select>
+                                <label for='{$field->id}'>".($field->label ?? ucfirst($field->name))."</label>
+                            </div>
+                        </div>";
+            case 'checkbox':
+            case 'radio':
+                return "<div class='mb-3'>
+                            <input type='radio' class='btn-check $validityClass' name='{$field->name}' autocomplete='off' $field->inline_attributes>
+                            <label class='btn btn-outline-success' for='{$field->id}'>".($field->label ?? ucfirst($field->name))."</label>
+                        </div>";
+            case 'file':
+                return "<div class='mb-3'>
+                            <label for='{$field->id}' class='form-label'>Choose file</label>
+                            <input type='file' class='form-control $validityClass' name='{$field->name}' $field->inline_attributes />
+                        </div>";
+            case 'hidden':
+                return "<input type='hidden' class='form-control $validityClass' name='{$field->name}' $field->inline_attributes />";
+            case 'textarea':
+                return "<div class='form-group mb-3'>
+                            <div class='form-floating'>
+                                <textarea class='form-control $validityClass' name='{$field->name}' style='height: 100px' $field->inline_attributes>$field->value</textarea>
+                                <label for='{$field->id}'>".($field->label ?? ucfirst($field->name))."</label>
+                            </div>
+                        </div>";
+            case 'text':
+            case 'tel':
+            case 'email':
+            case 'password':
+            case 'time':
+            case 'color':
+            case 'datetime':
+            case 'date':
+            case 'datetime-local':
+            case 'number':
+            case 'month':
+                default:
+                    return "<div class='form-group mb-3'>
+                                <div class='form-floating'>
+                                    <input type='{$field->type}' class='form-control $validityClass' name='{$field->name}' $field->inline_attributes>
+                                    <label for='{$field->id}'>".($field->label ?? ucfirst($field->name))."</label>
+                                </div>
+                            </div>";
+        }
+    }
+    
 
 }
 

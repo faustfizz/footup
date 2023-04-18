@@ -8,7 +8,6 @@ use Footup\Cli\Konsole as App;
 
 class View extends Command
 {
-    protected $filename;
     public $scaffold = false;
     protected $extension = VIEW_EXT;
 

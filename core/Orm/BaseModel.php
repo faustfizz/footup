@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -17,70 +17,65 @@ use Footup\Database\DbConnection;
 use Footup\Html\Form;
 use Footup\Paginator\Paginator;
 use PDO;
-use ReflectionClass;
 
 /**
  * BaseModel of FOOTUP
  * 
- * @method QueryBuilder reset()
- * @method QueryBuilder from($table, $reset = true)
- * @method QueryBuilder join($table, $fields, $type = 'INNER', $operator = '=')
- * @method QueryBuilder eftJoin($table, $fields, $operator = '=')
- * @method QueryBuilder rightJoin($table, $fields, $operator = '=')
- * @method QueryBuilder fullJoin($table, $fields, $operator = '=')
- * @method QueryBuilder where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
- * @method QueryBuilder whereOr(array|string $key, $val = null, $operator = null, $escape = true)
- * @method QueryBuilder whereIn($key, array $val, $escape = true)
- * @method QueryBuilder whereNotIn($key, array $val, $escape = true)
- * @method QueryBuilder whereRaw($str)
- * @method QueryBuilder whereNotNull($key)
- * @method QueryBuilder whereNull($key)
- * @method QueryBuilder whereOrIn(array|string $key, array $val, $escape = true)
- * @method QueryBuilder whereOrNotIn(array|string $key, array $val, $escape = true)
- * @method QueryBuilder whereOrRaw($str)
- * @method QueryBuilder whereOrNotNull($key)
- * @method QueryBuilder whereOrNull($key)
- * @method QueryBuilder asc($field)
- * @method QueryBuilder desc($field)
- * @method QueryBuilder orderBy($field, $direction = 'ASC')
- * @method QueryBuilder groupBy($field)
- * @method QueryBuilder having($field, $value = null)
- * @method QueryBuilder limit($limit = null, $offset = null)
- * @method QueryBuilder offset($offset, $limit = null)
- * @method QueryBuilder distinct($value = true)
- * @method QueryBuilder between($field, $value1, $value2)
- * @method QueryBuilder select($fields = '*', $limit = null, $offset = null)
+ * @method ModelQueryBuilder reset()
+ * @method ModelQueryBuilder from($table, $reset = true)
+ * @method ModelQueryBuilder join($table, $fields, $type = 'INNER', $operator = " = ")
+ * @method ModelQueryBuilder leftJoin($table, $fields, $operator = " = ")
+ * @method ModelQueryBuilder rightJoin($table, $fields, $operator = " = ")
+ * @method ModelQueryBuilder fullJoin($table, $fields, $operator = " = ")
+ * @method ModelQueryBuilder where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
+ * @method ModelQueryBuilder orWhere(array|string $key, $val = null, $operator = null, $escape = true)
+ * @method ModelQueryBuilder whereIn($key, array $val, $escape = true)
+ * @method ModelQueryBuilder whereNotIn($key, array $val, $escape = true)
+ * @method ModelQueryBuilder whereRaw($str)
+ * @method ModelQueryBuilder whereNotNull($key)
+ * @method ModelQueryBuilder whereNull($key)
+ * @method ModelQueryBuilder orWhereIn(array|string $key, array $val, $escape = true)
+ * @method ModelQueryBuilder orWhereNotIn(array|string $key, array $val, $escape = true)
+ * @method ModelQueryBuilder orWhereRaw($str)
+ * @method ModelQueryBuilder orWhereNotNull($key)
+ * @method ModelQueryBuilder orWhereNull($key)
+ * @method ModelQueryBuilder asc(string|array $field)
+ * @method ModelQueryBuilder desc(string|array $field)
+ * @method ModelQueryBuilder orderBy(string|array $field, $direction = 'ASC')
+ * @method ModelQueryBuilder groupBy(string|array $field)
+ * @method ModelQueryBuilder having(string|array $field, $value = null)
+ * @method ModelQueryBuilder limit($limit = null, $offset = null)
+ * @method ModelQueryBuilder offset($offset, $limit = null)
+ * @method ModelQueryBuilder distinct($value = true)
+ * @method ModelQueryBuilder between(string $field, $value1, $value2)
+ * @method ModelQueryBuilder select($fields = '*', $limit = null, $offset = null)
  * @method bool|int insert(array $data = [])
- * @method boll update($data)
  * @method bool delete($where = null)
- * @method QueryBuilder|string sql($sql = null)
- * @method QueryBuilder setDb($config = null, $init = true)
+ * @method ModelQueryBuilder|string sql($sql = null)
+ * @method ModelQueryBuilder setDb($config = null, $init = true)
  * @method \PDO getDb()
  * @method object execute(array $params = [])
  * @method BaseModel[]|null get($select = "*", $where = null, $limit = null, $offset = null)
  * @method BaseModel|null one($fields = null, $where = null)
- * @method BaseModel|null first($field = null, $where = null)
- * @method BaseModel|null last($field = null, $where = null)
+ * @method BaseModel|null first(string $field = null, $where = null)
+ * @method BaseModel|null last(string $field = null, $where = null)
  * @method mixed value($name)
- * @method mixed min($field, $key = null)
- * @method mixed max($field, $key = null)
- * @method mixed sum($field, $key = null)
- * @method mixed avg($field, $key = null)
- * @method int|null count($field = '*')
+ * @method mixed min(string $field, $key = null)
+ * @method mixed max(string $field, $key = null)
+ * @method mixed sum(string $field, $key = null)
+ * @method mixed avg(string $field, $key = null)
+ * @method int|null count(string $field = '*')
  * @method mixed quote($value)
- * @method BaseModel|BaseModel[]|null find($value = null, $field = null)
+ * @method BaseModel|BaseModel[]|null find($value = null, string $field = null)
  * @method bool save(BaseModel $object = null, array $fields = null)
- * @method bool remove($object = null)
  * @method array getTableInfo()
- * @method bool create(array $properties)
- * @method BaseModel[]|bool findOrCreate(array $properties = null)
  * @method string getLastQuery()
- * @method QueryBuilder setLastQuery(string $last_query)
+ * @method ModelQueryBuilder setLastQuery(string $last_query)
  * @method int getNumRows()
  * @method int|string getInsertID()
  * @method int getAffectedRows()
  */
-class BaseModel
+class BaseModel implements \Countable, \IteratorAggregate
 {
     /**
      * @var string $table
@@ -90,7 +85,7 @@ class BaseModel
     /**
      * @var string
      */
-    protected $primaryKey = 'id';
+    protected $primaryKey;
 
     /**
      * @var string can be self | object | array -- self for BaseModel and it's the default
@@ -124,7 +119,7 @@ class BaseModel
 
     
     /**
-     * Permet de passer un array de la forme $data = [ 'data' => [] ] avant insertion
+     * Permet de passer un array de la forme `$data = [ 'data' => [] ]` avant insertion
      * les callbacks doivent obligatoirement retourner $data
      * 
      * @var array
@@ -132,16 +127,15 @@ class BaseModel
     protected $beforeInsert         = [];
 
     /**
-     * Permet de passer un array de la forme $data = [ 'data' => [], 'where'    => ,'limit' =>, 'offset'    =>  ] 
-     * avant recuperation
-     * les callbacks doivent obligatoirement retourner $data
+     * Permet de passer un array de la forme `$data = [ 'data' => [], 'where'    => ,'limit' =>, 'offset'    =>  ]`
+     * avant recuperation les callbacks doivent obligatoirement retourner $data
      * 
      * @var array
      */
 	protected $beforeFind           = [];
 
     /**
-     * Permet de passer un array de la forme $data = [ 'id' => $primaryKeyValue ] avant suppression
+     * Permet de passer un array de la forme `$data = [ 'id' => $primaryKeyValue ]` avant suppression
      * les callbacks doivent obligatoirement retourner $data
      * 
      * @var array
@@ -149,21 +143,21 @@ class BaseModel
 	protected $beforeDelete         = [];
     
     /**
-     * Permet de passer un array de la forme $data = [ 'id' =>  $primaryKeyValue, 'data' => [] ] avant modification
+     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [] ]` avant modification
      * 
      * @var array
      */
 	protected $beforeUpdate         = [];
     
     /**
-     * Permet de passer un array de la forme $data = [ 'id' =>  $primaryKeyValue, 'data' => [] ] après insertion
+     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [] ]` après insertion
      * 
      * @var array
      */
 	protected $afterInsert          = [];
 
     /**
-     * Permet de passer un array de la forme $data = [ 'data' => [ ModelObjectFetched ] ] après recupération
+     * Permet de passer un array de la forme `$data = [ 'data' => [ ModelObjectFetched ] ]` après recupération
      * les callbacks doivent obligatoirement retourner $data
      * 
      * @var array
@@ -171,7 +165,7 @@ class BaseModel
 	protected $afterFind            = [];
 
     /**
-     * Permet de passer un array de la forme $data = [ 'id' => $primaryKeyValue, 'result'   => bool ] 
+     * Permet de passer un array de la forme `$data = [ 'id' => $primaryKeyValue, 'result'   => bool ]`
      * après suppression
      * 
      * @var array
@@ -179,7 +173,7 @@ class BaseModel
 	protected $afterDelete          = [];
     
     /**
-     * Permet de passer un array de la forme $data = [ 'id' =>  $primaryKeyValue, 'data' => [], 'result'  => bool ] 
+     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [], 'result'  => bool ]` 
      * après modification
      * 
      * @var array
@@ -189,43 +183,51 @@ class BaseModel
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ``` 
+     * <?php
+     * # Use with arrays:
      *
      *      protected $hasOne = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field'
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $hasOne        = [];
 
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      * 
      *      protected $hasMany = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field'
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $hasMany       = [];
 
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      *
      *      protected $manyMany = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'pivot' => 'Pivot_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field',
@@ -234,6 +236,7 @@ class BaseModel
      *                             ]
      *          ....................
      *      ];
+     * ```
      *
      */
     protected $manyMany      = [];
@@ -241,27 +244,32 @@ class BaseModel
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      *
      *     protected $belongsTo = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field'
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $belongsTo     = [];
 
     /**
      * FRelationships
      *
-     * Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      * 
      *      protected $belongsToMany = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'pivot' => 'Pivot_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field',
@@ -270,11 +278,12 @@ class BaseModel
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $belongsToMany = [];
 
     /**
-     * @var QueryBuilder
+     * @var ModelQueryBuilder
      */
     protected $builder;
     
@@ -294,7 +303,8 @@ class BaseModel
     public function __construct(array $data = null, $config = null, $init = true)
     {
         DbConnection::setDb($config, $init);
-        $this->setBuilder(new QueryBuilder($this));
+        
+        $this->setBuilder(new ModelQueryBuilder($this, DbConnection::getDb()));
 
         if(!empty($data))
         {
@@ -302,6 +312,15 @@ class BaseModel
         }
         // allow callbacks
         $this->tmp_callbacks = $this->allow_callbacks;
+    }
+
+    /**
+     * @param string $columns
+     * @return int
+     */
+    public function count($columns = "*")
+    {
+        return $this->getBuilder()->count($columns);
     }
 
     /**
@@ -388,9 +407,11 @@ class BaseModel
     {
         if (empty($data)) return false;
 
-        $pk = $this->getPrimaryKey();
+        $id = isset($data[$this->getPrimaryKey()]) ? $data[$this->getPrimaryKey()] : $this->id();
 
-        $this->{$pk} = $id = isset($data[$pk]) ? $data[$pk] : $this->{$pk};
+        if(empty($id) && empty($this->builder->where)){
+            throw new Exception("No primary key value to use as reference & no where specified !");
+        }
 
         $eventData = [
 			'id'   => $id,
@@ -403,7 +424,7 @@ class BaseModel
             $data = isset($eventData['data']) && !empty($eventData['data']) ? $eventData['data'] : $data;
 		}
 
-        $executed = $this->getBuilder()->update($data);
+        $executed = $this->getBuilder()->update($data, $id);
 
 		$eventData = [
 			'id'     => $id,
@@ -431,11 +452,13 @@ class BaseModel
      */
     public function delete($where = null)
     {
-        $pk = $this->getPrimaryKey();
-        $id = $this->{$pk} ?? $this->getBuilder()->getInsertID();
+        if(empty($where) && $this->id())
+        {
+            $where = $this->getPrimaryKey()." = ".$this->getBuilder()->quote($this->id());
+        }
 
         $eventData = [
-            'id'    => is_int($where) ? $where : $id
+            'id'    => $this->id()
         ];
 
 		if ($this->tmp_callbacks)
@@ -463,7 +486,7 @@ class BaseModel
      * Return the PK for this record.
      * 
      * @access public
-     * @return integer
+     * @return int|string
      */
     public function id()
     {
@@ -570,13 +593,10 @@ class BaseModel
      */
     public function getTable()
     {
-        $class = new ReflectionClass($this);
-        $classVar = $class->getDefaultProperties();
-        
-        if (isset($classVar['table']))
-            return $this->table = $classVar['table'];
-
-        return $this->table = strtolower($class->getShortName());
+        if (empty($this->table))
+            return $this->table = strtolower(basename(strtr(get_class($this), ['\\' => '/'])));
+            
+        return $this->table;
     }
 
     /**
@@ -586,12 +606,9 @@ class BaseModel
      */
     public function getPrimaryKey()
     {
-        $classVar = get_class_vars(get_class($this));
-        
-        if (isset($classVar['primaryKey']))
+        if (empty($this->primaryKey))
         {
-            $this->primaryKey = $classVar['primaryKey'];
-            return $this->primaryKey;
+            $this->primaryKey = "id_".strtolower(basename(strtr(get_class($this), ['\\' => '/'])));
         }
             
         return $this->primaryKey;
@@ -604,11 +621,10 @@ class BaseModel
      */
     public function getReturnType()
     {
-        $classVar = get_class_vars(get_class($this));
-
-        if (isset($classVar['returnType']))
+        if (empty($this->returnType))
         {
-            $this->returnType = $classVar['returnType'];
+            // We use our default 
+            $this->returnType = "self";
         }
             
         return $this->returnType;
@@ -616,6 +632,10 @@ class BaseModel
 
     public function __get($name)
     {
+        if(property_exists($this, $name))
+        {
+            return $this->{$name};
+        }
         if(in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany))))
         {
             return $this->loadRelations($name);
@@ -638,22 +658,26 @@ class BaseModel
      */
     public function __call($name, $arguments)
     {
+        if (method_exists($this, $name)) {
+            return $this->{$name}(...$arguments);
+        }
+
         // Note: value of $name is case sensitive.
         if (!method_exists($this, $name) && preg_match('/^findBy/', $name) == 1) {
-            // it's a find_by_{fieldname} dynamic method
+            // it's a findBy{fieldname} dynamic method
             $fieldname = substr($name, 6); // remove find by
             $match     = isset($arguments[0]) ? $arguments[0] : null;
             return $this->getBuilder()->find($match, strtolower($fieldname));
         }
 
         if (!method_exists($this, $name) && preg_match('/^firstBy/', $name) == 1) {
-            // it's a find_by_{fieldname} dynamic method
+            // it's a findBy{fieldname} dynamic method
             $fieldname = substr($name, 7);
             return $this->getBuilder()->first(strtolower($fieldname));
         }
 
         if (!method_exists($this, $name) && preg_match('/^lastBy/', $name) == 1) {
-            // it's a find_by_{fieldname} dynamic method
+            // it's a findBy{fieldname} dynamic method
             $fieldname = substr($name, 6);
             return $this->getBuilder()->last(strtolower($fieldname));
         }
@@ -677,9 +701,9 @@ class BaseModel
             return $this->loadRelations($name, (isset($arguments[0]) ? $arguments[0] : $this->per_page), (isset($arguments[1]) ? $arguments[1] : 0));
         }
 
-        // Load the method from the QueryBuilder magically
+        // Load the method from the ModelQueryBuilder magically
         if (method_exists($this->builder, $name)) {
-            // it's a find_by_{fieldname} dynamic method
+            // it's a findBy{fieldname} dynamic method
             return $this->getBuilder()->{$name}(...$arguments);
         }
 
@@ -693,14 +717,14 @@ class BaseModel
      */
     public static function __callStatic($method, $args)
     {
-        $model = (new ReflectionClass(\get_called_class()))->newInstance();
+        $model = (new static);
         return $model->{$method}(...$args);
     }
 
     public function fieldTypes()
     {
         $fields = array();
-        foreach ($this->getBuilder()->getDb()->query("SHOW COLUMNS FROM `{$this->getTable()}`")->fetchAll(PDO::FETCH_OBJ) as $field) {
+        foreach ($this->getBuilder()->getTableInfo(PDO::FETCH_OBJ) as $field) {
             $type = explode("(", $field->Type);
             
             $_type = $type[0];
@@ -718,28 +742,26 @@ class BaseModel
 
             if(in_array(strtolower($_type), ['set', 'enum']))
             {   $opt = strtr($length, ["'" => ""]);
-                $fields[$field->Field]['options'] = explode(",", $opt);
+                $field->options = explode(",", $opt);
             }
 
-            $fields[$field->Field]['maxLength'] = (int)$length;
-            $fields[$field->Field]['label'] = ucwords(strtr($field->Field, ["_" => " "]));
-            $fields[$field->Field]['name'] = $field->Field;
-            $fields[$field->Field]['id'] = $field->Field;
-            $fields[$field->Field]['isPrimaryKey'] = $field->Key == "PRI" ? true : false;
-            $fields[$field->Field]['type'] = $_type;
-            $fields[$field->Field]['null'] = $field->Null == 'YES' ? true : false;
-            $fields[$field->Field]['extra'] = $field->Extra;
-            $fields[$field->Field]['default'] = $field->Default;
-            $fields[$field->Field]['crudType'] = $this->getCrudType($_type, $length);
-        }
-        $results = $this->getBuilder()->getTableInfo();
-        $flds = array();
-        foreach ($results as $num => $row) {
-            $row = (array)$row;
-            $flds[$row['Field']] = (object)(array_merge($row, $fields[$row['Field']]));
+            $field->maxLength       = (int)$length;
+            $field->label           = ucwords(strtr($field->Field, ["_"     => " "]));
+            $field->placeholder     = ucwords(strtr($field->Field, ["_"     => " "]));
+            $field->name            = $field->Field;
+            $field->id              = 'field_'.$field->Field;
+            $field->isPrimaryKey    = $field->Key == "PRI" ? true : false;
+            $field->type            = $_type;
+            $field->null            = $field->Null == 'YES' ? true : false;
+            $field->required        = !$field->null;
+            $field->extra           = $field->Extra;
+            $field->default         = $field->Default === "current_timestamp()" ? date("Y-m-d H:i:s") : $field->Default;
+            $field->crudType        = $this->getCrudType($_type, $length);
+
+            $fields[$field->Field] = $field;
         }
 
-        return $flds;
+        return $fields;
     }
 
     /**
@@ -832,46 +854,6 @@ class BaseModel
         return $type;
     }
 
-    /**
-     * Try to match property value to the table column type
-     *
-     * @param string $field
-     * @param mixed  $value  to be matched
-     * @return mixed $value  with converted type
-     *
-     * @todo match all possible types properly
-     */
-    protected function matchType($field, $value)
-    {
-        $type = $this->getFieldType($field);
-        $type = explode('(', $type);
-        switch ($type[0]) {
-            case 'tinyint':
-            case 'smallint':
-            case 'mediumint':
-            case 'int':
-            case 'bigint':
-                $value = (int)$value;
-                break;
-            case 'char':
-            case 'varchar':
-            case 'tinytext':
-            case 'text':
-            case 'mediumtext':
-            case 'longtext':
-                $value = (string)$value;
-                break;
-            case 'double':
-            case 'float':
-            case 'decimal':
-                $value = (float)$value;
-                break;
-            default:
-                break;
-        }
-        return $value;
-    }
-
     public function getForm($action = "#", $data = [], $print = false)
     {
         if(empty($data))
@@ -879,7 +861,7 @@ class BaseModel
             $data = $this->getAttributes();
         }
 
-        $form = new Form($action, $this->fieldTypes(), $data);
+        $form = new Form($action ?? "#", $this->fieldTypes(), $data);
         return $form->build()->print($print);
     }
 
@@ -898,7 +880,7 @@ class BaseModel
         /**
          * @var BaseModel
          */
-        $model = (new ReflectionClass(\get_called_class()))->newInstance();
+        $model = (new static);
         return $model->get($select, $where, $limit, $offset);
     }
 
@@ -944,7 +926,7 @@ class BaseModel
      * @param array $relationConfig
      * @return BaseModel Model instance
      */
-    public function hasOne($relationConfig)
+    protected function hasOne($relationConfig)
     {
         /**
          * @var BaseModel
@@ -963,7 +945,7 @@ class BaseModel
      * @param array $relationConfig
      * @return BaseModel[] Models
      */
-    public function manyMany($relationConfig, $limit = null, $offset = null)
+    protected function manyMany($relationConfig, $limit = null, $offset = null)
     {
         /**
          * @var BaseModel
@@ -992,7 +974,7 @@ class BaseModel
      * @param array $relationConfig
      * @return BaseModel[] Models
      */
-    public function hasMany($relationConfig, $limit = null, $offset = null)
+    protected function hasMany($relationConfig, $limit = null, $offset = null)
     {
         /**
          * @var BaseModel
@@ -1011,7 +993,7 @@ class BaseModel
      * @param array $relationConfig
      * @return BaseModel Model instance
      */
-    public function belongsTo($relationConfig)
+    protected function belongsTo($relationConfig)
     {
         /**
          * @var BaseModel
@@ -1031,7 +1013,7 @@ class BaseModel
      * @param array $relationConfig
      * @return BaseModel[] Models
      */
-    public function belongsToMany($relationConfig, $limit = null, $offset = null)
+    protected function belongsToMany($relationConfig, $limit = null, $offset = null)
     {
         /**
          * @var BaseModel
@@ -1097,7 +1079,7 @@ class BaseModel
     /**
      * Get the value of builder
      *
-     * @return  QueryBuilder
+     * @return  ModelQueryBuilder
      */ 
     public function getBuilder()
     {
@@ -1107,11 +1089,11 @@ class BaseModel
     /**
      * Set the value of builder
      *
-     * @param  QueryBuilder  $builder
+     * @param  ModelQueryBuilder  $builder
      *
      * @return  self
      */ 
-    public function setBuilder(QueryBuilder $builder)
+    public function setBuilder(ModelQueryBuilder $builder)
     {
         $this->builder = $builder;
 
@@ -1141,4 +1123,10 @@ class BaseModel
 
         return $this;
     }
+
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->paginate());
+    }
+
 }

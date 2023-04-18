@@ -1,16 +1,16 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Orm
- * @version 0.1
+ * @package Footup/Database
+ * @version 0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
-namespace Footup\Orm;
+namespace Footup\Database;
 
 use Exception;
 use Footup\Database\DbConnection;
@@ -18,7 +18,7 @@ use PDO;
 use PDOException;
 use PDOStatement;
 
-class QueryBuilder
+class QueryBuilder implements \IteratorAggregate
 {
     /**
      * @var string $table
@@ -28,12 +28,17 @@ class QueryBuilder
     /**
      * @var string
      */
-    protected $primaryKey = 'id';
+    protected $primaryKey;
 
     /**
      * @var string
      */
-    protected $returnType;
+    protected $returnType = PDO::FETCH_OBJ;
+
+    /**
+     * @var string $selectFields
+     */
+    protected $selectFields;
 
     /**
      * @var string $where
@@ -81,29 +86,9 @@ class QueryBuilder
     protected $sql;
 
     /**
-     * @var int
-     */
-    protected $page_count = null;
-    
-    /**
-     * @var int
-     */
-    protected $current_page = 0;
-    
-    /**
-     * @var int
-     */
-    protected $per_page = 10;
-
-    /**
      * @var \PDO $db connection
      */
     protected static $db = null;
-
-    /**
-     * @var string|object $class classe courrante
-     */
-    protected $class;
 
     /**
      * @var string $last_query dernière requête sql
@@ -138,17 +123,14 @@ class QueryBuilder
     /**
      * QueryBuilder constructor
      *
-     * @param BaseModel $model the model that use the query builder
+     * @param string $table the table that we work on
      * @param PDO $DbConnection
      */
-    public function __construct(BaseModel $model, $DbConnection = null)
+    public function __construct(string $table, $DbConnection = null)
     {
-        $this->class = $model;
-        self::$db = $DbConnection instanceof PDO ? $DbConnection : DbConnection::getDb();
-
-        $this->getTable();
+        $this->from($table);
+        self::$db = $DbConnection instanceof PDO ? $DbConnection : DbConnection::setDb(null, true);
         $this->getPrimaryKey();
-        $this->getReturnType();
     }
 
     /*** Core Methods ***/
@@ -171,17 +153,6 @@ class QueryBuilder
     {
         if (!$this->getTable()) {
             throw new Exception(text("Db.undefinedTable"));
-        }
-    }
-
-    /**
-     * Checks whether the class property has been set.
-     * @throws Exception
-     */
-    private function checkClass()
-    {
-        if (!$this->class) {
-            throw new Exception(text("Db.modelClassUndefined"));
         }
     }
 
@@ -218,7 +189,7 @@ class QueryBuilder
     {
         $this->table = $table;
         if ($reset) {
-            return $this->reset();
+            $this->reset();
         }
         return $this;
     }
@@ -232,7 +203,7 @@ class QueryBuilder
      * @return QueryBuilder Self reference
      * @throws Exception For invalid join type
      */
-    public function join($table, $fields, $type = 'INNER', $operator = '=')
+    public function join($table, $fields, $type = ' INNER ', $operator = " = ")
     {
         static $joins = array(
             'INNER',
@@ -267,9 +238,9 @@ class QueryBuilder
      * @param array|string $fields Fields to join on
      * @return QueryBuilder Self reference
      */
-    public function leftJoin($table, $fields, $operator = '=')
+    public function leftJoin($table, $fields, $operator = " = ")
     {
-        return $this->join($table, $fields, 'LEFT OUTER', $operator);
+        return $this->join($table, $fields, ' LEFT OUTER ', $operator);
     }
 
     /**
@@ -279,9 +250,9 @@ class QueryBuilder
      * @param array|string $fields Fields to join on
      * @return QueryBuilder Self reference
      */
-    public function rightJoin($table, $fields, $operator = '=')
+    public function rightJoin($table, $fields, $operator = " = ")
     {
-        return $this->join($table, $fields, 'RIGHT OUTER', $operator);
+        return $this->join($table, $fields, ' RIGHT OUTER ', $operator);
     }
 
     /**
@@ -291,9 +262,9 @@ class QueryBuilder
      * @param array $fields Fields to join on
      * @return QueryBuilder Self reference
      */
-    public function fullJoin($table, $fields, $operator = '=')
+    public function fullJoin($table, $fields, $operator = " = ")
     {
-        return $this->join($table, $fields, 'FULL OUTER', $operator);
+        return $this->join($table, $fields, ' FULL OUTER ', $operator);
     }
 
     /**
@@ -305,36 +276,36 @@ class QueryBuilder
      */
     public function where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
     {
-        $this->where .= (empty($this->where)) ? 'WHERE ' : '';
+        $this->where .= (empty($this->where)) ? ' WHERE ' : '';
 
         if (is_array($key)) {
             $key = array_filter($key);
             $counter = count($key);
             foreach ($key as $k => $v) {
-                $glue = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where']) ? $link : '';
+                $glue = !empty($this->where) && trim(strtolower($this->where)) != 'where' ? $link : '';
                 $this->where .= $counter > 1 ? ' (' : '';
                 $counter--;
-                $this->where .= $glue . $k . ' ' . trim($operator ?? '=') . ' ' . ($escape && !is_numeric($v) ? $this->quote($v) : $v);
+                $this->where .= $glue . $k . ' ' . trim($operator ?? " = ") . ' ' . ($escape && !is_numeric($v) ? $this->quote($v) : $v);
                 $this->where .= $counter == 0 && count($key) > 1 ? ') ' : '';
             }
         } else if (is_string($key) && is_null($val)) {
-            $link = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where'])  ? $link : '';
+            $link = !empty($this->where) && trim(strtolower($this->where)) != 'where'  ? $link : '';
             $this->where .= $link . $key;
         } else {
-            $link = !empty($this->where) && !in_array(trim($this->where), ['WHERE', 'where'])  ? $link : '';
-            if (trim($operator) != 'IS' && trim($operator) != 'is') {
-                if (is_array($val) && !empty($val)) {
-                    $val = '(' . implode(',', array_map(array($this, 'quote'), $val)) . ')';
-                    $operator = ' IN ';
-                }
+            $link = !empty($this->where) && trim(strtolower($this->where)) != 'where'  ? $link : '';
+            if (trim(strtolower($operator)) != 'is') {
                 if (is_null($val)) {
                     $operator = "IS NOT NULL";
                 }
                 if (is_string($val) && !empty($val)) {
                     $val = ($escape && !is_numeric($val) ? $this->quote($val) : $val);
                 }
+                if (is_array($val) && !empty($val)) {
+                    $val = '(' . implode(',', array_map(array($this, 'quote'), $val)) . ')';
+                    $operator = ' IN ';
+                }
             }
-            $this->where .= trim($link . $key . ' ' . trim($operator ?? '=') . ' ' . $val);
+            $this->where .= trim($link . $key . ' ' . trim($operator ?? " = ") . ' ' . $val);
         }
 
         return $this;
@@ -346,19 +317,19 @@ class QueryBuilder
      * @param string $operator
      * @return QueryBuilder
      */
-    public function whereOr(array|string $key, $val = null, $operator = null, $escape = true)
+    public function orWhere($key, $val = null, $operator = null, $escape = true)
     {
         return $this->where($key, $val, $operator, ' OR ', $escape);
     }
 
     /**
-     * @param array|string $key
+     * @param string $key
      * @param array|string $val
      * @return QueryBuilder
      */
     public function whereIn($key, array $val, $escape = true)
     {
-        return $this->where($key, $val, ' IN ', 'AND', $escape);
+        return $this->where($key, $val, ' IN ', ' AND ', $escape);
     }
 
     /**
@@ -368,7 +339,7 @@ class QueryBuilder
      */
     public function whereNotIn($key, array $val, $escape = true)
     {
-        return $this->where($key, $val, ' NOT IN ', 'AND', $escape);
+        return $this->where($key, $val, ' NOT IN ', ' AND ', $escape);
     }
 
     /**
@@ -407,9 +378,9 @@ class QueryBuilder
      * @param array|string $val
      * @return QueryBuilder
      */
-    public function whereOrIn(array|string $key, array $val, $escape = true)
+    public function orWhereIn(array|string $key, array $val, $escape = true)
     {
-        return $this->whereOr($key, $val, ' IN ', $escape);
+        return $this->orWhere($key, $val, ' IN ', $escape);
     }
 
     /**
@@ -417,9 +388,9 @@ class QueryBuilder
      * @param array $val
      * @return QueryBuilder
      */
-    public function whereOrNotIn(array|string $key, array $val, $escape = true)
+    public function orWhereNotIn(array|string $key, array $val, $escape = true)
     {
-        return $this->whereOr($key, $val, ' NOT IN ', $escape);
+        return $this->orWhere($key, $val, ' NOT IN ', $escape);
     }
 
     /**
@@ -428,36 +399,36 @@ class QueryBuilder
      * @param string $link
      * @return QueryBuilder
      */
-    public function whereOrRaw($str)
+    public function orWhereRaw($str)
     {
-        return $this->whereOr($str);
+        return $this->orWhere($str);
     }
 
     /**
      * @param $key
      * @return QueryBuilder
      */
-    public function whereOrNotNull($key)
+    public function orWhereNotNull($key)
     {
-        return $this->whereOr($key, ' NOT NULL ', ' IS ');
+        return $this->orWhere($key, ' NOT NULL ', ' IS ');
     }
 
     /**
      * @param $key
      * @return QueryBuilder
      */
-    public function whereOrNull($key)
+    public function orWhereNull($key)
     {
-        return $this->whereOr($key, 'NULL', ' IS ');
+        return $this->orWhere($key, 'NULL', ' IS ');
     }
 
     /**
      * Adds an ascending sort for a field.
      *
-     * @param string $field Field name
+     * @param string|array $field Field name
      * @return QueryBuilder Self reference
      */
-    public function asc($field)
+    public function asc($field = null)
     {
         return $this->orderBy($field, 'ASC');
     }
@@ -465,10 +436,10 @@ class QueryBuilder
     /**
      * Adds an descending sort for a field.
      *
-     * @param string $field Field name
+     * @param string|array $field Field name
      * @return QueryBuilder Self reference
      */
-    public function desc($field)
+    public function desc($field = null)
     {
         return $this->orderBy($field, 'DESC');
     }
@@ -476,25 +447,25 @@ class QueryBuilder
     /**
      * Adds fields to order by.
      *
-     * @param string $field Field name
+     * @param string|array $field Field name
      * @param string $direction Sort direction
      * @return QueryBuilder Self reference
      */
-    public function orderBy($field, $direction = 'ASC')
+    public function orderBy(mixed $field, $direction = 'ASC')
     {
-        $join = (empty($this->order)) ? 'ORDER BY' : ',';
+        $this->order = (empty($this->order)) ? 'ORDER BY ' : $this->order.',';
 
         if (is_array($field)) {
             foreach ($field as $key => $value) {
                 $field[$key] = $value . ' ' . $direction;
             }
         } else {
-            $field .= ' ' . $direction;
+            $field = ($field ?? $this->getPrimaryKey()) .' ' . $direction;
         }
 
         $fields = (is_array($field)) ? implode(', ', $field) : $field;
 
-        $this->order .= $join . ' ' . $fields;
+        $this->order .= $fields;
 
         return $this;
     }
@@ -507,7 +478,7 @@ class QueryBuilder
      */
     public function groupBy($field)
     {
-        $join = (empty($this->order)) ? 'GROUP BY' : ',';
+        $join = (empty($this->groups)) ? 'GROUP BY ' : ',';
         $fields = (is_array($field)) ? implode(',', $field) : $field;
 
         $this->groups .= $join . ' ' . $fields;
@@ -524,8 +495,18 @@ class QueryBuilder
      */
     public function having($field, $value = null)
     {
-        $join = (empty($this->having)) ? 'HAVING' : '';
-        $this->having .= $this->where($field, $value, $join);
+        $join = (empty($this->having)) ? 'HAVING ' : '';
+        if(is_array($field))
+        {   $thisModel = $this;
+            $fields = array_map(function($key, $value) use ($thisModel){
+                $chain = is_numeric($key) ? $thisModel->primaryKey." = ".$thisModel->quote($value) : "$key = ".$thisModel->quote($value);
+                return $chain;
+            }, array_keys($field), array_values($field));
+            $join .= implode(',', $fields);
+        }else{
+            $join .= !empty($value) ? $field." = ".$this->quote($value) : $field;
+        }
+        $this->having .= $join;
 
         return $this;
     }
@@ -539,7 +520,7 @@ class QueryBuilder
      */
     public function limit($limit = null, $offset = null)
     {
-        if ($limit !== null) {
+        if ($limit !== null && empty($this->limit)) {
             $this->limit = 'LIMIT ' . $limit;
         }
         if ($offset !== null) {
@@ -558,7 +539,7 @@ class QueryBuilder
      */
     public function offset($offset, $limit = null)
     {
-        if ($offset !== null) {
+        if ($offset !== null && empty($this->offset)) {
             $this->offset = 'OFFSET ' . $offset;
         }
         if ($limit !== null) {
@@ -576,7 +557,7 @@ class QueryBuilder
      */
     public function distinct($value = true)
     {
-        $this->distinct = ($value) ? 'DISTINCT' : '';
+        $this->distinct = ($value) ? 'DISTINCT ' : '';
 
         return $this;
     }
@@ -615,51 +596,49 @@ class QueryBuilder
         $fields = (is_array($fields)) ? implode(',', $fields) : $fields;
         $this->limit($limit, $offset);
 
-        return $this->sql(array(
-            'SELECT',
-            $this->distinct,
-            $fields,
-            'FROM',
-            $this->getTable(),
-            $this->joins,
-            $this->where,
-            $this->groups,
-            $this->having,
-            $this->order,
-            $this->limit,
-            $this->offset
-        ));
+        if($fields === "*" && !empty($this->selectFields)) return $this;
+
+        $this->selectFields .= !empty($this->selectFields) ?  ", ".$fields : $fields;
+
+        return $this;
     }
 
     /**
      * Builds an insert query.
      *
-     * @param array $data Array of key and values to insert
+     * @param array $data Array of key and values or array of keys to insert
+     * @param array $values Array of values to use prepared statement
      * @return bool|int
      */
-    public function insert(array $data = [])
+    public function insert(array $data = [], $values = [])
     {
         $this->checkTable();
 
         if (empty($data)) return false;
 
-        $keys = implode(',', array_keys($data));
-        $values = implode(',', array_values(
-            array_map(
-                array($this, 'quote'),
-                $data
-            )
-        ));
+        if(!empty($values))
+        {
+            $keys = implode(',', array_values($data));
+            $vals = str_repeat("? , ", count($values));
+        }else{
+            $keys = implode(',', array_keys($data));
+            $vals = implode(',', array_values(
+                array_map(
+                    array($this, 'quote'),
+                    $data
+                )
+            ));
+        }
         
         $this->sql(array(
             'INSERT INTO',
-            $this->getTable(),
+            ($this->getTable()),
             '(' . $keys . ')',
             'VALUES',
-            '(' . $values . ')'
+            '(' . trim($vals, " ,") . ')'
         ));
 
-        $insert = $this->execute();
+        $insert = $this->execute($values);
 
         return $insert->ok;
     }
@@ -667,41 +646,34 @@ class QueryBuilder
     /**
      * Builds an update query.
      *
-     * @param array $data Array of keys and values, or string literal
+     * @param array|\stdClass $data Array of keys and values or object of type \stdClass
+     * @param int|null $id 
      * @return bool 
      */
-    public function update($data)
+    public function update($data, $id = null)
     {
         $this->checkTable();
+        $data = is_object($data) ? get_object_vars($data) : $data;
 
         $values = array();
-
-        $pk = $this->getPrimaryKey();
-        $id = $this->class->{$pk} ?? $this->insert_id ?? null;
-
-        if(!isset($data[$pk]) && !is_null($id))
-        {
-            $this->where($pk . " = " . $id);
-        }else{
-            $id = isset($data[$pk]) ? $data[$pk] : $id;
-            $this->where($pk . " = " . $id);
-        }
+        
+        $id && $this->where($this->getPrimaryKey() . " = " . $id);
         
         if (empty($this->where)) {
             throw new Exception(text("Db.dontUse", ["UPDATE"]));
         }
-
-        if (is_array($data)) {
-            foreach ($data as $key => $value) {
-                $values[] = is_numeric($key) ? $value : $key . '=' . $this->quote($value);
+        
+        foreach ($data as $key => $value) {
+            if(is_numeric($key))
+            {
+                throw new Exception("Data array should be in format [field => value] !");
             }
-        } else {
-            $values[] = (string)$data;
+            $values[] = $key . " = " . $this->quote($value);
         }
         
         $this->sql(array(
             'UPDATE',
-            $this->table,
+            $this->getTable(),
             'SET',
             implode(',', $values),
             $this->where
@@ -723,14 +695,7 @@ class QueryBuilder
     {
         $this->checkTable();
 
-        $pk = $this->getPrimaryKey();
-        $id = is_int($where) ? $where : $this->class->{$pk} ?? $this->insert_id ?? null;
-
-        if (is_string($where) || is_array($where)) {
-            $this->where($where);
-        }else{
-            $this->where($pk . " = " . $id);
-        }
+        $where && $this->where(is_int($where) ? $this->getPrimaryKey()." = ".$where : $where);
 
         if (empty($this->where)) {
             throw new Exception(text("Db.dontUse", ["DELETE"]));
@@ -738,7 +703,7 @@ class QueryBuilder
 
         $this->sql(array(
             'DELETE FROM',
-            $this->table,
+            $this->getTable(),
             $this->where
         ));
 
@@ -757,9 +722,10 @@ class QueryBuilder
     {
         if ($sql !== null) {
             $this->sql = trim(
-                (is_array($sql)) ?
-                    array_reduce($sql, array($this, 'build')) :
-                    $sql
+                strtr(
+                    is_array($sql) ? array_reduce($sql, array($this, 'build')) : $sql,
+                    ["  " => " "]
+                )
             );
 
             return $this;
@@ -769,30 +735,6 @@ class QueryBuilder
     }
 
     /*** Database Access Methods ***/
-
-    /**
-     * Sets the database connection.
-     *
-     * @param \PDO|DbConnection|string|array $config
-     * @param boolean $init
-     * @throws Exception For connection error
-     * @return QueryBuilder
-     */
-    public function setDb($config = null, $init = true)
-    {
-        self::$db = DbConnection::setDb($config, $init);
-        return $this;
-    }
-
-    /**
-     * Gets the database connection.
-     *
-     * @return object Database connection
-     */
-    public function getDb()
-    {
-        return self::$db;
-    }
 
     /**
      * Executes a sql statement.
@@ -809,10 +751,10 @@ class QueryBuilder
 
         $result = null;
 
-        $this->num_rows = 0;
-        $this->affected_rows = 0;
-        $this->insert_id = -1;
-        $this->setLastQuery($this->sql);
+        $this->setNumRows(0)
+            ->setAffectedRows(0)
+            ->setInsertId(-1)
+            ->setLastQuery($this->sql);
 
         if (!empty($this->sql))
         {
@@ -827,9 +769,10 @@ class QueryBuilder
                     $bool = $result->execute($params);
                     $error = !$bool ? $result->errorInfo()[2] : null;
 
-                    $this->num_rows = $result->rowCount();
-                    $this->affected_rows = $result->rowCount();
-                    $this->insert_id = self::$db->lastInsertId();
+                    $this->setNumRows($result->rowCount())
+                        ->setAffectedRows($result->rowCount())
+                        ->setInsertId(-1)
+                        ->setInsertId(self::$db->lastInsertId());
                 }
             } catch (PDOException $ex) {
                 $error = $ex->getMessage();
@@ -845,7 +788,7 @@ class QueryBuilder
 
         $this->reset();
         
-        $res = ['ok' => ($bool && $this->insert_id ? $this->insert_id : $bool), 'result' => $result];
+        $res = ['ok' => ($bool && $this->getInsertID() ? $this->getInsertID() : $bool), 'result' => $result];
         return (object)$res;
     }
 
@@ -856,16 +799,31 @@ class QueryBuilder
      * @param array|string $where
      * @param int $limit
      * @param int $offset
-     * @return BaseModel[]
+     * @return \stdClass[]
      */
     public function get($select = "*", $where = null, $limit = null, $offset = null)
     {
-        if (!is_null($where)) {
+        if (!empty($where)) {
             $this->where($where);
         }
         if (empty($this->sql)) {
             $this->select($select, $limit, $offset);
         }
+
+        $this->sql(array(
+            'SELECT',
+            $this->distinct,
+            $this->selectFields,
+            'FROM',
+            ($this->getTable()),
+            $this->joins,
+            $this->where,
+            $this->groups,
+            $this->having,
+            $this->order,
+            $this->limit,
+            $this->offset
+        ));
 
         $execute = $this->execute();
 
@@ -874,18 +832,7 @@ class QueryBuilder
          */
         $result = $execute->result;
 
-        switch ($this->returnType) {
-            case 'object':
-                return $result->fetchAll(PDO::FETCH_OBJ);
-            
-            case 'array':
-                return $result->fetchAll(PDO::FETCH_ASSOC);
-                
-            case 'self':
-                default:
-                return $result->fetchAll(PDO::FETCH_CLASS, get_class($this->class));
-        }
-
+        return $result->fetchAll($this->getReturnType());
     }
 
     /**
@@ -894,7 +841,7 @@ class QueryBuilder
      * @param string $fields
      * @param string|array $where
      *
-     * @return BaseModel|null Row
+     * @return \stdClass|\Footup\Orm\BaseModel|null Row
      */
     public function one($fields = null, $where = null)
     {
@@ -915,11 +862,14 @@ class QueryBuilder
      * @param string $field
      * @param string|array $where
      *
-     * @return BaseModel|null Row
+     * @return \stdClass|\Footup\Orm\BaseModel|null Row
      */
     public function first($field = null, $where = null)
     {
-        return $this->asc($field ?? $this->getPrimaryKey())->one(null, $where);
+        if (empty($this->sql)) {
+            $this->asc($field);
+        }
+        return $this->one(null, $where);
     }
 
     /**
@@ -928,7 +878,7 @@ class QueryBuilder
      * @param string $field
      * @param string|array $where
      *
-     * @return BaseModel|null Row
+     * @return \stdClass|\Footup\Orm\BaseModel|null Row
      */
     public function last($field = null, $where = null)
     {
@@ -1068,8 +1018,6 @@ class QueryBuilder
     {
         $field = is_null($field) ? $this->getPrimaryKey() : $field;
 
-        $this->from($this->table ?? $this->getTable(), false);
-
         if (!empty($value)) {
             if ((is_int($value) || is_string($value)) && ($this->getPrimaryKey() == $field || property_exists($this, $field))) {
                 $this->where($field, $value);
@@ -1087,75 +1035,6 @@ class QueryBuilder
     }
 
     /**
-     * Saves an object to the database.
-     *
-     * @param \Footup\Orm\BaseModel $object Class instance
-     * @param array $fields Select database fields to save
-     * @return bool
-     */
-    public function save(BaseModel $object = null, array $fields = null)
-    {
-        $object = is_null($object) ? $this->class : $object;
-
-        $this->from($object->getTable());
-
-        $pk = $object->getPrimaryKey();
-        $id = $object->class->{$pk} ?? null;
-
-        $data = $object->getAttributes();
-
-        if (is_null($id)) {
-            if ($bool = $this->insert(
-                    array_filter($data, 
-                        function($v, $k) {
-                            return  trim($v) !== "";
-                        }, ARRAY_FILTER_USE_BOTH
-                    )
-                )
-            ) {
-                $object->class->{$pk} = $this->insert_id;
-            }
-            return $bool;
-        } else {
-            if ($fields !== null) {
-                $keys = array_flip($fields);
-                $data = array_intersect_key($data, $keys);
-            }
-            
-            return $this->where($pk, $id)
-                ->update(
-                    array_filter($data, 
-                        function($v, $k) {
-                            return trim($v) !== "";
-                        }, ARRAY_FILTER_USE_BOTH
-                    )
-                );
-        }
-    }
-
-    /**
-     * Removes an object from the database.
-     *
-     * @param \Footup\Orm\BaseModel $object Class instance
-     * @return bool
-     */
-    public function remove($object = null)
-    {
-        $object = is_null($object) ? $this->class : $object;
-
-        $this->from($object->getTable());
-
-        $pk = $object->getPrimaryKey();
-        $id = $object->class->{$pk} ?? null;
-
-        if ($id !== null) {
-            return $this->where($pk, $id)
-                ->delete();
-        }
-        return false;
-    }
-
-    /**
      * Get the table name for this ER class.
      * 
      * @access public
@@ -1163,8 +1042,9 @@ class QueryBuilder
      */
     public function getTable()
     {
-        return $this->table = $this->class->getTable();
+        return $this->table;
     }
+
 
     /**
      * Get the value of primaryKey
@@ -1173,7 +1053,21 @@ class QueryBuilder
      */
     public function getPrimaryKey()
     {
-        return $this->primaryKey = $this->class->getPrimaryKey();
+        if(empty($this->primaryKey))
+        {
+            $columns = $this->getTableInfo();
+            
+            foreach ($columns as $key => $column) {
+                # code...
+                if($column["Key"] === "PRI")
+                {
+                    $this->primaryKey = $column["Field"];
+                    break;
+                }
+            }
+        }
+        
+        return $this->primaryKey;
     }
 
     /**
@@ -1183,56 +1077,27 @@ class QueryBuilder
      */
     public function getReturnType()
     {
-        return $this->returnType = $this->class->getReturnType();
+        return $this->returnType;
     }
 
     /**
-     * @return array|string|false $tableInfo
+     * @param int $fetchType
+     * @return array $tableInfo
      */
-    public function getTableInfo()
+    public function getTableInfo($fetchType = PDO::FETCH_ASSOC)
     {
         if (empty($this->tableInfo)) {
             $stmt = self::$db->prepare(
-                "SHOW COLUMNS FROM " . $this->getTable() . ";"
+                "SHOW COLUMNS FROM " . ($this->getTable()) . ";"
             );
             $stmt->execute();
             $this->tableInfo = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
-        return $this->tableInfo;
+        
+        return $fetchType === PDO::FETCH_OBJ ? array_map(function($field){
+            return (object)$field;
+        }, $this->tableInfo) : $this->tableInfo;
     }
-
-    /**
-     * Create new data row.
-     *
-     * @param array $properties
-     * 
-     * @return bool
-     */
-    public function create(array $properties)
-    {
-        return $this->insert($properties);
-    }
-
-
-    /**
-     * Find one model in the database.
-     * or create if not exists.
-     *
-     * @param array $properties
-     * 
-     * @return BaseModel[]|bool|array
-     */
-    public function findOrCreate(array $properties = null)
-    {
-        // search for model and create if not exists
-        $object = $this->get('*', $properties);
-        if (empty($object) && !empty($properties)) {
-            return $this->create($properties);
-        } else {
-            return $object;
-        }
-    }
-
 
     /**
      * Get $last_query dernière requête sql
@@ -1289,12 +1154,95 @@ class QueryBuilder
     }
 
     /**
-     * Get $class classe courrante
+     * Undocumented function
      *
-     * @return  string|object
-     */ 
-    public function getModel()
+     * @todo i need help here 
+     * @return \ArrayIterator
+     */
+    public function getIterator()
     {
-        return $this->class;
+        # code...
+        $data = $this->get();
+        return new \ArrayIterator($data ?? []);
+    }
+
+    /**
+     * Set the value of returnType
+     *
+     * @param  string  $returnType
+     *
+     * @return  self
+     */ 
+    public function setReturnType(string $returnType)
+    {
+        $this->returnType = $returnType;
+
+        return $this;
+    }
+
+    /**
+     * Set the value of primaryKey
+     *
+     * @param  string  $primaryKey
+     *
+     * @return  self
+     */ 
+    public function setPrimaryKey(string $primaryKey)
+    {
+        $this->primaryKey = $primaryKey;
+
+        return $this;
+    }
+
+    /**
+     * Set $insert_id id dernièrement ajouté
+     *
+     * @param  int|string  $insert_id  $insert_id id dernièrement ajouté
+     *
+     * @return  self
+     */ 
+    public function setInsertId($insert_id)
+    {
+        $this->insert_id = $insert_id;
+
+        return $this;
+    }
+
+    /**
+     * Set $num_rows
+     *
+     * @param  int  $num_rows  $num_rows
+     *
+     * @return  self
+     */ 
+    public function setNumRows(int $num_rows)
+    {
+        $this->num_rows = $num_rows;
+
+        return $this;
+    }
+
+    /**
+     * Set $affcted_rows
+     *
+     * @param  int  $affected_rows  $affcted_rows
+     *
+     * @return  self
+     */ 
+    public function setAffectedRows(int $affected_rows)
+    {
+        $this->affected_rows = $affected_rows;
+
+        return $this;
+    }
+
+    /**
+     * Get $db connection
+     *
+     * @return  \PDO
+     */ 
+    public function getDb()
+    {
+        return self::$db;
     }
 }

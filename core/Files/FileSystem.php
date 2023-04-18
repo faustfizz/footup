@@ -1,6 +1,6 @@
 <?php
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -21,7 +21,7 @@ class FileSystem
      * @param  string $path
      * @return string
      */
-    public function hash($path)
+    public static function hash($path)
     {
         return md5_file($path);
     }
@@ -31,7 +31,7 @@ class FileSystem
      * @param  bool   $lock
      * @return string
      */
-    public function get($path, $lock = false)
+    public static function get($path, $lock = false)
     {
         if (is_file($path)) {
             if ($lock === true) {
@@ -67,7 +67,7 @@ class FileSystem
      * @param  bool   $lock
      * @return int
      */
-    public function put(string $path, string $content, bool $lock = false)
+    public static function put(string $path, string $content, bool $lock = false)
     {
         return file_put_contents($path, $content, $lock ? LOCK_EX : 0);
     }
@@ -76,7 +76,7 @@ class FileSystem
      * @param string $path
      * @param string $content
      */
-    public function replace(string $path, $content)
+    public static function replace(string $path, $content)
     {
         clearstatcache(true, $path);
 
@@ -84,11 +84,11 @@ class FileSystem
 
         $temp = tempnam(dirname($path), basename($path));
 
-        $this->chmod($temp, 0777 - umask());
+        self::chmod($temp, 0777 - umask());
 
-        $this->put($temp, $content);
+        self::put($temp, $content);
 
-        $this->move($temp, $path);
+        self::move($temp, $path);
     }
 
     /**
@@ -96,13 +96,13 @@ class FileSystem
      * @param  string $data
      * @return int
      */
-    public function prepend($path, $data)
+    public static function prepend($path, $data)
     {
         if (file_exists($path)) {
-            $data .= $this->get($path);
+            $data .= self::get($path);
         }
 
-        return $this->put($path, $data);
+        return self::put($path, $data);
     }
 
     /**
@@ -110,7 +110,7 @@ class FileSystem
      * @param  string $data
      * @return int
      */
-    public function append($path, $data)
+    public static function append($path, $data)
     {
         return file_put_contents($path, $data, FILE_APPEND);
     }
@@ -120,7 +120,7 @@ class FileSystem
      * @param  int  $permission
      * @return mixed
      */
-    public function chmod(string $path, int $permission = null)
+    public static function chmod(string $path, int $permission = null)
     {
         if (!is_null($permission)) {
             return chmod($path, $permission);
@@ -134,7 +134,7 @@ class FileSystem
      * @param  bool   $preserve
      * @return bool|void
      */
-    public function delete(string $path, bool $preserve = false)
+    public static function delete(string $path, bool $preserve = false)
     {
         if (is_file($path) && file_exists($path)) {
             return @unlink($path);
@@ -143,9 +143,9 @@ class FileSystem
 
             foreach ($items as $item) {
                 if ($item->isFile()) {
-                    $status = $this->delete($item);
+                    $status = self::delete($item);
                 } elseif ($item->isDir() && ! $item->isLink()) {
-                    if ($this->delete($item)) {
+                    if (self::delete($item)) {
                         $status = @rmdir($item);
                     }
                 }
@@ -164,7 +164,7 @@ class FileSystem
      * @param  string $target
      * @return bool
      */
-    public function move($path, $target)
+    public static function move($path, $target)
     {
         return rename($path, $target);
     }
@@ -175,7 +175,7 @@ class FileSystem
      * @param  int    $flag
      * @return bool
      */
-    public function copy(string $directory, string $destination, int $flag = null)
+    public static function copy(string $directory, string $destination, int $flag = null)
     {
         if (! is_dir($directory) && ! is_file($directory)) {
             return false;
@@ -187,7 +187,7 @@ class FileSystem
             }
 
             if (! is_dir($destination)) {
-                $this->mkdir($destination, 0755, true);
+                self::mkdir($destination, 0755, true);
             }
 
             $items = new FilesystemIterator($directory, $flag);
@@ -196,11 +196,11 @@ class FileSystem
                 $target = $destination . '/' . $item->getBasename();
 
                 if ($item->isDir()) {
-                    if (! $this->copy($item->getPathname(), $target, $flag)) {
+                    if (! self::copy($item->getPathname(), $target, $flag)) {
                         return false;
                     }
                 } else {
-                    if (! $this->copy($item->getPathname(), $target, $flag)) {
+                    if (! self::copy($item->getPathname(), $target, $flag)) {
                         return false;
                     }
                 }
@@ -218,7 +218,7 @@ class FileSystem
      * @param  bool   $recursive
      * @return bool
      */
-    public function mkdir(string $path, int $permission = 0755, bool $recursive = true)
+    public static function mkdir(string $path, int $permission = 0755, bool $recursive = true)
     {
         if (is_dir($path) || is_file($path)) {
             return true;
@@ -232,7 +232,7 @@ class FileSystem
      * @param  int    $flag
      * @return RecursiveIteratorIterator|array
      */
-    public function iterator(string $path, int $flag = null)
+    public static function iterator(string $path, int $flag = null)
     {
         if (! is_dir($path)) {
             return [];

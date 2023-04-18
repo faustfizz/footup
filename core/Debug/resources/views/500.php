@@ -40,7 +40,7 @@
             <div class="panel mb-10 bg-primary" style="padding-top:15px">
                 <div class="panel-body" style="max-width:940px;margin:auto;width:100%;text-align:left">
                     <p class="exp-exp"><?=str_last($ex->class)?> <span style="color:black">| <?= frameworkName() .' - '. frameworkVersion() ?></span></p> 
-                    <p><li style="display:list-item"><?=$ex->message?> <span class="copy" data-copy='<?=$ex->message?>'  onclick="copy(this)">copy</span></li></p>
+                    <p><li style="display:list-item"><?=$ex->message?> <span class="copy" data-copy="<?= htmlentities($ex->message) ?>"  onclick="copy(this)">copy</span></li></p>
                 </div>
             </div>
         </div>
@@ -257,11 +257,7 @@
     <!-- FOOTER: DEBUG INFO + COPYRIGHTS -->
     <footer>
         <div class="environment">
-
-            <p>Boot + Render time <b><?php echo request()->env('delayed_time') ?></b> seconds</p>
-
             <p>Environment: <b><?php echo ENVIRONMENT ?></b> - <?php echo "PHP ". PHP_VERSION ?></p>
-
         </div>
 
         <div class="copyright">
@@ -271,13 +267,12 @@
     </footer>
 
     <script>
-        <?php echo ouch_assets('js/custom.min.js')?>
-        
         EnlighterJS.init('pre', "code", {
             language : 'php',
             theme : 'beyond',
-            title: '<?= $ex->message ?>'
+            title: <?= json_encode($ex->message) ?>
         });
+        <?php echo ouch_assets('js/custom.min.js')?>
     </script>
 
 </body>

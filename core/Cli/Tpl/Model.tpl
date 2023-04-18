@@ -34,43 +34,51 @@ class {class_name} extends Model
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ``` 
+     * <?php
+     * # Use with arrays:
      *
      *      protected $hasOne = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field'
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $hasOne        = [];
 
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      * 
      *      protected $hasMany = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field'
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $hasMany       = [];
 
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      *
      *      protected $manyMany = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'pivot' => 'Pivot_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field',
@@ -79,6 +87,7 @@ class {class_name} extends Model
      *                             ]
      *          ....................
      *      ];
+     * ```
      *
      */
     protected $manyMany      = [];
@@ -86,27 +95,32 @@ class {class_name} extends Model
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      *
      *     protected $belongsTo = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field'
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $belongsTo     = [];
 
     /**
      * FRelationships
      *
-     * @example # Use with arrays:
+     * ```
+     * <?php
+     * # Use with arrays:
      * 
      *      protected $belongsToMany = [
      *           'properties1' => [
-     *                              'model' => 'Other_Model_1',
+     *                              'model' => 'Other_Model',
      *                              'pivot' => 'Pivot_Model',
      *                              'foreign_key' => 'foreign_field',
      *                              'local_key' => 'local_field',
@@ -115,6 +129,7 @@ class {class_name} extends Model
      *                             ]
      *          ....................
      *      ];
+     * ```
      */
     protected $belongsToMany = [];
 

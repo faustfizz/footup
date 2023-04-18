@@ -1,7 +1,7 @@
 <?php
 
 /**
- * FOOTUP - 0.1.6 - 2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
  * Hard Coded by Faustfizz Yous
  * 
@@ -581,7 +581,7 @@ class Router
     public function notFound($title = null, $message = "")
     {
         $title = $title ?? text("Http.pageNotFound");
-        (new Response())->die("404", $title, $message)->send(true);
+        (new Response())->die("404", $title, $message);
         exit;
     }
 
