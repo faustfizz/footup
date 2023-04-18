@@ -15,7 +15,7 @@ namespace Footup\Routing;
 use Footup\Http\Request;
 use Footup\Http\Response;
 
-abstract class Middle implements MiddleInterface
+interface MiddleInterface
 {
     /**
      * Execute the middle --- Function called by the core framework
@@ -27,5 +27,5 @@ abstract class Middle implements MiddleInterface
      * @return Response|string|void -- to continue to the next middle return $next($request, $response),
      * return $response to skip all other middle and return a string or void if you need to stop here
      */
-    abstract public function execute(Request $request, Response $response, $next);
+    public function execute(Request $request, Response $response, $next);
 }

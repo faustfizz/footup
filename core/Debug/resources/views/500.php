@@ -257,11 +257,7 @@
     <!-- FOOTER: DEBUG INFO + COPYRIGHTS -->
     <footer>
         <div class="environment">
-
-            <p>Boot + Render time <b><?php echo request()->env('delayed_time') ?></b> seconds</p>
-
             <p>Environment: <b><?php echo ENVIRONMENT ?></b> - <?php echo "PHP ". PHP_VERSION ?></p>
-
         </div>
 
         <div class="copyright">
