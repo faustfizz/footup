@@ -367,10 +367,10 @@ class Response implements JsonSerializable
     }
 
     /**
-     * @param  array $header
+     * @param  string|array $header
      * @return $this
      */
-    public function header(string|array $headerKey, $value = null)
+    public function header($headerKey, $value = null)
     {
         if(empty($headerKey)) return $this;
 

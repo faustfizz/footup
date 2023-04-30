@@ -191,7 +191,7 @@ class Lang
 	 * @param string $locale
 	 * @return bool|string
 	 */
-	public function setInput(string $file, string|array $key, mixed $value = null, string $locale = null, )
+	public function setInput(string $file, $key, mixed $value = null, string $locale = null)
 	{
 		if(!is_array($key) && is_null($value))
 		{
@@ -328,7 +328,7 @@ class Lang
 	 * @param mixed $value
 	 * @return bool|string
 	 */
-	protected function write(string $locale, string $file, string|array $key, mixed $value = null)
+	protected function write(string $locale, string $file, $key, mixed $value = null)
 	{
 		$file = strtolower($file);
 
@@ -398,7 +398,7 @@ class Lang
 	 * @param mixed $value
 	 * @return bool|string
 	 */
-	public function removeLine(string $file, string|array $key = null, string $locale = null)
+	public function removeLine(string $file, $key = null, string $locale = null)
 	{
 		if (strpos($file, '.'))
 		{
@@ -468,7 +468,7 @@ class Lang
 	 * @param string $path
 	 * @return mixed
 	 */
-	protected function require(string $path): mixed
+	protected function require(string $path)
 	{
         if(!file_exists(APP_PATH.$path) && !file_exists(SYS_PATH.$path))
         {
