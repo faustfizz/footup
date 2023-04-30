@@ -450,18 +450,8 @@ class Router
             throw new Exception(text("Http.routeMethodNotFound", [$requestMethod]));
         }
 
-        if (!isset($this->routes[$requestMethod]) && $this->autoRoute()) {
-            /**
-             * Sorry but nothing match, so we go with autodiscovery if enabled
-             */
-            if ($this->autoRoute())
-            {
-                return $this->doAutoRoute($requestUri);
-            }
-        }
-
         // Merge the any-method-routes and those matching the current request method
-        $routes = $this->routes[$requestMethod];
+        $routes = $this->routes[$requestMethod] ?? $this->routes["GET"];
         
         // Check for direct matches
         if (isset($this->routes[$requestMethod][$requestUri])) {
@@ -481,6 +471,14 @@ class Router
         if($route instanceof Route)
         {
             return $route;
+        }
+
+        /**
+         * Sorry but nothing match, so we go with autodiscovery if enabled
+         */
+        if ($this->autoRoute())
+        {
+            return $this->doAutoRoute($requestUri);
         }
 
         $this->notFound(null, text("Http.pageNotFoundMessage", [$requestUri]));
