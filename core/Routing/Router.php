@@ -451,7 +451,7 @@ class Router
         }
 
         // Merge the any-method-routes and those matching the current request method
-        $routes = $this->routes[$requestMethod];
+        $routes = $this->routes[$requestMethod] ?? $this->routes["GET"];
         
         // Check for direct matches
         if (isset($this->routes[$requestMethod][$requestUri])) {
