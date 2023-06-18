@@ -74,10 +74,10 @@ class Footup
             {
                 $return = $handler(...array_values($route->getArgs()));
 
-                if(!$return instanceof Response && !empty($return)){
-                    return $response->body($return)->send(true);
+                if($return instanceof Response){
+                    return $return->send(true);
                 }
-                return $return->send(true);
+                return $response->body($return ?? '')->send(true);
             }
             /**
              * @var \Footup\Controller $controller
@@ -87,17 +87,17 @@ class Footup
             $this->endTime($request);
             $return = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
 
-            if(!$return instanceof Response && !empty($return)){
-                return $response->body($return)->send(true);
+            if($return instanceof Response){
+                return $return->send(true);
             }
-            return $return->send(true);
+            return $response->body($return ?? '')->send(true);
 
         } catch (\ErrorException $exception) {
             // Erreur 500.
             throw new \ErrorException(text("Http.error500", [self::NAME, $exception->getMessage()]), $exception->getCode(), $exception->getSeverity(), $exception->getFile(), $exception->getLine(), $exception);
         }
     }
-
+    
     /**
      * Execute les middleWare
      *
@@ -147,7 +147,7 @@ class Footup
 
         if(!empty($middlesStack))
         {
-            $response = (new MiddleHandler($middlesStack))->dispatch($request, $response);
+            (new MiddleHandler($middlesStack))->dispatch($request, $response);
         }
         
         return $controller;
