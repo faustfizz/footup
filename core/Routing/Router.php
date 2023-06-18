@@ -316,7 +316,7 @@ class Router
 
         // Build the placeholder regex from the delimiter characters
         $placeholderExpression = sprintf(
-            '#(?:\%s(\w+?)(?:%s[^/]+)?\%s)#',
+            '#(?:\%s(\w+?)(?:%s[^/]+)?\??\%s)#',
             static::MATCH_DELIMITER_OPENING,
             static::MATCH_DELIMITER_SEPARATOR,
             static::MATCH_DELIMITER_CLOSING
@@ -355,6 +355,8 @@ class Router
                 PREG_SET_ORDER
             );
 
+            print_r($placeholders);
+
             // Create a copy of the URI (we'll need it later on)
             $expression = $uri;
 
@@ -364,7 +366,7 @@ class Router
             // Pop the last params if params's size bigger than placeholders size
             if(count($params) > count($placeholders))
             {
-                $params = array_chunk($params, 2)[0];
+                $params = array_slice($params, 0, count($placeholders));
             }
             // We continue as we have placeholder so create parameters
             $parameters = !empty($params) ? implode("/", $params) : "";
@@ -385,10 +387,11 @@ class Router
 
                     // Replacement will be anything between the offset and the last character ("}")
                     // This should probably account for the closing delimiter length.
-                    $replacement = substr($placeholder, $offset, -1);
+                    $replacement = substr($placeholder, $offset, strpos($placeholder, '?'. static::MATCH_DELIMITER_CLOSING) !== false ? -2 : -1);
                 }
+                
                 // Replace the full placeholder with a match-anything rule
-                $expression = str_replace($placeholder, "($replacement)", $expression);
+                $expression = str_replace($placeholder, strpos($placeholder, '?'. static::MATCH_DELIMITER_CLOSING) !== false ? "?($replacement)?" : "($replacement)", $expression);
             }
 
             // Keep the matched variable values
@@ -398,6 +401,11 @@ class Router
             if (preg_match("~^$expression\$~", ($reverse ? "/".ltrim($parameters, "/") : $requestUri), $matches)) {
                 // Remove the useless full matches
                 $o = array_shift($matches);
+
+                if(count($placeholderNames) > count($matches))
+                {
+                    $placeholderNames = array_slice($placeholderNames, 0, count($matches));
+                }
                 
                 // Assign the placeholder names to the matched values from the URI
                 $variables = array_combine($placeholderNames, $matches);
