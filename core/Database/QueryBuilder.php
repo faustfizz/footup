@@ -31,7 +31,8 @@ class QueryBuilder implements \IteratorAggregate
     protected $primaryKey;
 
     /**
-     * @var string
+     * A supported PDO FETCH type
+     * @var int
      */
     protected $returnType = PDO::FETCH_OBJ;
 
@@ -163,15 +164,16 @@ class QueryBuilder implements \IteratorAggregate
      */
     public function reset()
     {
-        $this->where    =
-            $this->joins    =
-            $this->order    =
-            $this->groups   =
-            $this->having   =
-            $this->distinct =
-            $this->limit    =
-            $this->offset   =
-            $this->sql      = '';
+        $this->where        =
+        $this->selectFields =
+        $this->joins        =
+        $this->order        =
+        $this->groups       =
+        $this->having       =
+        $this->distinct     =
+        $this->limit        =
+        $this->offset       =
+        $this->sql          = '';
 
         return $this;
     }
@@ -638,9 +640,7 @@ class QueryBuilder implements \IteratorAggregate
             '(' . trim($vals, " ,") . ')'
         ));
 
-        $insert = $this->execute($values);
-
-        return $insert->ok;
+        return ($this->execute($values))->ok;
     }
 
     /**
@@ -660,7 +660,11 @@ class QueryBuilder implements \IteratorAggregate
         $id && $this->where($this->getPrimaryKey() . " = " . $id);
         
         if (empty($this->where)) {
-            throw new Exception(text("Db.dontUse", ["UPDATE"]));
+            if(!empty($data[$this->getPrimaryKey()])) {
+                $this->where($this->getPrimaryKey() . " = " . $this->quote($data[$this->getPrimaryKey()]));
+            }else{
+                throw new Exception(text("Db.dontUse", ["UPDATE"]));
+            }
         }
         
         foreach ($data as $key => $value) {
@@ -679,10 +683,7 @@ class QueryBuilder implements \IteratorAggregate
             $this->where
         ));
 
-        $ex = $this->execute();
-        $execute = $ex->ok;
-
-        return $execute;
+        return ($this->execute())->ok;
     }
 
     /**
@@ -707,9 +708,7 @@ class QueryBuilder implements \IteratorAggregate
             $this->where
         ));
 
-        $execute = ($this->execute())->ok;
-
-        return $execute;
+        return ($this->execute())->ok;
     }
 
     /**
@@ -788,8 +787,7 @@ class QueryBuilder implements \IteratorAggregate
 
         $this->reset();
         
-        $res = ['ok' => ($bool && $this->getInsertID() ? $this->getInsertID() : $bool), 'result' => $result];
-        return (object)$res;
+        return (object)['ok' => ($bool && $this->getInsertID() ? $this->getInsertID() : $bool), 'result' => $result];
     }
 
     /**
@@ -848,12 +846,9 @@ class QueryBuilder implements \IteratorAggregate
         if (empty($this->sql)) {
             $this->limit(1)->select();
         }
-
         $data = $this->get($fields ?? "*");
 
-        $row = (!empty($data)) ? $data[0] : null;
-
-        return $row;
+        return (!empty($data)) ? $data[0] : null;
     }
 
     /**
@@ -899,9 +894,7 @@ class QueryBuilder implements \IteratorAggregate
     {
         $row = $this->one();
 
-        $value = (!empty($row)) ? $row->$name : null;
-
-        return $value;
+        return (!empty($row)) ? $row->$name : null;
     }
 
     /**
@@ -1073,7 +1066,7 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get the value of primaryKey
      * 
-     * @return string
+     * @return int
      */
     public function getReturnType()
     {
