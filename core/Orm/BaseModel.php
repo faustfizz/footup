@@ -6,7 +6,7 @@
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Orm
- * @version 0.2
+ * @version 0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 

@@ -2,7 +2,7 @@
 
 <div align="center">
   <img src="core/footup-ascii-art.png" alt="Footup Logo" width="400px" />
-  <h2 class="name_title">FOOTUP MVC FRAMEWORK - 0.1.6</h2>
+  <h2 class="name_title">FOOTUP MVC FRAMEWORK - 0.1.7-alpha.1</h2>
 </div>
 
 <p align="center">
