@@ -6,7 +6,7 @@
  * Hard Coded by Faustfizz Yous
  * 
  * @package Footup/Database
- * @version 0.3
+ * @version 0.4
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
