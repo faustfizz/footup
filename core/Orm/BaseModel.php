@@ -119,6 +119,32 @@ class BaseModel implements \Countable, \IteratorAggregate
 
     
     /**
+     * @var array
+     */
+    protected $originalData         = [];
+
+    /**
+     * @var array
+     */
+    protected $data         = [];
+
+    /**
+     * Add all fillable fields here, if empty, all fields are fillable except  fields added on the **exclude** array
+     * 
+     * @var string[]
+     */
+    protected $fillable         = [];
+
+    /**
+     * Add all non fillable fields here, if empty, all fields are fillable
+     * 
+     * Consider using this in case you have too many fields and cannot add them all on **fillable** array
+     * 
+     * @var string[]
+     */
+    protected $exclude         = [];
+
+    /**
      * Permet de passer un array de la forme `$data = [ 'data' => [] ]` avant insertion
      * les callbacks doivent obligatoirement retourner $data
      * 
@@ -330,33 +356,30 @@ class BaseModel implements \Countable, \IteratorAggregate
     public function fill(array $data) 
     {
         $fields = $this->getFieldNames();
+
+        // if we have a list to exclude, so we use it and we don't use the fillable
+        if(!empty($this->exclude)) {
+            $fields = array_filter($fields, function($field){
+                return !in_array($field, $this->exclude);
+            });
+        }else{
+            // as we don't have a list of excluded fields, we use the fillable
+            if(!empty($this->fillable)) {
+                $fields = array_filter($fields, function($field){
+                    return in_array($field, $this->fillable) || $field === $this->getPrimaryKey();
+                });
+            }
+        }
+
+        // If fillable and exclude are empty, we'll use all fields of the table
+
         foreach ($fields as $field) {
             # code...
-            if(isset($data[$field]))
-                $this->$field = $data[$field];
+            if(isset($data[$field])) 
+                $this->data[$field] = $data[$field];
                 
         }
         return $this;
-    }
-
-    /**
-     * Retrouve les données de l'objet class courant
-     *
-     * @param string $property
-     * @return mixed|array
-     */
-    public function getAttributes($property = null) 
-    {
-        $data = array();
-        foreach ($this->getFieldNames() as $column) {
-            # code...
-            if(!is_null($property) && $column == $property && $this->$column)
-            {
-                return $this->$column;
-            }
-            $data[$column] = $this->$column ?? null;
-        }
-        return $data;
     }
 
     /**
@@ -377,7 +400,7 @@ class BaseModel implements \Countable, \IteratorAggregate
             $data = $eventData['data'];
 		}
 
-        $inserted = $this->getBuilder()->insert($data);
+        $inserted = $this->getBuilder()->insert(array_intersect_key($data, $this->getFillableKeys()));
 
         $eventData = [
 			'id'     => $this->getBuilder()->getInsertID(),
@@ -424,7 +447,9 @@ class BaseModel implements \Countable, \IteratorAggregate
             $data = isset($eventData['data']) && !empty($eventData['data']) ? $eventData['data'] : $data;
 		}
 
-        $executed = $this->getBuilder()->update($data, $id);
+        if($this->hasChanged()) {
+            $executed = $this->getBuilder()->update(array_intersect_key($data, $this->getFillableKeys()), $id);
+        }
 
 		$eventData = [
 			'id'     => $id,
@@ -490,7 +515,52 @@ class BaseModel implements \Countable, \IteratorAggregate
      */
     public function id()
     {
-        return $this->{$this->getPrimaryKey()};
+        return $this->data[$this->getPrimaryKey()];
+    }
+
+    /**
+     * We may know if model data is changed
+     *
+     * @return boolean
+     */
+    public function hasChanged() {
+        // if the length of original data and the current data is different, we have make a change
+        if(count($this->originalData) != count($this->data)){
+            return true;
+        }
+
+        // if the length for the two arrays is the same we check for data value
+        foreach($this->data as $field => $value) {
+            if(isset($this->originalData[$field]) && $value != $this->originalData[$field]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get fillables for insert or update action
+     *
+     * @return array
+     */
+    public function getFillableKeys() {
+        $fillableKeys = $this->getFieldNames();
+        $returnedKeys = [];
+        // if we have a list to exclude, so we use it and we don't use the fillable
+        if(!empty($this->exclude)) {
+            $returnedKeys = array_filter($fillableKeys, function($field){
+                return !in_array($field, $this->exclude);
+            });
+        }else{
+            // as we don't have a list of excluded fields, we use the fillable
+            if(!empty($this->fillable)) {
+                $returnedKeys = array_filter($fillableKeys, function($field){
+                    return in_array($field, $this->fillable) || $field === $this->getPrimaryKey();
+                });
+            }
+        }
+
+        return empty($returnedKeys) ? array_flip($fillableKeys) : array_flip($returnedKeys);
     }
 
     /**
@@ -636,6 +706,10 @@ class BaseModel implements \Countable, \IteratorAggregate
         {
             return $this->{$name};
         }
+        if(isset($this->data[$name]))
+        {
+            return $this->data[$name];
+        }
         if(in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany))))
         {
             return $this->loadRelations($name);
@@ -648,7 +722,7 @@ class BaseModel implements \Countable, \IteratorAggregate
 
     public function __set($property, $val)
     {
-        return $this->{$property} = $val;
+        return $this->data[$property] = $val;
     }
 
     /**
@@ -687,7 +761,7 @@ class BaseModel implements \Countable, \IteratorAggregate
 
         if($setter === "set" && in_array($field, $this->getFieldNames()))
         {
-            $this->$field = isset($arguments[0]) ? $arguments[0] : null;
+            $this->data[$field] = isset($arguments[0]) ? $arguments[0] : null;
             return $this;
         }
 
@@ -761,7 +835,7 @@ class BaseModel implements \Countable, \IteratorAggregate
             $fields[$field->Field] = $field;
         }
 
-        return $fields;
+        return array_intersect_key($fields, $this->getFillableKeys());
     }
 
     /**
@@ -858,7 +932,7 @@ class BaseModel implements \Countable, \IteratorAggregate
     {
         if(empty($data))
         {
-            $data = $this->getAttributes();
+            $data = $this->getData();
         }
 
         $form = new Form($action ?? "#", $this->fieldTypes(), $data);
@@ -1129,4 +1203,72 @@ class BaseModel implements \Countable, \IteratorAggregate
         return new \ArrayIterator($this->paginate());
     }
 
+
+    /**
+     * Get all fillable fields here, if empty, all fields are fillable except fields added on the **exclude** array
+     *
+     * @return  string[]
+     */ 
+    public function getFillable()
+    {
+        return $this->fillable;
+    }
+
+    /**
+     * Get all non fillable fields here, if empty, all fields are fillable
+     *
+     * @return  string[]
+     */ 
+    public function getExclude()
+    {
+        return $this->exclude;
+    }
+
+    /**
+     * Get the value of originalData
+     *
+     * @return  array
+     */ 
+    public function getOriginalData()
+    {
+        return $this->originalData;
+    }
+
+    /**
+     * Set the value of originalData
+     *
+     * @param  array  $originalData
+     *
+     * @return  self
+     */ 
+    public function setOriginalData(array $originalData)
+    {
+        $this->originalData = $originalData;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of data
+     *
+     * @return  array
+     */ 
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * Set the value of data
+     *
+     * @param  array  $data
+     *
+     * @return  self
+     */ 
+    public function setData(array $data)
+    {
+        $this->data = $data;
+
+        return $this;
+    }
 }

@@ -32,6 +32,22 @@ class {class_name} extends Model
     protected $returnType = '{return_type}';
 
     /**
+     * Add all fillable fields here, if empty, all fields are fillable except  fields added on the **exclude** array
+     * 
+     * @var string[]
+     */
+    protected $fillable         = [];
+
+    /**
+     * Add all non fillable fields here, if empty, all fields are fillable
+     * 
+     * Consider using this in case you have too many fields and cannot add them all on **fillable** array
+     * 
+     * @var string[]
+     */
+    protected $exclude         = [];
+
+    /**
      * FRelationships
      *
      * ``` 
