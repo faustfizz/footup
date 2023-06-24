@@ -68,6 +68,27 @@ class ModelQueryBuilder extends QueryBuilder
         }
         return parent::delete($where);
     }
+    
+    /**
+     * Fetch a value from a field.
+     *
+     * @param string $name Database field name
+     * @return mixed Row value
+     */
+    public function value($name)
+    {
+        $returnType = $this->getReturnType();
+
+        if($this->getReturnType() !== 'object') {
+            $this->setReturnType('object');
+        }
+        
+        $row = $this->one();
+
+        $this->setReturnType($returnType);
+
+        return (!empty($row)) ? $row->$name : null;
+    }
 
     /**
      * Undocumented function
@@ -117,8 +138,15 @@ class ModelQueryBuilder extends QueryBuilder
                 return $result->fetchAll(PDO::FETCH_ASSOC);
                 
             case 'self':
-                default:
-                return $result->fetchAll(PDO::FETCH_CLASS, get_class($this->model));
+                default:{
+                    $items = $result->fetchAll(PDO::FETCH_ASSOC);
+                    $model = get_class($this->model);
+                    return array_map(function ($item) use ($model) {
+                        $Model = new $model;
+                        $Model->fill($item);
+                        return $Model->setOriginalData($Model->getData());
+                    }, $items);
+                }
         }
 
     }
@@ -138,8 +166,8 @@ class ModelQueryBuilder extends QueryBuilder
 
         $pk = $object->getPrimaryKey();
         $id = $object->{$pk} ?? null;
-
-        $data = $object->getAttributes();
+        
+        $data = $object->getData();
 
         if (is_null($id)) {
             if ($bool = $this->insert(
@@ -160,12 +188,12 @@ class ModelQueryBuilder extends QueryBuilder
             }
             
             return $this->update(
-                    $id,
                     array_filter($data, 
                         function($v, $k) {
                             return trim($v) !== "";
                         }, ARRAY_FILTER_USE_BOTH
-                    )
+                    ),
+                    $id
                 );
         }
     }
