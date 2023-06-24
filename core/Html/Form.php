@@ -215,15 +215,15 @@ class Form
             if(is_numeric($key))
             {
                 $attr = array("value" => strtolower($value));
-
-                if($field->default && strtolower($field->default) == strtolower($value['value']) || (isset($data[$field->name]) && $value['value'] == $data[$field->name]))
+                
+                if($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name]))
                 {
                     $attr['selected'] = true;
                 }
             }else{
                 $attr = array("value" => strtolower($key));
-                
-                if($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name]))
+
+                if($field->default && strtolower($field->default) == strtolower($value['value']) || (isset($data[$field->name]) && $value['value'] == $data[$field->name]))
                 {
                     $attr['selected'] = true;
                 }
