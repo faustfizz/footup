@@ -15,6 +15,10 @@ namespace Footup\Orm;
 use Exception;
 use Footup\Database\DbConnection;
 use Footup\Html\Form;
+use Footup\Orm\Traits\CastValue;
+use Footup\Orm\Traits\Events;
+use Footup\Orm\Traits\Fillable;
+use Footup\Orm\Traits\Relations;
 use Footup\Paginator\Paginator;
 use PDO;
 
@@ -77,6 +81,8 @@ use PDO;
  */
 class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
 {
+    use Fillable, Events, Relations, CastValue;
+
     /**
      * @var string $table
      */
@@ -106,17 +112,6 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
      * @var int
      */
     protected $per_page = 10;
-	
-    /**
-     * @var bool $allow_callbacks activer les évenements 
-     */
-	protected $allow_callbacks      = true;
-	
-    /**
-     * @var bool $tmp_callbacks activer les évenements temporairement
-     */
-	protected $tmp_callbacks;
-
     
     /**
      * @var array
@@ -127,186 +122,6 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
      * @var array
      */
     protected $data         = [];
-
-    /**
-     * Add all fillable fields here, if empty, all fields are fillable except  fields added on the **exclude** array
-     * 
-     * @var string[]
-     */
-    protected $fillable         = [];
-
-    /**
-     * Add all non fillable fields here, if empty, all fields are fillable
-     * 
-     * Consider using this in case you have too many fields and cannot add them all on **fillable** array
-     * 
-     * @var string[]
-     */
-    protected $exclude         = [];
-
-    /**
-     * Permet de passer un array de la forme `$data = [ 'data' => [] ]` avant insertion
-     * les callbacks doivent obligatoirement retourner $data
-     * 
-     * @var array
-     */
-    protected $beforeInsert         = [];
-
-    /**
-     * Permet de passer un array de la forme `$data = [ 'data' => [], 'where'    => ,'limit' =>, 'offset'    =>  ]`
-     * avant recuperation les callbacks doivent obligatoirement retourner $data
-     * 
-     * @var array
-     */
-	protected $beforeFind           = [];
-
-    /**
-     * Permet de passer un array de la forme `$data = [ 'id' => $primaryKeyValue ]` avant suppression
-     * les callbacks doivent obligatoirement retourner $data
-     * 
-     * @var array
-     */
-	protected $beforeDelete         = [];
-    
-    /**
-     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [] ]` avant modification
-     * 
-     * @var array
-     */
-	protected $beforeUpdate         = [];
-    
-    /**
-     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [] ]` après insertion
-     * 
-     * @var array
-     */
-	protected $afterInsert          = [];
-
-    /**
-     * Permet de passer un array de la forme `$data = [ 'data' => [ ModelObjectFetched ] ]` après recupération
-     * les callbacks doivent obligatoirement retourner $data
-     * 
-     * @var array
-     */
-	protected $afterFind            = [];
-
-    /**
-     * Permet de passer un array de la forme `$data = [ 'id' => $primaryKeyValue, 'result'   => bool ]`
-     * après suppression
-     * 
-     * @var array
-     */
-	protected $afterDelete          = [];
-    
-    /**
-     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [], 'result'  => bool ]` 
-     * après modification
-     * 
-     * @var array
-     */
-	protected $afterUpdate          = [];
-
-    /**
-     * FRelationships
-     *
-     * ``` 
-     * <?php
-     * # Use with arrays:
-     *
-     *      protected $hasOne = [
-     *           'properties1' => [
-     *                              'model' => 'Other_Model',
-     *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field'
-     *                             ]
-     *          ....................
-     *      ];
-     * ```
-     */
-    protected $hasOne        = [];
-
-    /**
-     * FRelationships
-     *
-     * ```
-     * <?php
-     * # Use with arrays:
-     * 
-     *      protected $hasMany = [
-     *           'properties1' => [
-     *                              'model' => 'Other_Model',
-     *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field'
-     *                             ]
-     *          ....................
-     *      ];
-     * ```
-     */
-    protected $hasMany       = [];
-
-    /**
-     * FRelationships
-     *
-     * ```
-     * <?php
-     * # Use with arrays:
-     *
-     *      protected $manyMany = [
-     *           'properties1' => [
-     *                              'model' => 'Other_Model',
-     *                              'pivot' => 'Pivot_Model',
-     *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field',
-     *                              'pivot_foreign_key' => 'modelKey_in_pivot_table',
-     *                              'pivot_local_key' => 'localKey_in_pivot_table',
-     *                             ]
-     *          ....................
-     *      ];
-     * ```
-     *
-     */
-    protected $manyMany      = [];
-
-    /**
-     * FRelationships
-     *
-     * ```
-     * <?php
-     * # Use with arrays:
-     *
-     *     protected $belongsTo = [
-     *           'properties1' => [
-     *                              'model' => 'Other_Model',
-     *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field'
-     *                             ]
-     *          ....................
-     *      ];
-     * ```
-     */
-    protected $belongsTo     = [];
-
-    /**
-     * FRelationships
-     *
-     * ```
-     * <?php
-     * # Use with arrays:
-     * 
-     *      protected $belongsToMany = [
-     *           'properties1' => [
-     *                              'model' => 'Other_Model',
-     *                              'pivot' => 'Pivot_Model',
-     *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field',
-     *                              'pivot_foreign_key' => 'modelKey_in_pivot_table',
-     *                              'pivot_local_key' => 'localKey_in_pivot_table',
-     *                             ]
-     *          ....................
-     *      ];
-     * ```
-     */
-    protected $belongsToMany = [];
 
     /**
      * @var ModelQueryBuilder
@@ -334,7 +149,7 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
 
         if(!empty($data))
         {
-            $this->fill($data);
+            $this->fill($data, true);
         }
         // allow callbacks
         $this->tmp_callbacks = $this->allow_callbacks;
@@ -353,29 +168,16 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
      * @param array $data
      * @return BaseModel
      */
-    public function fill(array $data) 
+    public function fill(array $data, $original = false) 
     {
         $fields = $this->getFieldNames();
 
-        // if we have a list to exclude, so we use it and we don't use the fillable
-        if(!empty($this->exclude)) {
-            $fields = array_filter($fields, function($field){
-                return !in_array($field, $this->exclude);
-            });
-        }else{
-            // as we don't have a list of excluded fields, we use the fillable
-            if(!empty($this->fillable)) {
-                $fields = array_filter($fields, function($field){
-                    return in_array($field, $this->fillable) || $field === $this->getPrimaryKey();
-                });
-            }
-        }
-
-        // If fillable and exclude are empty, we'll use all fields of the table
-
         foreach ($fields as $field) {
+
+            if($original == false && !$this->isFillable($field)) continue;
+
             # code...
-            if(isset($data[$field])) 
+            if(isset($data[$field]))
                 $this->data[$field] = $data[$field];
                 
         }
@@ -548,23 +350,9 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
      * @return array
      */
     public function getFillableKeys() {
-        $fillableKeys = $this->getFieldNames();
-        $returnedKeys = [];
-        // if we have a list to exclude, so we use it and we don't use the fillable
-        if(!empty($this->exclude)) {
-            $returnedKeys = array_filter($fillableKeys, function($field){
-                return !in_array($field, $this->exclude);
-            });
-        }else{
-            // as we don't have a list of excluded fields, we use the fillable
-            if(!empty($this->fillable)) {
-                $returnedKeys = array_filter($fillableKeys, function($field){
-                    return in_array($field, $this->fillable) || $field === $this->getPrimaryKey();
-                });
-            }
-        }
+        $returnedKeys = $this->getRealFillableKeys($this->getFieldNames());
 
-        return empty($returnedKeys) ? array_flip($fillableKeys) : array_flip($returnedKeys);
+        return array_flip($returnedKeys);
     }
 
     /**
@@ -636,28 +424,8 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
 
         $this->setPaginator(new Paginator($total, $this->per_page, $page, request()->url(), $this->paginatorConfig));
 
-        $data = $this->get("*", null, (int)$this->per_page, (int)$offset);
-        
-        return $data;
+        return $this->get("*", null, (int)$this->per_page, (int)$offset);
 	}
-
-    /**
-     * Loads properties for an object.
-     *
-     * @param object $object Class instance
-     * @param array $data Property data
-     * @return object Populated object
-     */
-    public function load($object, array $data)
-    {
-        foreach ($data as $key => $value) {
-            if (property_exists($object, $key)) {
-                $object->$key = $value;
-            }
-        }
-
-        return $object;
-    }
 
     /**
      * Get the table name for this ER class.
@@ -708,7 +476,7 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
     {
         if(isset($this->data[$name]))
         {
-            return $this->data[$name];
+            return $this->castValue($name);
         }
         if(in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany))))
         {
@@ -722,7 +490,8 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
 
     public function __set($property, $val)
     {
-        return $this->data[$property] = $val;
+        if($this->isFillable($property))
+            $this->data[$property] = $val;
     }
 
     /**
@@ -959,198 +728,6 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
     }
 
     /**
-     * Load the defined relation models
-     * and add them as property of this model.
-     *
-     * @return BaseModel|BaseModel[]|null
-     */
-    public function loadRelations($for, $limit = null, $offset = null)
-    {
-        if (count($this->hasOne) && isset($this->hasOne[$for])) {
-            $relation = $this->hasOne[$for];
-            return $this->{$for} = $this->hasOne($relation);
-        }
-
-        if (count($this->hasMany) && isset($this->hasMany[$for])) {
-            $relation = $this->hasMany[$for];
-            return $this->{$for} = $this->hasMany($relation, $limit, $offset);
-        }
-
-        if (count($this->belongsTo) && isset($this->belongsTo[$for])) {
-            $relation = $this->belongsTo[$for];
-            return $this->{$for} = $this->belongsTo($relation);
-        }
-
-        if (count($this->belongsToMany) && isset($this->belongsToMany[$for])) {
-            $relation = $this->belongsToMany[$for];
-            return $this->{$for} = $this->belongsToMany($relation, $limit, $offset);
-        }
-
-        if (count($this->manyMany) && isset($this->manyMany[$for])) {
-            $relation = $this->manyMany[$for];
-            return $this->{$for} = $this->manyMany($relation, $limit, $offset);
-        }
-        
-    }
-
-
-    /**
-     * Get object in relationship with.
-     *
-     * @param array $relationConfig
-     * @return BaseModel Model instance
-     */
-    protected function hasOne($relationConfig)
-    {
-        /**
-         * @var BaseModel
-         */
-        $class = new $relationConfig['model']();
-        $foreign_key = $relationConfig['foreign_key'];
-        $local_key = $relationConfig['local_key'];
-
-        $object = $class->where($foreign_key, $this->{$local_key})->one();
-        return $object;
-    }
-
-    /**
-     * Get all objects in relationship with.
-     *
-     * @param array $relationConfig
-     * @return BaseModel[] Models
-     */
-    protected function manyMany($relationConfig, $limit = null, $offset = null)
-    {
-        /**
-         * @var BaseModel
-         */
-        $class = new $relationConfig['model']();
-
-        /**
-         * @var BaseModel
-         */
-        $pivot = new $relationConfig['pivot']();
-        $foreign_key = $relationConfig['foreign_key'];
-        $local_key = $relationConfig['local_key'];
-        $pivot_foreign_key = $relationConfig['pivot_foreign_key'];
-        $pivot_local_key = $relationConfig['pivot_local_key'];
-
-        $objects = $class->join($pivot->getTable()." pivot", "pivot.$pivot_foreign_key = ".$class->getTable().".$foreign_key")
-                        ->join($this->table, $this->table.".$local_key = pivot.$pivot_local_key")
-                        ->get($class->getTable().".*, pivot.*", "pivot.$pivot_local_key = ".$this->{$local_key}, $limit, $offset);
-
-        return $objects;
-    }
-
-    /**
-     * Get all objects in relationship with.
-     *
-     * @param array $relationConfig
-     * @return BaseModel[] Models
-     */
-    protected function hasMany($relationConfig, $limit = null, $offset = null)
-    {
-        /**
-         * @var BaseModel
-         */
-        $class = new $relationConfig['model']();
-        $foreign_key = $relationConfig['foreign_key'];
-        $local_key = $relationConfig['local_key'];
-
-        $objects = $class->get("*", [$foreign_key => $this->{$local_key}], $limit, $offset);
-        return $objects;
-    }
-
-    /**
-     * Get object in relationship with.
-     *
-     * @param array $relationConfig
-     * @return BaseModel Model instance
-     */
-    protected function belongsTo($relationConfig)
-    {
-        /**
-         * @var BaseModel
-         */
-        $class = new $relationConfig['model']();
-        $foreign_key = $relationConfig['foreign_key'];
-        $local_key = $relationConfig['local_key'];
-
-        $object = $class->where($foreign_key, $this->{$local_key})->one();
-        return $object;
-    }
-
-
-    /**
-     * Get all objects in relationship with.
-     *
-     * @param array $relationConfig
-     * @return BaseModel[] Models
-     */
-    protected function belongsToMany($relationConfig, $limit = null, $offset = null)
-    {
-        /**
-         * @var BaseModel
-         */
-        $model = new $relationConfig['model']();
-        
-        /**
-         * @var BaseModel
-         */
-        $pivot = new $relationConfig['pivot']();
-        $foreign_key = $relationConfig['foreign_key'];
-        $local_key = $relationConfig['local_key'];
-        $pivot_foreign_key = $relationConfig['pivot_foreign_key'];
-        $pivot_local_key = $relationConfig['pivot_local_key'];
-
-        $objects = $model->join($pivot->getTable()." pivot", "pivot.$pivot_foreign_key = ".$model->getTable().".$foreign_key")
-                        ->join($this->table, $this->table.".$local_key = pivot.$pivot_local_key")
-                        ->get($model->getTable().".*, pivot.*", "pivot.$pivot_local_key = ".$this->{$local_key}, $limit, $offset);
-
-        return $objects;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param string $event
-     * @param array $eventData
-     * @return array
-     */
-    protected function trigger(string $event, array $eventData)
-    {
-        // Ensure it's a valid event
-        if (! isset($this->{$event}) || empty($this->{$event}))
-        {
-            return $eventData;
-        }
-
-        foreach ($this->{$event} as $callback)
-        {
-            if (! method_exists($this, $callback))
-            {
-                throw new Exception(text("Db.undefinedMethod", [$callback , get_class($this)]));
-            }
-
-            $eventData = $this->{$callback}($eventData);
-        }
-
-        return $eventData;
-    }
-
-
-	/**
-	 * Set the value of tmp_callbacks
-	 *
-	 * @return  self
-	 */ 
-	public function allowCallbacks($value = true)
-	{
-		$this->tmp_callbacks = $value;
-		return $this;
-	}
-
-    /**
      * Get the value of builder
      *
      * @return  ModelQueryBuilder
@@ -1203,27 +780,6 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
         return new \ArrayIterator($this->paginate());
     }
 
-
-    /**
-     * Get all fillable fields here, if empty, all fields are fillable except fields added on the **exclude** array
-     *
-     * @return  string[]
-     */ 
-    public function getFillable()
-    {
-        return $this->fillable;
-    }
-
-    /**
-     * Get all non fillable fields here, if empty, all fields are fillable
-     *
-     * @return  string[]
-     */ 
-    public function getExclude()
-    {
-        return $this->exclude;
-    }
-
     /**
      * Get the value of originalData
      *
@@ -1246,6 +802,23 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
         $this->originalData = $originalData;
 
         return $this;
+    }
+
+    /**
+     * Get the value of data
+     *
+     * @return  array
+     */ 
+    public function toArray()
+    {
+        $data = $this->getData();
+        $relations = array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany));
+
+        foreach ($relations as $key => $relationName) {
+            # code...
+            $data[$relationName] = $this->loadRelations($relationName);
+        }
+        return $data;
     }
 
     /**
@@ -1276,7 +849,7 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
      * @return array
      */
     public function jsonSerialize(){
-        return $this->getData();
+        return $this->toArray();
     }
 
 
