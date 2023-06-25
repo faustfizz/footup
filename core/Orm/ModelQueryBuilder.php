@@ -142,9 +142,8 @@ class ModelQueryBuilder extends QueryBuilder
                     $items = $result->fetchAll(PDO::FETCH_ASSOC);
                     $model = get_class($this->model);
                     return array_map(function ($item) use ($model) {
-                        $Model = new $model;
-                        $Model->fill($item);
-                        return $Model->setOriginalData($Model->getData());
+                        $Model = new $model($item);
+                        return $Model->setOriginalData($item);
                     }, $items);
                 }
         }

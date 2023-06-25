@@ -75,7 +75,7 @@ use PDO;
  * @method int|string getInsertID()
  * @method int getAffectedRows()
  */
-class BaseModel implements \Countable, \IteratorAggregate
+class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
 {
     /**
      * @var string $table
@@ -390,30 +390,32 @@ class BaseModel implements \Countable, \IteratorAggregate
      */
     public function insert(array $data = [])
     {
-        if (empty($data)) return false;
+        empty($data) && $data = $this->getData();
+
+        if (empty($data)) {
+            throw new Exception("No data to insert !");
+        } 
 
         $eventData = ['data' => $data];
 
 		if ($this->tmp_callbacks)
 		{
 			$eventData = $this->trigger('beforeInsert', $eventData);
-            $data = $eventData['data'];
 		}
 
-        $inserted = $this->getBuilder()->insert(array_intersect_key($data, $this->getFillableKeys()));
+        $inserted = $this->getBuilder()->insert(array_intersect_key($eventData['data'], $this->getFillableKeys()));
 
-        $eventData = [
-			'id'     => $this->getBuilder()->getInsertID(),
-			'data'   => $data
-		];
+        $eventData['id']     = $this->getBuilder()->getInsertID();
 
-		if ($this->tmp_callbacks && $inserted)
-		{
-            $data[$this->getPrimaryKey()] = $eventData["id"];
-            $eventData["data"] = $data;
-            $this->fill($data);
-			$this->trigger('afterInsert', $eventData);
-		}
+        if($inserted) {
+            $this->setOriginalData($eventData["data"]);
+            if ($this->tmp_callbacks)
+            {
+                $eventData = $this->trigger('afterInsert', $eventData);
+                $eventData["data"][$this->getPrimaryKey()] = $eventData["id"];
+            }
+            $this->fill($eventData["data"]);
+        }
 
         $this->tmp_callbacks = $this->allow_callbacks;
 
@@ -426,9 +428,13 @@ class BaseModel implements \Countable, \IteratorAggregate
      * @param array $data Array of keys and values, or string literal
      * @return bool 
      */
-    public function update($data)
+    public function update(array $data = [])
     {
-        if (empty($data)) return false;
+        empty($data) && $data = $this->getData();
+
+        if (empty($data)) {
+            throw new Exception("No data to update !");
+        } 
 
         $id = isset($data[$this->getPrimaryKey()]) ? $data[$this->getPrimaryKey()] : $this->id();
 
@@ -444,25 +450,23 @@ class BaseModel implements \Countable, \IteratorAggregate
 		if ($this->tmp_callbacks)
 		{
 			$eventData = $this->trigger('beforeUpdate', $eventData);
-            $data = isset($eventData['data']) && !empty($eventData['data']) ? $eventData['data'] : $data;
 		}
 
         if($this->hasChanged()) {
-            $executed = $this->getBuilder()->update(array_intersect_key($data, $this->getFillableKeys()), $id);
+            $executed = $this->getBuilder()->update(array_intersect_key($eventData['data'], $this->getFillableKeys()), $id);
         }
 
-		$eventData = [
-			'id'     => $id,
-			'data'   => $data,
-			'result' => $executed,
-		];
+		$eventData['result'] = $executed;
 
-        
-		if ($this->tmp_callbacks && $executed)
-		{
-            $this->fill($data);
-			$this->trigger('afterUpdate', $eventData);
-		}
+        if($executed) {
+            $this->setOriginalData($eventData["data"]);
+            if ($this->tmp_callbacks)
+            {
+                $eventData = $this->trigger('afterUpdate', $eventData);
+                $eventData["data"][$this->getPrimaryKey()] = $eventData["id"];
+            }
+            $this->fill($eventData['data']);
+        }
 
 		$this->tmp_callbacks = $this->allow_callbacks;
 
@@ -610,7 +614,7 @@ class BaseModel implements \Countable, \IteratorAggregate
 	{
         $this->paginatorConfig = new \App\Config\Paginator();
 
-        $this->per_page = $perPage ?? $this->paginatorConfig->perPage ?? $this->per_page;
+        $this->per_page = $perPage ?? $this->per_page ?? $this->paginatorConfig->perPage;
 
         if($pageName)
         {
@@ -628,7 +632,7 @@ class BaseModel implements \Countable, \IteratorAggregate
 		$this->page_count = $total / $this->per_page;
 		$this->current_page = $page;
 
-		$offset      = ($page - 1) * $perPage;
+		$offset      = ($page - 1) * $this->per_page;
 
         $this->setPaginator(new Paginator($total, $this->per_page, $page, request()->url(), $this->paginatorConfig));
 
@@ -1267,4 +1271,13 @@ class BaseModel implements \Countable, \IteratorAggregate
 
         return $this;
     }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize(){
+        return $this->getData();
+    }
+
+
 }
