@@ -4,17 +4,12 @@ namespace App\Model;
 use Footup\I18n\Time;
 use Footup\Model;
 
-class Contact extends Model{
-    /**
-     * PrimaryKey
-     *
-     * @var string
-     */
-    protected $primaryKey = 'idcont';
+class Article extends Model{
 
     protected $casts         = [
-        'created_at'    =>  Time::class
+        'created_at'    =>  Time::class,
     ];
+    protected $exclude         = ['created_at'];
     protected $beforeInsert         = [];
 	protected $beforeFind           = [];
 	protected $beforeDelete         = [];
@@ -23,5 +18,12 @@ class Contact extends Model{
 	protected $afterFind            = [];
 	protected $afterDelete          = [];
 	protected $afterUpdate          = [];
+	protected $hasOne          = [
+        'user' => [
+            'model' => User::class,
+            'foreign_key' => 'id_user',
+            'local_key' => 'user_id'
+        ]
+    ];
 
 }
