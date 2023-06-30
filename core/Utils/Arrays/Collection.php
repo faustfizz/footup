@@ -395,7 +395,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      */
     public function offsetGet($offset)
     {
-        return $this->items[$offset];
+        return $this->items[$offset] ?? null;
     }
     /**
      * @InheritDoc
@@ -403,6 +403,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     public function offsetSet($offset, $value)
     {
         $this->items[$offset] = $value;
+        return $this;
     }
     /**
      * @InheritDoc
@@ -410,6 +411,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     public function offsetUnset($offset)
     {
         unset($this->items[$offset]);
+        return $this;
     }
     /**
      * @InheritDoc
