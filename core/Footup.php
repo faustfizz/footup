@@ -64,20 +64,15 @@ class Footup
          */
         $method = $route->getMethod();
 
-        $request = $this->router->request;
+        $request = $this->router->getRequest();
         $response = new Response();
-
-        $this->endTime($request);
 
         try {
             if($handler instanceof \Closure)
             {
-                $return = $handler(...array_values($route->getArgs()));
-
-                if($return instanceof Response){
-                    return $return->send(true);
-                }
-                return $response->body($return ?? '')->send(true);
+                $this->endTime($request);
+                $responseOrContent = $handler(...array_values($route->getArgs()));
+                return $response->body($responseOrContent ?? '')->send();
             }
             /**
              * @var \Footup\Controller $controller
@@ -85,14 +80,12 @@ class Footup
             $controller = $this->runMiddles(new $handler(), $method, $request, $response);
             // Recalculate endTime as we can run many Middles before
             $this->endTime($request);
-            $return = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
-
-            if($return instanceof Response){
-                return $return->send(true);
-            }
-            return $response->body($return ?? '')->send(true);
+            $responseOrContent = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
+            
+            return $response->body($responseOrContent ?? '')->send();
 
         } catch (\ErrorException $exception) {
+            $this->endTime($request);
             // Erreur 500.
             throw new \ErrorException(text("Http.error500", [self::NAME, $exception->getMessage()]), $exception->getCode(), $exception->getSeverity(), $exception->getFile(), $exception->getLine(), $exception);
         }

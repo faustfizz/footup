@@ -106,15 +106,9 @@ class MiddleHandler
         }
 
         // If the result is not an instance of Response so you don't need to continue
-        if(is_string($result) || is_callable($result))
+        if($result)
         {
-            $response->body((string) $result)->send(true);
-            exit;
-        }
-
-        if($result instanceof Response)
-        {
-            return $result;
+            return $response->body($result);
         }else{
             // We are facing a middle that return void that mean it delegate itself the request so we don't continue
             // Yes we stop because you don't return a response, nor string or callable but nothing that we need

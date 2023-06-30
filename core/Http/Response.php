@@ -32,6 +32,11 @@ class Response implements JsonSerializable
     protected $header = [];
 
     /**
+     * @var mixed
+     */
+    protected $originalBody;
+
+    /**
      * @var string
      */
     protected $body;
@@ -169,7 +174,7 @@ class Response implements JsonSerializable
             {
                 $this->header($arguments[1]);
             }
-            return $this->status($status)->body($arguments[0] ?? $this->message[$status])->send(true);
+            return $this->status($status)->body($arguments[0] ?? $this->message[$status])->send();
         }
     }
 
@@ -178,12 +183,12 @@ class Response implements JsonSerializable
      */
     public function __toString()
     {
-        return $this->send();
+        return $this->getBody();
     }
 
     public function jsonSerialize()
     {
-        return empty($this->body) ? ['message' => $this->reason] : (array)$this->body;
+        return ['data' => empty($this->body) ? $this->reason : $this->getBody(), 'status' => $this->status];
     }
 
     /**
@@ -196,53 +201,71 @@ class Response implements JsonSerializable
     }
 
     /**
-     * @param  string $body
-     * @return $this
+     * @param  mixed $body
+     * @return Response
      */
     public function body($body)
     {
-        $this->body = $this->check($body);
-
-        return $this;
+        $this->body = $this->check($body ?? '');
+        return $this->setOriginalBody($body);
     }
 
     /**
-     * @param  string $body
-     * @return $this
-     */
-    public function prepend($body)
-    {
-        $this->body = $this->check($body) . $this->body;
-
-        return $this;
-    }
-
-    /**
-     * @param  string $body
-     * @return $this
-     */
-    public function append($body)
-    {
-        $this->body .= $this->check($body);
-
-        return $this;
-    }
-
-    /**
-     * @param  string $body
+     * @param  mixed $body
      * @return string
      */
     private function check($body)
     {
-        if (!is_null($body) && !is_string($body) && !is_numeric($body) && !is_callable([$body, '__toString'])) {
+        if (!is_scalar($body) && !is_callable([$body, '__toString']) && !is_object($body) && !is_array($body)) {
+            // Ooops we don't handle your type here
             throw new Exception(text('Http.invalidBodyType', [gettype($body)]));
         }
 
-        if (is_object($body) && is_callable([$body, '__toString'])) {
-            $body = call_user_func($body);
+        if (is_callable([$body, '__toString'])) {
+            $body = (string)$body;
         }
 
-        return $body ?? $this->body;
+        if ($this->itCanBeJson($body)) {
+            $this->cache()->header(array_merge($this->header, ['Content-Type' => 'application/json; charset=UTF-8']));
+            $body = $this->convertToJson($body);
+        }
+
+        return $body;
+    }
+
+    /**
+     * Check if the content can be a json
+     *
+     * @param mixed $content
+     * @return boolean
+     */
+    public function itCanBeJson($content)
+    {
+        if (!empty($content)) {
+            return is_array($content) || is_callable([$content, 'toArray']) || is_object($content) || ($content instanceof JsonSerializable);
+        }
+        return false;
+    }
+
+    /**
+     * Convert conntent to json
+     *
+     * @param mixed $content
+     * @return string
+     */
+    public function convertToJson($content)
+    {
+        if (!empty($content)) {
+            if (is_callable([$content, 'toArray'])) {
+                return json_encode($content->toArray());
+            } elseif ($content instanceof JsonSerializable || is_array($content)) {
+                return json_encode($content);
+            } elseif (is_object($content)) {
+                $propsAndValues = get_object_vars ( $content );
+                return json_encode($propsAndValues);
+            }
+        }
+        return $content;
     }
     
     /**
@@ -250,10 +273,9 @@ class Response implements JsonSerializable
      * @param integer $status
      * @param array $header
      * @param integer $option
-     * @param boolean $echo
-     * @return Response|void
+     * @return void
      */
-    public function json(array $data = [], $echo = false, int $status = 200, array $header = [], int $option = 0)
+    public function json(array $data = [], int $status = 200, array $header = [], int $option = 0)
     {
         $this->status($status)->header(array_merge($header, ['Content-Type' => 'application/json; charset=UTF-8']));
 
@@ -262,16 +284,14 @@ class Response implements JsonSerializable
             $option
         );
 
-        $this->body($data);
-        
-        return $echo ? $this->send(true) : $this;
+        return $this->body($data)->send();
     }
 
     /**
      * @param  string $filepath
      * @param  string $filename
      * @param  string $disposition
-     * @return $this
+     * @return Response
      */
     public function download(string $filepath, string $filename = null, string $disposition = 'attachment')
     {
@@ -345,7 +365,7 @@ class Response implements JsonSerializable
     /**
      * @param  int    $status
      * @param  string $reason
-     * @return $this
+     * @return Response
      */
     public function status(int $status, string $reason = null)
     {
@@ -368,7 +388,7 @@ class Response implements JsonSerializable
 
     /**
      * @param  string|array $header
-     * @return $this
+     * @return Response
      */
     public function header($headerKey, $value = null)
     {
@@ -396,21 +416,15 @@ class Response implements JsonSerializable
     }
 
     /**
-     * @return mixed
+     * @return void
      */
-    public function send($echo = false)
-    {
+    public function send()
+    { 
         if (!headers_sent()) {
             $this->sendHeaders();
         }
-
-        if($echo)
-        {
-            echo $this->body;
-            $this->sent = true;
-        }else{
-            return $this->body;
-        }
+        $this->sent = true;
+        echo $this->body;
     }
 
     /**
@@ -445,6 +459,7 @@ class Response implements JsonSerializable
         $this->status = 200;
         $this->header = [];
         $this->body = '';
+        $this->originalBody = '';
 
         return $this;
     }
@@ -553,4 +568,38 @@ class Response implements JsonSerializable
         return $this->sent;
     }
 
+
+    /**
+     * Get the value of originalBody
+     *
+     * @return  mixed
+     */ 
+    public function getOriginalBody()
+    {
+        return $this->originalBody;
+    }
+
+    /**
+     * Set the value of originalBody
+     *
+     * @param  mixed  $originalBody
+     *
+     * @return  self
+     */ 
+    public function setOriginalBody($originalBody)
+    {
+        $this->originalBody = $originalBody;
+
+        return $this;
+    }
+
+    /**
+     * Get the transformed body body
+     *
+     * @return  string
+     */ 
+    public function getBody()
+    {
+        return $this->body;
+    }
 }

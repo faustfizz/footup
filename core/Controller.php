@@ -80,15 +80,14 @@ class Controller
 
     /**
      * @param array $data
-     * @param boolean $echo
      * @param integer $status
      * @param array $headers
      * 
      * @return Response|void
      */
-    protected function json($data = [], $echo = true, $status = 200, $headers = [])
+    protected function json($data = [], $status = 200, $headers = [])
     {
-        return $this->response->json($data, $echo, $status, $headers);
+        return $this->response->json($data, $status, $headers);
     }
 
     /**
@@ -97,7 +96,7 @@ class Controller
      * @param string $path
      * @param array|object $data
      * @param string $ext
-     * @return Response
+     * @return Response|void
      */
     function view( $path , $data = null, $ext = VIEW_EXT )
     {
@@ -111,7 +110,7 @@ class Controller
         ob_start();
         include_once(VIEW_PATH . $path . ".". $ext);
         $body = ob_get_clean();
-        return $this->response->body($body);
+        return $this->response->body($body)->send();
     }
 
 

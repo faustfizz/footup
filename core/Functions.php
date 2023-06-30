@@ -1060,15 +1060,14 @@ if(! function_exists("json"))
      * Affiche ou retourne des données en JSON
      *
      * @param array $data
-     * @param boolean $echo
      * @param integer $status
      * @param array $headers
 	 * 
      * @return Response|void
      */
-    function json(array $data, $echo = true, $status = 200, $headers = [])
+    function json(array $data, $status = 200, $headers = [])
     {
-        return response()->json($data, $echo, $status, $headers);
+        return response()->json($data, $status, $headers);
     }
 }
 
