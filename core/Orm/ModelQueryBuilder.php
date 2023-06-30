@@ -91,13 +91,39 @@ class ModelQueryBuilder extends QueryBuilder
     }
 
     /**
+     * Finds and populates an object.
+     *
+     * @param int|string|array Search value
+     * @param string $field Search value
+     * @return object|array|null Populated object
+     */
+    public function find($value = [], $field = null)
+    {
+        $field = is_null($field) ? $this->getPrimaryKey() : $field;
+
+        if (!empty($value)) {
+            if ((is_int($value) || is_string($value)) && ($this->getPrimaryKey() == $field || isset($this->model->getFieldNames()[$field]))) {
+                $this->where($field, $value);
+            } else if (is_array($value)) {
+                $this->whereIn($field, $value);
+            }
+        }
+
+        if (empty($this->sql)) {
+            $this->select();
+        }
+
+        return $field == $this->getPrimaryKey() && is_array($value) ? $this->get() : $this->one($field);
+    }
+
+    /**
      * Undocumented function
      *
      * @param string $select
      * @param array|string $where
      * @param int $limit
      * @param int $offset
-     * @return BaseModel[]
+     * @return Collection<int, BaseModel|array|object>
      */
     public function get($select = "*", $where = null, $limit = null, $offset = null)
     {
@@ -132,69 +158,24 @@ class ModelQueryBuilder extends QueryBuilder
 
         switch ($this->returnType) {
             case 'object':
-                return $result->fetchAll(PDO::FETCH_OBJ);
+                $items = $result->fetchAll(PDO::FETCH_OBJ);
+                break;
             
             case 'array':
-                return $result->fetchAll(PDO::FETCH_ASSOC);
+                $items = $result->fetchAll(PDO::FETCH_ASSOC);
+                break;
                 
             case 'self':
                 default:{
                     $items = $result->fetchAll(PDO::FETCH_ASSOC);
                     $model = get_class($this->model);
-                    return array_map(function ($item) use ($model) {
-                        $Model = new $model($item);
-                        return $Model->setOriginalData($item);
+                    $items =  array_map(function ($item) use ($model) {
+                        return new $model($item);
                     }, $items);
                 }
         }
+        return new Collection($items);
 
-    }
-
-    /**
-     * Saves an object to the database.
-     *
-     * @param \Footup\Orm\BaseModel $object Class instance
-     * @param array $fields Select database fields to save
-     * @return bool
-     */
-    public function save(BaseModel $object = null, array $fields = null)
-    {
-        $object = is_null($object) ? $this->model : $object;
-
-        $this->from($object->getTable());
-
-        $pk = $object->getPrimaryKey();
-        $id = $object->{$pk} ?? null;
-        
-        $data = $object->getData();
-
-        if (is_null($id)) {
-            if ($bool = $this->insert(
-                    array_filter($data, 
-                        function($v, $k) {
-                            return  trim($v) !== "";
-                        }, ARRAY_FILTER_USE_BOTH
-                    )
-                )
-            ) {
-                $object->{$pk} = $this->getInsertID();
-            }
-            return $bool;
-        } else {
-            if ($fields !== null) {
-                $keys = array_flip($fields);
-                $data = array_intersect_key($data, $keys);
-            }
-            
-            return $this->update(
-                    array_filter($data, 
-                        function($v, $k) {
-                            return trim($v) !== "";
-                        }, ARRAY_FILTER_USE_BOTH
-                    ),
-                    $id
-                );
-        }
     }
 
     /**
@@ -244,15 +225,5 @@ class ModelQueryBuilder extends QueryBuilder
     public function getModel()
     {
         return $this->model;
-    }
-
-    /**
-     * Get $db connection
-     *
-     * @return  \PDO
-     */ 
-    public function getDb()
-    {
-        return self::$db;
     }
 }

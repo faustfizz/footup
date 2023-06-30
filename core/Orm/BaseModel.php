@@ -20,6 +20,7 @@ use Footup\Orm\Traits\Events;
 use Footup\Orm\Traits\Fillable;
 use Footup\Orm\Traits\Relations;
 use Footup\Paginator\Paginator;
+use Footup\Utils\Arrays\Arrayable;
 use PDO;
 
 /**
@@ -59,7 +60,7 @@ use PDO;
  * @method ModelQueryBuilder setDb($config = null, $init = true)
  * @method \PDO getDb()
  * @method object execute(array $params = [])
- * @method BaseModel[]|null get($select = "*", $where = null, $limit = null, $offset = null)
+ * @method Collection get($select = "*", $where = null, $limit = null, $offset = null)
  * @method BaseModel|null one($fields = null, $where = null)
  * @method BaseModel|null first(string $field = null, $where = null)
  * @method BaseModel|null last(string $field = null, $where = null)
@@ -68,10 +69,8 @@ use PDO;
  * @method mixed max(string $field, $key = null)
  * @method mixed sum(string $field, $key = null)
  * @method mixed avg(string $field, $key = null)
- * @method int|null count(string $field = '*')
  * @method mixed quote($value)
- * @method BaseModel|BaseModel[]|null find($value = null, string $field = null)
- * @method bool save(BaseModel $object = null, array $fields = null)
+ * @method Collection|BaseModel find($value = null, string $field = null)
  * @method array getTableInfo()
  * @method string getLastQuery()
  * @method ModelQueryBuilder setLastQuery(string $last_query)
@@ -79,7 +78,7 @@ use PDO;
  * @method int|string getInsertID()
  * @method int getAffectedRows()
  */
-class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
+class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
 {
     use Fillable, Events, Relations, CastValue;
 
@@ -159,9 +158,9 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
      * @param string $columns
      * @return int
      */
-    public function count($columns = "*")
+    public static function count($columns = "*")
     {
-        return $this->getBuilder()->count($columns);
+        return (new static)->getBuilder()->count($columns);
     }
 
     /**
@@ -171,6 +170,10 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
     public function fill(array $data, $original = false) 
     {
         $fields = $this->getFieldNames();
+        
+        if ($original) {
+            $this->setOriginalData($data);
+        }
 
         foreach ($fields as $field) {
 
@@ -238,7 +241,7 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
             throw new Exception("No data to update !");
         } 
 
-        $id = isset($data[$this->getPrimaryKey()]) ? $data[$this->getPrimaryKey()] : $this->id();
+        $id = $this->id();
 
         if(empty($id) && empty($this->builder->where)){
             throw new Exception("No primary key value to use as reference & no where specified !");
@@ -256,6 +259,9 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
 
         if($this->hasChanged()) {
             $executed = $this->getBuilder()->update(array_intersect_key($eventData['data'], $this->getFillableKeys()), $id);
+        }else{
+            // as nothing was changed, we don't throw error. just return a success to our user
+            $executed = true;
         }
 
 		$eventData['result'] = $executed;
@@ -273,6 +279,37 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
 		$this->tmp_callbacks = $this->allow_callbacks;
 
         return $executed;
+    }
+
+    /**
+     * Saves an object to the database.
+     *
+     * @param \Footup\Orm\BaseModel $object Class instance
+     * @param array $fields Select database fields to save
+     * @return bool
+     */
+    public function save(BaseModel $object = null, array $fields = null)
+    {
+        $object = is_null($object) ? $this : $object;
+
+        $this->from($object->getTable());
+        
+        $data = $object->getData();
+
+        if ($fields !== null) {
+            $keys = array_flip($fields);
+            $data = array_intersect_key($data, $keys);
+        }
+
+        if ($this->id()) {
+            return $this->update($data);
+        } else {
+            if ($bool = $this->insert($data)
+            ) {
+                $object->{$this->getPrimaryKey()} = $this->getInsertID();
+            }
+            return $bool;
+        }
     }
 
     /**
@@ -362,7 +399,7 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
      * @param array|string $where
      * @param int $limit
      * @param int $offset
-     * @return BaseModel[]
+     * @return  Collection <int, BaseModel|array|object>
      */
     public function get($select = "*", $where = null, $limit = null, $offset = null)
     {
@@ -396,7 +433,7 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
      * @param integer|null $perPage
      * @param string $pageName
      * @param integer $page
-     * @return BaseModel[]
+     * @return  Collection<int, BaseModel|array|object>
      */
     public function paginate(int $perPage = null, string $pageName = 'page', int $page = 0)
 	{
@@ -561,7 +598,7 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
     public static function __callStatic($method, $args)
     {
         $model = (new static);
-        return $model->{$method}(...$args);
+        return $model->$method(...$args);
     }
 
     public function fieldTypes()
@@ -715,7 +752,7 @@ class BaseModel implements \Countable, \IteratorAggregate, \JsonSerializable
      * @param mixed $where
      * @param int $limit
      * @param int $offset
-     * @return BaseModel[]
+     * @return Collection<int, BaseModel|array|object>
      */
     public static function all($select = "*", $where = null, $limit = null, $offset = null)
     {
