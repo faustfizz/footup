@@ -16,6 +16,7 @@ use Footup\Config\Config;
 use ArrayObject;
 use DateTime;
 use Exception;
+use Footup\Utils\Arrays\Arrayable;
 use Footup\Utils\Shared;
 use JsonSerializable;
 
@@ -222,7 +223,7 @@ class Response implements JsonSerializable
         }
 
         if (is_callable([$body, '__toString'])) {
-            $body = (string)$body;
+            $body = $body->__toString();
         }
 
         if ($this->itCanBeJson($body)) {
@@ -242,9 +243,15 @@ class Response implements JsonSerializable
     public function itCanBeJson($content)
     {
         if (!empty($content)) {
-            return is_array($content) || is_callable([$content, 'toArray']) || is_object($content) || ($content instanceof JsonSerializable);
+            return is_array($content) || ($content instanceof Arrayable) || is_object($content) || ($content instanceof JsonSerializable);
         }
         return false;
+    }
+
+    protected function shouldContentTypeBeJson()
+    {
+        json_decode($this->body);
+        return (json_last_error() == JSON_ERROR_NONE);
     }
 
     /**
@@ -256,7 +263,7 @@ class Response implements JsonSerializable
     public function convertToJson($content)
     {
         if (!empty($content)) {
-            if (is_callable([$content, 'toArray'])) {
+            if ($content instanceof Arrayable) {
                 return json_encode($content->toArray());
             } elseif ($content instanceof JsonSerializable || is_array($content)) {
                 return json_encode($content);
@@ -419,7 +426,11 @@ class Response implements JsonSerializable
      * @return void
      */
     public function send()
-    { 
+    {
+        if ($this->shouldContentTypeBeJson()) {
+            $this->header(array_merge($this->header, ['Content-Type' => 'application/json; charset=UTF-8']));
+        }
+        
         if (!headers_sent()) {
             $this->sendHeaders();
         }
