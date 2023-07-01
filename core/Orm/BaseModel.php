@@ -848,14 +848,27 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      */ 
     public function toArray()
     {
-        $data = $this->getData();
+        if (empty($this->data)) {
+            $object = $this->getBuilder()->last();
+            if ($object) {
+                $this->fill(($object instanceof BaseModel) ? $object->getData() : (array)$object);
+            }
+        }
         $relations = array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany));
 
         foreach ($relations as $key => $relationName) {
             # code...
-            $data[$relationName] = $this->loadRelations($relationName);
+            $this->data[$relationName] = $this->loadRelations($relationName);
         }
-        return $data;
+        return $this->data;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return json_encode($this->toArray());
     }
 
     /**
