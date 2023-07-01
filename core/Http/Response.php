@@ -25,7 +25,7 @@ class Response implements JsonSerializable
     /**
      * header Content-Length.
      */
-    public bool $content_length = false;
+    public bool $content_length = true;
 
     /**
      * @var array;

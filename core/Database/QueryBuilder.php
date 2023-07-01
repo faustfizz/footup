@@ -848,7 +848,7 @@ class QueryBuilder implements \IteratorAggregate
         }
         $data = $this->get($fields ?? "*");
 
-        return (!empty($data)) ? $data[0] : null;
+        return !empty($data) ? $data[0] : null;
     }
 
     /**
