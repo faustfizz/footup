@@ -184,7 +184,7 @@ class HttpClient
     /**
      * Get response headers
      *
-     * @param $parsed boolean
+     * @param boolean $parsed
      * @return array
      */
     public function getHeaders($parsed = true)
