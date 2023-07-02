@@ -187,6 +187,9 @@ class Response implements JsonSerializable
         return $this->getBody();
     }
 
+    /**
+     * @return mixed
+     */#[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return ['data' => empty($this->body) ? $this->reason : $this->getBody(), 'status' => $this->status];

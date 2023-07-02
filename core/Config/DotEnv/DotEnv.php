@@ -241,6 +241,11 @@ class DotEnv extends \ArrayObject
         parent::offsetSet($index, $newval);
     }
 
+    /**
+     * @param mixed $index
+     * @return mixed
+     * 
+     */#[\ReturnTypeWillChange]
     public function offsetGet($index)
     {
         return parent::offsetGet($index);
