@@ -3,7 +3,7 @@
     "description": "FootUp MVC Framework: A Rich Featured LightWeight PHP MVC Framework",
     "keywords": ["MVC", "FootUp Framework", "PHP Framework", "POO"],
     "type": "project",
-    "version": "0.1.7-alpha.1",
+    "version": "0.1.7-alpha.2",
     "license": "BSD-3-Clause",
     "autoload": {
         "psr-4": {

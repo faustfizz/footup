@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Config
+ * @package Footup\Config
  * @version 0.4
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */

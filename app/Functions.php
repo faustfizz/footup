@@ -2,12 +2,12 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * Ce fichier contient les fonctions globales du framework FOOTUP
  * Ce fichier fait partie du framework
  * 
- * @package Footup/App
+ * @package Footup\App
  * @version 0.1.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  * 

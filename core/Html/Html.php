@@ -1,9 +1,9 @@
 <?php
 
 /**
- * FOOTUP -  2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @uses Html::h1("Content !", ["attr" => "value", "..." => "..."]) | where h1 is in $pairs or $impairs arrays
  * 

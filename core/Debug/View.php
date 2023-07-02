@@ -1,8 +1,8 @@
 <?php
 /**
- * FOOTUP -  2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup\Debug
  * @version 0.1

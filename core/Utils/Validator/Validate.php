@@ -3,12 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * Ce fichier contient les fonctions globales du framework FOOTUP
- * Ce fichier fait partie du framework
- * 
- * @package Footup/Utils/Validator
+ * @package Footup\Utils\Validator
  * @version 0.0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */

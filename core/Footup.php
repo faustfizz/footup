@@ -1,11 +1,11 @@
 <?php
 /**
- * FOOTUP 
- * *************************
- * Hard Coded by Faustfizz Yous
+ * FOOTUP FRAMEWORK  2021 - 2023
+ * *****************************
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1.7-alpha.1
+ * @version 0.1.7-alpha.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
@@ -21,7 +21,7 @@ class Footup
     protected $router;
     public const NAME = "FootUP Framework";
 
-    public const VERSION = "0.1.7-alpha.1";
+    public const VERSION = "0.1.7-alpha.2";
 
     public function __construct(Router &$router)
     {
