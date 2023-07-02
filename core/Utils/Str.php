@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * FOOTUP FRAMEWORK
+ * *************************
+ * Hard Coded by Faustfizz Yous
+ * 
+ * @package Footup/Utils
+ * @version 0.1
+ * @author Faustfizz Yous <youssoufmbae2@gmail.com>
+ */
 namespace Footup\Utils;
 
 class Str
@@ -60,5 +69,24 @@ class Str
             $field[$i] = $attribute[$i];
         }
         return implode('.', $field);
+    }
+
+    /**
+     * Get random string
+     *
+     * @param integer $length
+     * @param string $with
+     * @return string
+     */
+    public static function random($length = 16, $with = 'alphanum')
+    {
+        $characters = $with === 'alphanum' ? '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_' : (in_array($with, ['num', 'number']) ? '0123456789' : 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_');
+
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        while (strlen($randomString) < $length) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
 }
