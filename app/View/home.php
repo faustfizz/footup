@@ -26,7 +26,8 @@
 			<li class="menu-toggle">
 				<button onclick="toggleMenu();">&#9776;</button>
 			</li>
-			<li class="menu-item hidden"><a href="#">Home</a></li>
+			<li class="menu-item hidden"><a href="<?= base_url('/') ?>">Home</a></li>
+			<li class="menu-item hidden"><a href="<?= base_url('/docs') ?>">Docs API</a></li>
 			<li class="menu-item hidden"><a href="https://github.io/faustfizz/footup" target="_blank">Github</a>
 		</ul>
 	</div>
