@@ -17,13 +17,13 @@ namespace Footup\Html;
 /**
  * HTML Class
  * 
- * @method static string a(string text, array attributes = [])
- * @method static string abbr(string text, array attributes = [])
- * @method static string address(string htmlContent, attributes = [])
- * @method static string article(string html, array attributes = [])
- * @method static string aside(string html, array attributes = [])
- * @method static string audio(string html, array attributes = [])
- * @method static string b(string text, array attributes = [])
+ * @method static string a(string $text, array $attributes = [])
+ * @method static string abbr(string $text, array $attributes = [])
+ * @method static string address(string $htmlContent, $attributes = [])
+ * @method static string article(string $html, array $attributes = [])
+ * @method static string aside(string $html, array attributes = [])
+ * @method static string audio(string $html, array $attributes = [])
+ * @method static string b(string $text, array $attributes = [])
  * 
  * @see Html::$pairs and Html::$impairs
  */

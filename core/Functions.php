@@ -825,7 +825,7 @@ if (! function_exists('mailto'))
 	 *
 	 * @param string $email      the email address
 	 * @param string $title      the link title
-	 * @param mixed  $attributes any attributes
+	 * @param array  $attributes any attributes
 	 *
 	 * @return string
 	 */
