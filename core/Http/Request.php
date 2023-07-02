@@ -345,7 +345,7 @@ class Request
      */
     public function method($upper = false)
     {
-        $m = $this->server('REQUEST_METHOD');
+        $m = $this->server('REQUEST_METHOD') ?? 'GET';
         return $upper === false ? strtolower($m) : strtoupper($m);
     }
 
