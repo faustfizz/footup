@@ -29,17 +29,14 @@ class Base64{
             $prefix = $matchPrefix[1];
         }
 
-        if ($filename) {
-            $filename = strtr("$prefix-$filename.$extension", [".$extension" => ".$extension"]);
-        }else{
-            $filename = "$prefix-".Str::random().".$extension";
-        }
+        $filename = ($filename ? strtr("$prefix-$filename", [".$extension" => ".$extension"]) : "$prefix-".Str::random()).".$extension";
 
         $fileData = file_get_contents($base64);
         
         if(file_put_contents(Shared::loadConfig()->store_dir . $filename . '.'. $extension, $fileData)) {
             return $filename;
         }
+        
         return false;
     }
 

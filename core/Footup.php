@@ -106,40 +106,33 @@ class Footup
         /**
          * For globaux Middles
          */
-        foreach($controller->getGlobalMiddles($method) as $key => $value)
-        {
-            if($value instanceof \Closure || class_exists($value) || $method === $key)
-            {
+        foreach ($controller->getGlobalMiddles($method) as $key => $value) {
+            if($value instanceof \Closure || class_exists($value) || $method === $key) {
                 $middlesStack[] = $value;
             }
         }
 
+        $class = trim(get_class($controller), '\\');
         /**
          * For spécifiques middles
          * @var string|string[]
          */
-        $middles = $controller->getMiddles(trim(get_class($controller), '\\')) ?? $controller->getMiddles(rtrim(get_class($controller), '\\'));
+        $middles = $controller->getMiddles($class) ?? $controller->getMiddles(rtrim($class, '\\'));
 
-        if($middles)
-        {
-            if($value instanceof \Closure || !is_array($middles) && class_exists($middles))
-            {
+        if ($middles) {
+            if ($middles instanceof \Closure || !is_array($middles) && class_exists($middles)) {
                 $middlesStack[] = $middles;
             }
-            elseif(is_array($middles))
-            {
-                foreach($middles as $key => $middle)
-                {
-                    if($value instanceof \Closure || class_exists($middle) && $method === $key)
-                    {
+            elseif (is_array($middles)) {
+                foreach ($middles as $key => $middle) {
+                    if ($middle instanceof \Closure || class_exists($middle) && $method === $key) {
                         $middlesStack[] = $middle;
                     }
                 }
             }
         }
 
-        if(!empty($middlesStack))
-        {
+        if (!empty($middlesStack)) {
             (new MiddleHandler($middlesStack))->dispatch($request, $response);
         }
         

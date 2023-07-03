@@ -155,6 +155,7 @@ class ModelQueryBuilder extends QueryBuilder
          * @var \PDOStatement
          */
         $result = $execute->result;
+        $items = [];
 
         switch ($this->returnType) {
             case 'object':

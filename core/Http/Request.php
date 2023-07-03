@@ -186,14 +186,14 @@ class Request
      */
     public function server($key, $default = null)
     {
-        $kname = is_null($key) ? null : str_replace('-', '_', mb_strtoupper($key));
+        $key = is_null($key) ? null : str_replace('-', '_', mb_strtoupper($key));
 
-        if (is_null($kname)) {
+        if (is_null($key)) {
             return $default;
         }
 
-        if (isset($this->server[$kname]) || isset($this->server[$key])) {
-            return $this->server[$kname] ?? $this->server[$key];
+        if (isset($this->server[$key])) {
+            return $this->server[$key];
         }
 
         return $this->header($key, $default);
@@ -214,7 +214,7 @@ class Request
         if ($key === null) {
             return $arr;
         }
-        return isset($arr[$key]) ? $arr[$key] : $default;
+        return $arr[$key] ?? $default;
     }
 
     /**
@@ -334,8 +334,8 @@ class Request
         if (!is_null($field) && isset($this->files[$field]['name'])) {
             return new File($this->files[$field]);
         } else {
-            $k = array_keys($this->files);
-            return isset($k[0]) ? new File($this->files[$k[0]]) : false;
+            $firstFile = reset($this->files);
+            return $firstFile ? new File($firstFile) : false;
         }
     }
 
@@ -396,14 +396,9 @@ class Request
      */
     public function uri(): string
     {
-        $url = parse_url($this->url(false, true));
-
-        $uri = $this->server('REQUEST_URI');
-
-        if(isset($url['path']))
-        {
-            $uri = strtr($this->server('REQUEST_URI'), [rtrim($url['path'], '/') => ""]);
-        }
+        $uri = strtr($this->server('REQUEST_URI'), [
+            rtrim($this->url(false, true), '/') => ""
+        ]);
 
         return rtrim(preg_replace('/\/+/', '/', $uri), '/') ?: '/';
     }
@@ -415,15 +410,18 @@ class Request
      */
     public function url($withQuery = true, $base = false): string
     {
-        $base_url = $this->env("base_url") ?? Shared::loadConfig()->base_url;
-        $base_url = trim((string) $base_url, " \n\r\t\v\x00\/");
+        $base_url = trim((string) ($this->env("base_url") ?? Shared::loadConfig()->base_url), " \n\r\t\v\x00\/");
 
         if($base === true)
-        {
             return $base_url;
+
+        $url = $base_url . $this->path();
+
+        if ($withQuery && !empty($this->query())) {
+            $url .= "?" . http_build_query($this->query(), "_key", "&");
         }
 
-		return $withQuery && !empty($this->query()) ? $base_url. $this->path() ."?".http_build_query($this->query(), "_key", "&") : $base_url. $this->path();
+        return $url;
     }
 
     /**
@@ -498,17 +496,15 @@ class Request
      * @param  string|null $name
      * @return mixed
      */
-    public function header(string $keyname, $default = null)
+    public function header(string $kname, $default = null)
     {
-        $kname = is_null($keyname) ? null : 'HTTP_' . mb_strtoupper($keyname);
-
-        if (empty($kname)) {
-            return $default;
+        $kname = is_null($kname) ? null : 'HTTP_' . str_replace('-', '_', mb_strtoupper($kname));
+    
+        if (!empty($kname) && isset($this->server[$kname])) {
+            return $this->server[$kname];
         }
 
-        $kname = str_replace('-', '_', $kname);
-        
-        return $this->server[$kname] ?? $default;
+        return $default;
     }
 
     /**
@@ -539,9 +535,10 @@ class Request
     public function is($patterns)
     {
         $path = rawurldecode($this->path());
-        $pattern = strtr( (is_array($patterns) ? implode("/", $patterns) : $patterns), [$this->url(false, true) => ""]);
+        $pattern = is_array($patterns) ? implode("/", $patterns) : $patterns;
+        $pattern = str_replace($this->url(false, true), "", $patterns);
 
-        return trim($pattern, " \n\r\t\v\x00/") === trim($path, " \n\r\t\v\x00/");
+        return trim($pattern) === trim($path);
     }
     
     /**
