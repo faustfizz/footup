@@ -22,7 +22,7 @@ trait MigrateTrait
 
         $status = implode(",", array_map('\Footup\Database\Schema\Schema::quoteDescription', $options));
 
-        $DB = DbConnection::getDb();
+        $DB = DbConnection::getDb(true);
         $stmt = $DB->query("SELECT * FROM ". Schema::quoteIdentifier(Migration::$table) .($filter ? " WHERE status in (". $status. ")" : ""));
         return $stmt->fetchAll(PDO::FETCH_OBJ);
 	}
@@ -35,7 +35,7 @@ trait MigrateTrait
      */
     protected function updateMigrationStatus($id, $status)
     {
-        $DB = DbConnection::getDb();
+        $DB = DbConnection::getDb(true);
         if(in_array($status, ['pending', 'applied', 'dropped', 'emptied']))
         {
             $stmt = $DB->query("UPDATE ". Schema::quoteIdentifier(Migration::$table) ." SET status = '$status' WHERE id = $id");

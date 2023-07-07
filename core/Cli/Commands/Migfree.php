@@ -32,7 +32,7 @@ class Migfree extends Command
 
         parent::__construct('migrate:empty', 'Run a migration or all migrations', false, $cli);
 
-        $this->schema = new Schema(DbConnection::getDb());
+        $this->schema = new Schema(DbConnection::getDb(true));
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance

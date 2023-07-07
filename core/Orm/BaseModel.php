@@ -142,9 +142,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      */
     public function __construct(array $data = null, $config = null, $init = true)
     {
-        DbConnection::setDb($config, $init);
-        
-        $this->setBuilder(new ModelQueryBuilder($this, DbConnection::getDb()));
+        $this->setBuilder(new ModelQueryBuilder($this, DbConnection::setDb($config, $init)));
 
         if(!empty($data))
         {

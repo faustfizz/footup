@@ -109,10 +109,14 @@ class DbConnection
     /**
      * Gets the database connection.
      *
+     * @param boolean $init init the connection if needed
      * @return PDO Database connection
      */
-    public static function getDb()
+    public static function getDb($init = false)
     {
+        if (is_null(self::$db)) {
+            return self::setDb(null, $init);
+        }
         return self::$db;
     }
 

@@ -43,7 +43,7 @@ class ModelQueryBuilder extends QueryBuilder
     public function __construct(BaseModel $model, $DbConnection = null)
     {
         $this->model = $model;
-        self::$db = $DbConnection instanceof PDO ? $DbConnection : DbConnection::getDb();
+        self::$db = $DbConnection instanceof PDO ? $DbConnection : DbConnection::getDb(true);
 
         $this->getTable();
         $this->getPrimaryKey();

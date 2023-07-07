@@ -37,7 +37,7 @@ class Migrate extends Command
 
         parent::__construct('migrate:create', 'Generate migration file', false, $cli);
 
-        if(DbConnection::getDb())
+        if(DbConnection::getDb(true))
         {
             DbConnection::getDb()->query("CREATE TABLE IF NOT EXISTS ". Schema::quoteIdentifier(Migration::$table) ."(
                 `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -114,7 +114,7 @@ class Migrate extends Command
 
     protected function exists($class)
     {
-        $stmt = DbConnection::getDb()->query("SELECT * FROM ". Schema::quoteIdentifier(Migration::$table) ." WHERE class = '".$class."'");
+        $stmt = DbConnection::getDb(true)->query("SELECT * FROM ". Schema::quoteIdentifier(Migration::$table) ." WHERE class = '".$class."'");
         $migration = null;
         if($stmt instanceof \PDOStatement){
             $migration = $stmt->fetchObject();
@@ -158,7 +158,7 @@ class Migrate extends Command
             $this->app()->io()->eol()->warn('"'.end($expl)."/Migration/".$filename.'.php" exists, use --force to override !', true)->eol();
             exit(0);
         }
-        $DB = DbConnection::getDb();
+        $DB = DbConnection::getDb(true);
         
         if(file_put_contents(
             APP_PATH."Migration/".$filename.'.php',

@@ -40,7 +40,7 @@ abstract class Seeder
      */
     public function __construct(PDO $db = null)
     {
-        $this->db = $db ?? DbConnection::getDb();
+        $this->db = $db ?? DbConnection::getDb(true);
     }
 
     /**
