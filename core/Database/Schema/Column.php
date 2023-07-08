@@ -241,10 +241,14 @@ class Column
 
 		// If it's null so it's NULL what do you exepect ?
         $sql .= $this->nullable ? " NULL " : " NOT NULL ";
-		
-		// quote the dafault value and if it nullable so default value is NULL right ?
-        $default = $this->defaultValue ? (is_string($this->defaultValue) ? Schema::quoteDescription( $this->defaultValue ) : $this->defaultValue) ." " : ($this->nullable ? "NULL " : "");
 
+		if (mb_stripos($this->defaultValue, 'CURRENT_TIMESTAMP') !== false) {
+			$default = $this->defaultValue;
+		} else {
+			// quote the dafault value and if it nullable so default value is NULL right ?
+			$default = $this->defaultValue ? (is_string($this->defaultValue) ? Schema::quoteDescription( $this->defaultValue ) : $this->defaultValue) ." " : ($this->nullable ? "NULL " : "");
+		}
+		
         if(!empty($default)) {
             $sql .= " DEFAULT ". $default;
         }

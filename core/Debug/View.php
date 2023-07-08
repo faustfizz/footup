@@ -21,6 +21,8 @@
 
 namespace Footup\Debug;
 
+use function Footup\Debug\Support\{readErrorFileConsole, ouch_views};
+
 class View
 {
     /**
@@ -31,7 +33,7 @@ class View
      * @param int    $bg
      * @param int    $bold
      *
-     * @return void
+     * @return bool|int
      */
     public static function writeLn($line, $color = 37, $bg = 48, $bold = 0)
     {
