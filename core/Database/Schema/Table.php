@@ -77,7 +77,7 @@ class Table
 	public function __construct($name, $db = null)
 	{
 		$this->name = $name;
-		$this->db = $db;
+		$this->db = &$db;
 	}
 
 

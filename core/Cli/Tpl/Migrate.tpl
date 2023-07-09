@@ -14,17 +14,15 @@ use Footup\Database\Migration;
 class {class_name} extends Migration
 {
     /**
-     * @param  $schema
+     * @param Schema $schema
      * @return bool|string|Schema
      */
     protected function up(Schema $schema)
     {
-        /**
-         * @var Table $table
-         */
-        $table = $schema->table("{table}");
-        
-        return $schema->create("{table}"); // or just return $schema
+        // don't miss the return keyword here
+        return Schema::createTable('{table}', function(Table $table){
+            $table->int("id")->autoIncrement()->addOption("PRIMARY KEY");
+        });
     }
 
     /**
