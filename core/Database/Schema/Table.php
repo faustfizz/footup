@@ -303,7 +303,7 @@ class Table
 	 * drop table
 	 * 
 	 * @param bool $ifNotExist
-	 * @return bool|PDOStatement|string
+	 * @return bool|\PDOStatement|string
 	 */
 	public function drop($ifNotExist = true)
 	{
@@ -335,7 +335,7 @@ class Table
 	 * @param bool $ifNotExist
 	 * @return bool|string
 	 */
-	public function execute($ifNotExist = true)
+	public function create($ifNotExist = true)
 	{
 		$this->ifNotExist = $ifNotExist;
 

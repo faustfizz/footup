@@ -230,7 +230,7 @@ class Schema
             case 'build':
             case 'execute':
             case 'create':
-                $action = "execute";
+                $action = "create";
                 break;
             default:
                 throw new ErrorException("Action '{$action}' not exists !");
@@ -241,11 +241,11 @@ class Schema
             {
                 return $table->{$action}($exists);
             }
-            if($action === "execute")
+            if($action === "create")
             {
                 throw new ErrorException("Table Object for `{$tableName}` not exists !");
             }else{
-                $exec = (bool)$this->db->query(($exists ? "CREATE TABLE IF NOT EXISTS {$tableName};" : "") . strtoupper($action)." TABLE "  .$tableName) ?:  $this->db->errorInfo()[2];
+                $exec = (bool)$this->db->query(strtoupper($action) ." TABLE "  . ($exists ? ($action === 'create' ? "IF NOT EXISTS" : "IF EXISTS") : "" )  . " `{$tableName}`;") ?:  $this->db->errorInfo()[2];
                 if(is_string($exec)) return $exec;
                 return true;
             }

@@ -14,10 +14,11 @@ use Footup\Database\Migration;
 class {class_name} extends Migration
 {
     /**
-     * @param Schema $schema
+     * You can use $this->table($tableName)->int('id) inside all these function but the createTable function is a static method
+     *
      * @return bool|string|Schema
      */
-    protected function up(Schema $schema)
+    protected function up()
     {
         // don't miss the return keyword here
         return Schema::createTable('{table}', function(Table $table){
@@ -26,20 +27,18 @@ class {class_name} extends Migration
     }
 
     /**
-     * @param Schema $schema
      * @return bool|string|Schema
      */
-    protected function empty(Schema $schema)
+    protected function empty()
     {
-        return $schema->empty("{table}"); // or just return $schema
+        return Schema::empty("{table}");
     }
 
     /**
-     * @param Schema $schema
      * @return bool|string|Schema
      */
-    protected function down(Schema $schema)
+    protected function down()
     {
-        return $schema->drop("{table}"); // or just return $schema
+        return Schema::drop("{table}");
     }
 }

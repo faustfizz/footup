@@ -36,28 +36,19 @@ abstract class Migration
     }
 
     /**
-     * 
-     * @param Schema $schema
-     * @param boolean $empty
-     * @return bool|Schema
-     */
-    abstract protected function up(Schema $schema);
-
-    /**
-     * 
-     * @param Schema $schema
-     * @param boolean $empty
      * @return bool|string|Schema
      */
-    abstract protected function down(Schema $schema);
+    abstract protected function up();
 
     /**
-     * 
-     * @param Schema $schema
-     * @param boolean $empty
      * @return bool|string|Schema
      */
-    abstract protected function empty(Schema $schema);
+    abstract protected function down();
+
+    /**
+     * @return bool|string|Schema
+     */
+    abstract protected function empty();
 
     /**
      * 
@@ -70,9 +61,9 @@ abstract class Migration
 
         switch($action)
         {
-            case self::DOWN: $result = $this->down($this->schema); break;
-            case self::EMPTY: $result = $this->empty($this->schema); break;
-            case self::UP: $result = $this->up($this->schema); break;
+            case self::DOWN: $result = $this->down(); break;
+            case self::EMPTY: $result = $this->empty(); break;
+            case self::UP: $result = $this->up(); break;
         }
 
         return $result;
