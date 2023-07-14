@@ -57,7 +57,7 @@ class ModelQueryBuilder extends QueryBuilder
     /**
      * Builds a delete query.
      *
-     * @param string|array|int $where Where conditions
+     * @param scalar $where Where conditions
      * @return bool
      */
     public function delete($where = null)
@@ -91,11 +91,7 @@ class ModelQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Finds and populates an object.
-     *
-     * @param int|string|array Search value
-     * @param string $field Search value
-     * @return object|array|null Populated object
+     * @inheritDoc 
      */
     public function find($value = [], $field = null)
     {
@@ -117,12 +113,7 @@ class ModelQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Undocumented function
-     *
-     * @param string $select
-     * @param array|string $where
-     * @param int $limit
-     * @param int $offset
+     * @inheritDoc
      * @return Collection<int, BaseModel|array|object>
      */
     public function get($select = "*", $where = null, $limit = null, $offset = null)

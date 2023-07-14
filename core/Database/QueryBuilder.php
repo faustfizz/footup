@@ -202,6 +202,8 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $table Table to join to
      * @param array|string $fields Fields to join on
      * @param string $type Type of join
+     * @param string $operator default = 
+     * 
      * @return QueryBuilder Self reference
      * @throws Exception For invalid join type
      */
@@ -238,6 +240,8 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param string $table Table to join to
      * @param array|string $fields Fields to join on
+     * @param string $operator default =
+     * 
      * @return QueryBuilder Self reference
      */
     public function leftJoin($table, $fields, $operator = " = ")
@@ -250,6 +254,8 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param string $table Table to join to
      * @param array|string $fields Fields to join on
+     * @param string $operator default =
+     * 
      * @return QueryBuilder Self reference
      */
     public function rightJoin($table, $fields, $operator = " = ")
@@ -262,6 +268,8 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param string $table Table to join to
      * @param array $fields Fields to join on
+     * @param string $operator default =
+     * 
      * @return QueryBuilder Self reference
      */
     public function fullJoin($table, $fields, $operator = " = ")
@@ -271,9 +279,11 @@ class QueryBuilder implements \IteratorAggregate
 
     /**
      * @param array|string $key
-     * @param string|array $val
-     * @param string $operator
-     * @param string $link
+     * @param array|string $val
+     * @param null|string $operator
+     * @param string $link default AND 
+     * @param bool $escape default TRUE
+     * 
      * @return QueryBuilder
      */
     public function where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
@@ -317,6 +327,8 @@ class QueryBuilder implements \IteratorAggregate
      * @param string|array $key
      * @param array|string $val
      * @param string $operator
+     * @param bool $escape default TRUE
+     * 
      * @return QueryBuilder
      */
     public function orWhere($key, $val = null, $operator = null, $escape = true)
@@ -326,7 +338,9 @@ class QueryBuilder implements \IteratorAggregate
 
     /**
      * @param string $key
-     * @param array|string $val
+     * @param array $val
+     * @param bool $escape default TRUE
+     * 
      * @return QueryBuilder
      */
     public function whereIn($key, array $val, $escape = true)
@@ -335,8 +349,10 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @param array $val
+     * @param bool $escape default TRUE
+     * 
      * @return QueryBuilder
      */
     public function whereNotIn($key, array $val, $escape = true)
@@ -345,9 +361,8 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param $str
-     * @param array|null $build_data
-     * @param string $link
+     * @param mixed $str
+     * 
      * @return QueryBuilder
      */
     public function whereRaw($str)
@@ -356,7 +371,8 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param $key
+     * @param string $key
+     * 
      * @return QueryBuilder
      */
     public function whereNotNull($key)
@@ -365,7 +381,8 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param $key
+     * @param string $key
+     * 
      * @return QueryBuilder
      */
     public function whereNull($key)
@@ -376,29 +393,31 @@ class QueryBuilder implements \IteratorAggregate
     // where OR
 
     /**
-     * @param array|string $key
-     * @param array|string $val
+     * @param string $key
+     * @param array $val
+     * 
      * @return QueryBuilder
      */
-    public function orWhereIn(array|string $key, array $val, $escape = true)
+    public function orWhereIn(string $key, array $val, $escape = true)
     {
         return $this->orWhere($key, $val, ' IN ', $escape);
     }
 
     /**
-     * @param array|string $key
+     * @param string $key
      * @param array $val
+     * @param bool $escape default TRUE
+     * 
      * @return QueryBuilder
      */
-    public function orWhereNotIn(array|string $key, array $val, $escape = true)
+    public function orWhereNotIn(string $key, array $val, $escape = true)
     {
         return $this->orWhere($key, $val, ' NOT IN ', $escape);
     }
 
     /**
-     * @param $str
-     * @param array|null $build_data
-     * @param string $link
+     * @param mixed $str
+     * 
      * @return QueryBuilder
      */
     public function orWhereRaw($str)
@@ -407,7 +426,8 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param $key
+     * @param string $key
+     * 
      * @return QueryBuilder
      */
     public function orWhereNotNull($key)
@@ -416,7 +436,7 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return QueryBuilder
      */
     public function orWhereNull($key)
@@ -428,6 +448,7 @@ class QueryBuilder implements \IteratorAggregate
      * Adds an ascending sort for a field.
      *
      * @param string|array $field Field name
+     * 
      * @return QueryBuilder Self reference
      */
     public function asc($field = null)
@@ -439,6 +460,7 @@ class QueryBuilder implements \IteratorAggregate
      * Adds an descending sort for a field.
      *
      * @param string|array $field Field name
+     * 
      * @return QueryBuilder Self reference
      */
     public function desc($field = null)
@@ -451,9 +473,10 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param string|array $field Field name
      * @param string $direction Sort direction
+     * 
      * @return QueryBuilder Self reference
      */
-    public function orderBy(mixed $field, $direction = 'ASC')
+    public function orderBy($field, $direction = 'ASC')
     {
         $this->order = (empty($this->order)) ? 'ORDER BY ' : $this->order.',';
 
@@ -476,6 +499,7 @@ class QueryBuilder implements \IteratorAggregate
      * Adds fields to group by.
      *
      * @param string|array $field Field name or array of field names
+     * 
      * @return QueryBuilder Self reference
      */
     public function groupBy($field)
@@ -493,6 +517,7 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param string|array $field A field name or an array of fields and values.
      * @param string $value A field value to compare to
+     * 
      * @return QueryBuilder Self reference
      */
     public function having($field, $value = null)
@@ -518,6 +543,7 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param int $limit Number of rows to limit
      * @param int $offset Number of rows to offset
+     * 
      * @return QueryBuilder Self reference
      */
     public function limit($limit = null, $offset = null)
@@ -537,6 +563,7 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param int $offset Number of rows to offset
      * @param int $limit Number of rows to limit
+     * 
      * @return QueryBuilder Self reference
      */
     public function offset($offset, $limit = null)
@@ -555,6 +582,7 @@ class QueryBuilder implements \IteratorAggregate
      * Sets the distinct keyword for a query.
      * 
      * @param bool $value
+     * 
      * @return QueryBuilder
      */
     public function distinct($value = true)
@@ -570,6 +598,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $field Database field
      * @param string $value1 First value
      * @param string $value2 Second value
+     * 
      * @return QueryBuilder
      */
     public function between($field, $value1, $value2)
@@ -589,6 +618,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param array|string $fields Array of field names to select
      * @param int $limit Limit condition
      * @param int $offset Offset condition
+     * 
      * @return QueryBuilder Self reference
      */
     public function select($fields = '*', $limit = null, $offset = null)
@@ -610,6 +640,7 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param array $data Array of key and values or array of keys to insert
      * @param array $values Array of values to use prepared statement
+     * 
      * @return bool|int
      */
     public function insert(array $data = [], $values = [])
@@ -648,6 +679,7 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param array|\stdClass $data Array of keys and values or object of type \stdClass
      * @param int|null $id 
+     * 
      * @return bool 
      */
     public function update($data, $id = null)
@@ -690,6 +722,7 @@ class QueryBuilder implements \IteratorAggregate
      * Builds a delete query.
      *
      * @param string|array|int $where Where conditions
+     * 
      * @return bool
      */
     public function delete($where = null)
@@ -715,6 +748,7 @@ class QueryBuilder implements \IteratorAggregate
      * Gets or sets the SQL statement.
      *
      * @param string|array SQL statement
+     * 
      * @return QueryBuilder|string SQL statement
      */
     public function sql($sql = null)
@@ -738,8 +772,9 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Executes a sql statement.
      *
-     * @throws Exception When database is not defined
      * @param array $params
+     * 
+     * @throws Exception When database is not defined
      * @return object Query results object
      */
     public function execute(array $params = [])
@@ -791,13 +826,14 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * Undocumented function
+     * get records from the db
      *
-     * @param string $select
-     * @param array|string $where
-     * @param int $limit
-     * @param int $offset
-     * @return \stdClass[]
+     * @param array|string $select
+     * @param array|string|null $where
+     * @param int|null $limit
+     * @param int|null $offset
+     * 
+     * @return array
      */
     public function get($select = "*", $where = null, $limit = null, $offset = null)
     {
@@ -839,7 +875,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $fields
      * @param string|array $where
      *
-     * @return \stdClass|\Footup\Orm\BaseModel|null Row
+     * @return object|null Row
      */
     public function one($fields = null, $where = null)
     {
@@ -857,7 +893,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $field
      * @param string|array $where
      *
-     * @return \stdClass|\Footup\Orm\BaseModel|null Row
+     * @return object|null Row
      */
     public function first($field = null, $where = null)
     {
@@ -873,12 +909,12 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $field
      * @param string|array $where
      *
-     * @return \stdClass|\Footup\Orm\BaseModel|null Row
+     * @return object|null Row
      */
     public function last($field = null, $where = null)
     {
         if (empty($this->sql)) {
-            $this->desc($field ?? $this->getPrimaryKey());
+            $this->desc($field);
         }
 
         return $this->one(null, $where);
@@ -888,20 +924,22 @@ class QueryBuilder implements \IteratorAggregate
      * Fetch a value from a field.
      *
      * @param string $name Database field name
+     * 
      * @return mixed Row value
      */
     public function value($name)
     {
         $row = $this->one();
 
-        return (!empty($row)) ? $row->$name : null;
+        return (!empty($row)) ? (is_array($row) ? $row[$name] : $row->$name) : null;
     }
 
     /**
      * Gets the min value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Row value
+     * 
+     * @return number Row value
      */
     public function min($field, $key = null)
     {
@@ -916,7 +954,8 @@ class QueryBuilder implements \IteratorAggregate
      * Gets the max value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Row value
+     * 
+     * @return number Row value
      */
     public function max($field, $key = null)
     {
@@ -931,7 +970,8 @@ class QueryBuilder implements \IteratorAggregate
      * Gets the sum value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Row value
+     * 
+     * @return number Row value
      */
     public function sum($field, $key = null)
     {
@@ -946,7 +986,8 @@ class QueryBuilder implements \IteratorAggregate
      * Gets the average value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Row value
+     * 
+     * @return number Row value
      */
     public function avg($field, $key = null)
     {
@@ -962,6 +1003,7 @@ class QueryBuilder implements \IteratorAggregate
      * Gets a count of records for a table.
      *
      * @param string $field Field name
+     * 
      * @return int Row value
      */
     public function count($field = '*')
@@ -977,7 +1019,8 @@ class QueryBuilder implements \IteratorAggregate
      * Wraps quotes around a string and escapes the content for a string parameter.
      *
      * @param mixed $value mixed value
-     * @return mixed Quoted value
+     * 
+     * @return string|int Quoted value
      */
     public function quote($value)
     {
@@ -1004,7 +1047,8 @@ class QueryBuilder implements \IteratorAggregate
      * Finds and populates an object.
      *
      * @param int|string|array Search value
-     * @param string $field Search value
+     * @param string $field Search field
+     * 
      * @return object|array|null Populated object
      */
     public function find($value = [], $field = null)
@@ -1030,7 +1074,6 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get the table name for this ER class.
      * 
-     * @access public
      * @return string
      */
     public function getTable()
@@ -1074,7 +1117,8 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param int $fetchType
+     * @param int $fetchType - PDO FETCH constants
+     * 
      * @return array $tableInfo
      */
     public function getTableInfo($fetchType = PDO::FETCH_ASSOC)
@@ -1095,7 +1139,7 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get $last_query dernière requête sql
      *
-     * @return  string
+     * @return string
      */ 
     public function getLastQuery()
     {
@@ -1105,9 +1149,9 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set $last_query dernière requête sql
      *
-     * @param  string  $last_query  $last_query dernière requête sql
+     * @param string $last_query  $last_query dernière requête sql
      *
-     * @return  self
+     * @return self
      */ 
     public function setLastQuery(string $last_query)
     {
@@ -1119,7 +1163,7 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get $num_rows
      *
-     * @return  int
+     * @return int
      */ 
     public function getNumRows()
     {
@@ -1129,7 +1173,7 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get $insert_id id dernièrement ajouté
      *
-     * @return  int|string
+     * @return int|string
      */ 
     public function getInsertID()
     {
@@ -1139,7 +1183,7 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get $affcted_rows
      *
-     * @return  int
+     * @return int
      */ 
     public function getAffectedRows()
     {
@@ -1162,9 +1206,9 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set the value of returnType
      *
-     * @param  string  $returnType
+     * @param string $returnType
      *
-     * @return  self
+     * @return self
      */ 
     public function setReturnType(string $returnType)
     {
@@ -1176,9 +1220,9 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set the value of primaryKey
      *
-     * @param  string  $primaryKey
+     * @param string $primaryKey
      *
-     * @return  self
+     * @return self
      */ 
     public function setPrimaryKey(string $primaryKey)
     {
@@ -1190,9 +1234,9 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set $insert_id id dernièrement ajouté
      *
-     * @param  int|string  $insert_id  $insert_id id dernièrement ajouté
+     * @param int|string $insert_id  $insert_id id dernièrement ajouté
      *
-     * @return  self
+     * @return self
      */ 
     public function setInsertId($insert_id)
     {
@@ -1204,9 +1248,9 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set $num_rows
      *
-     * @param  int  $num_rows  $num_rows
+     * @param int $num_rows  $num_rows
      *
-     * @return  self
+     * @return self
      */ 
     public function setNumRows(int $num_rows)
     {
@@ -1218,9 +1262,9 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set $affcted_rows
      *
-     * @param  int  $affected_rows  $affcted_rows
+     * @param int $affected_rows  $affcted_rows
      *
-     * @return  self
+     * @return self
      */ 
     public function setAffectedRows(int $affected_rows)
     {
@@ -1232,7 +1276,7 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get $db connection
      *
-     * @return  \PDO
+     * @return \PDO
      */ 
     public function getDb()
     {
