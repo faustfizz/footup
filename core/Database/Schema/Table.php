@@ -363,7 +363,6 @@ class Table
 			$name = $foreignKey->getName();
 
 		} else {
-			$targetColumns = empty($targetColumns) && !is_null($targetColumns) ? ['id_'.strtolower($targetTable)] : $targetColumns;
 			$foreignKey = new ForeignKey($name, $columns, $targetTable, $targetColumns, $this);
 			$name = $foreignKey->getName();
 		}
@@ -383,7 +382,7 @@ class Table
 	 * @return ForeignKey
 	 */
 	public function foreign(string $column, string $tagetTable = null) {
-		return $this->addForeignKey($this->getName(), [$column], $tagetTable, []);
+		return $this->addForeignKey($this->getName().'_'.$column, [$column], $tagetTable, []);
 	}
 
 	/**

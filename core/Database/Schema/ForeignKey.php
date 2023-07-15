@@ -100,6 +100,7 @@ class ForeignKey
 	 * @return self
 	 */
 	public function references(string $targetColumn) {
+		$this->targetColumns = []; // reset this array as you are setting a column as target
 		return $this->addTargetColumn($targetColumn);
 	}
 
