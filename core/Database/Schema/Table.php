@@ -41,6 +41,7 @@ use ErrorException;
  * @method Column mediumtext($name, $length = false) $length false to take default from database
  * @method Column char($name, $length = false) $length false to take default from database
  * @method Column varchar($name, $length = false) $length false to take default from database
+ * @method Column varbinary($name, $length = false) $length false to take default from database
  * @method Column string($name, $length = false) $length false to take default from database
  * @method Column tinytext($name, $length = false) $length false to take default from database
  */
@@ -346,7 +347,6 @@ class Table
 		return (bool)$this->db->query($this->toSQL()) ?: $this->db->errorInfo()[2];
 	}
 
-
 	/**
 	 * @param  string|ForeignKey $name
 	 * @param  string[]|string $columns
@@ -363,6 +363,7 @@ class Table
 			$name = $foreignKey->getName();
 
 		} else {
+			$targetColumns = empty($targetColumns) && !is_null($targetColumns) ? ['id_'.strtolower($targetTable)] : $targetColumns;
 			$foreignKey = new ForeignKey($name, $columns, $targetTable, $targetColumns, $this);
 			$name = $foreignKey->getName();
 		}
@@ -372,6 +373,17 @@ class Table
 		}
 
 		return $this->foreignKeys[$name] = $foreignKey;
+	}
+
+	/**
+	 * Add foreign key using a fluent syntax
+	 *
+	 * @param string $column
+	 * @param string|null $tagetTable
+	 * @return ForeignKey
+	 */
+	public function foreign(string $column, string $tagetTable = null) {
+		return $this->addForeignKey($this->getName(), [$column], $tagetTable, []);
 	}
 
 	/**
@@ -391,7 +403,6 @@ class Table
 		return $this;
 	}
 
-
 	/**
 	 * @param  string|ForeignKey $name
 	 * @return void
@@ -409,7 +420,6 @@ class Table
 		unset($this->foreignKeys[$name]);
 	}
 
-
 	/**
 	 * @param  string $name
 	 * @return ForeignKey|null
@@ -422,7 +432,6 @@ class Table
 		return NULL;
 	}
 
-
 	/**
 	 * @return ForeignKey[]
 	 */
@@ -430,7 +439,6 @@ class Table
 	{
 		return $this->foreignKeys;
 	}
-
 
 	/**
 	 * @throws ErrorException
@@ -489,7 +497,8 @@ class Table
      * get crud type
      *
      * @param string $type
-     * @param int|bool $length
+     * @param int|false $length
+	 * 
      * @return array
      */
     public static function matchTypeLength($type, $length = false)
@@ -526,18 +535,17 @@ class Table
 			case 'decimal':
 				return ["double", ((string)$length) ?: "25,3"];
             case 'blob':
+            case 'mediumblob':
+            case 'longblob':
 				return [$type, $length];
             case 'binary':
+            case 'varbinary':
 				return [$type, $length ?: 249];
             case 'text':
-				return [$type, $length];
-            case 'mediumblob':
+			case 'json':
+			case 'longtext':
             case 'mediumtext':
-				return ["mediumtext", $length];
-            case 'json':
-            case 'longblob':
-            case 'longtext':
-				return ["longtext", $length];
+				return [$type, $length];
             case 'char':
 				return [$type, $length ?: 3];
 			case 'tinytext':
