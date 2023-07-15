@@ -93,6 +93,25 @@ class ForeignKey
 		return $this->name;
 	}
 
+	/**
+	 * Referenced column on the target table
+	 *
+	 * @param string $targetColumn
+	 * @return self
+	 */
+	public function references(string $targetColumn) {
+		return $this->addTargetColumn($targetColumn);
+	}
+
+	/**
+	 * set target table
+	 *
+	 * @param string $targetTable
+	 * @return self
+	 */
+	public function on(string $targetTable) {
+		return $this->setTargetTable($targetTable);
+	}
 
 	/**
 	 * @param  string $column
@@ -141,6 +160,8 @@ class ForeignKey
 	public function addTargetColumn($targetColumn)
 	{
 		$this->targetColumns[] = $targetColumn;
+		$this->targetColumns = array_unique($this->targetColumns);
+
 		return $this;
 	}
 
@@ -158,7 +179,7 @@ class ForeignKey
 	 * @param  string $onUpdateAction
 	 * @return self
 	 */
-	public function setOnUpdateAction($onUpdateAction)
+	public function onUpdate($onUpdateAction)
 	{
 		if (!$this->validateAction($onUpdateAction)) {
 			throw new ErrorException("Action '$onUpdateAction' is invalid.");
@@ -172,7 +193,7 @@ class ForeignKey
 	/**
 	 * @return string
 	 */
-	public function getOnUpdateAction()
+	public function getOnUpdate()
 	{
 		return $this->onUpdateAction;
 	}
@@ -182,7 +203,7 @@ class ForeignKey
 	 * @param  string $onDeleteAction
 	 * @return self
 	 */
-	public function setOnDeleteAction($onDeleteAction)
+	public function onDelete($onDeleteAction)
 	{
 		if (!$this->validateAction($onDeleteAction)) {
 			throw new ErrorException("Action '$onDeleteAction' is invalid.");
@@ -196,7 +217,7 @@ class ForeignKey
 	/**
 	 * @return string
 	 */
-	public function getOnDeleteAction()
+	public function getOnDelete()
 	{
 		return $this->onDeleteAction;
 	}
@@ -217,7 +238,7 @@ class ForeignKey
 					join(',', array_map('\Footup\Database\Schema\Schema::quoteIdentifier', $this->getColumns())) . 
 				") REFERENCES " . Schema::quoteIdentifier($this->getTargetTable()) ." (" . 
 					join(',', array_map('\Footup\Database\Schema\Schema::quoteIdentifier', $this->getTargetColumns())) . 
-				") ON UPDATE " . $this->getOnUpdateAction() . " ON DELETE " . $this->getOnDeleteAction();
+				") ON UPDATE " . $this->getOnUpdate() . " ON DELETE " . $this->getOnDelete();
 		
         return trim(preg_replace("/\s\s/", " ", $sql));
     }

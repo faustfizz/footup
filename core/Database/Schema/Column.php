@@ -231,6 +231,11 @@ class Column
 		return $this;
 	}
 
+	public function foreignKeyOf(string $targetTable, string $targetColumn = null) {
+		$targetColumn = is_null($targetColumn) ? 'id_'.strtolower($targetTable) : $targetColumn;
+		return $this->caller->foreign($this->getName(), $targetTable)->references($targetColumn);
+	}
+
     public function toSQL()
     {
         $sql = Schema::quoteIdentifier($this->getName()) . ' ';
