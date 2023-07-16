@@ -480,11 +480,11 @@ class Table
 		
 		if(strtolower($type) === 'enum')
 		{
-			if($weHaveLength && !is_array($arguments[1]))
+			if($weHaveLength && !is_array($length))
 			{
 				throw new ErrorException("Type ENUM/SET should have values as choice");
 			}
-			$column->params($arguments[1]);
+			$column->params($length);
 
 			return $column;
 		}
@@ -528,7 +528,7 @@ class Table
 				return [$type, $length ?: 20];
             case 'enum':
             case 'set':
-				return ["ENUM", $length];
+				return ["enum", $length];
 			case 'float':
             case 'double':
 			case 'decimal':

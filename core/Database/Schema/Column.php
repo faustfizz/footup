@@ -241,7 +241,7 @@ class Column
         $sql = Schema::quoteIdentifier($this->getName()) . ' ';
 		// If it's enum, we use the parameters
 		$sql .= in_array(strtolower($this->type), ["enum", "set"]) ? 
-					"ENUM(".join(",", array_map("Schema::quoteDescription", $this->parameters)).")" :
+					"ENUM(".join(",", array_map([new Schema, "quoteDescription"], $this->parameters)).")" :
 				$this->type. ($this->getLength() ? "(". $this->getLength() .")" : "" );
 
 		// If it's null so it's NULL what do you exepect ?
