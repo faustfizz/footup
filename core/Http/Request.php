@@ -396,8 +396,11 @@ class Request
      */
     public function uri(): string
     {
-        $uri = strtr($this->server('REQUEST_URI'), [
-            rtrim($this->url(false, true), '/') => ""
+        $url = $this->scheme(true).rtrim($this->domain(), '/').$this->server('REQUEST_URI');
+        $base_url = trim((string) ($this->env("base_url") ?? Shared::loadConfig()->base_url), " \n\r\t\v\x00\/");
+
+        $uri = strtr($url, [
+            rtrim($base_url, '/') => ""
         ]);
 
         return rtrim(preg_replace('/\/+/', '/', $uri), '/') ?: '/';
