@@ -70,7 +70,7 @@ if (!function_exists('str_last')) {
      * @param string $str string
      * @param string $del delimiter
      *
-     * @return void
+     * @return string
      */
     function str_last($str, $del = '\\')
     {
@@ -128,8 +128,10 @@ if (!function_exists('readErrorFile')) {
 
         $start = $errorLine >= 6 ? $errorLine - 6 : 1;
         $end = ($errorLine + 6) <= $numberOfLines ? $errorLine + 6 : $numberOfLines;
-
+        
         for ($i = $start; $i <= $end; $i++) {
+            if (!isset($file[$i])) continue;
+
             if(($i == $start || $i == $end) && empty(trim($file[$i])))
             {
                 $file[$i] = "ㅤ".$file[$i]."";
