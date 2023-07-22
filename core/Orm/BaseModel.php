@@ -356,7 +356,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      */
     public function id()
     {
-        return $this->data[$this->getPrimaryKey()];
+        return $this->data[$this->getPrimaryKey()] ?? null;
     }
 
     /**
