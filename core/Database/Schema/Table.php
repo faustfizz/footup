@@ -65,7 +65,7 @@ class Table
 	/** @var array<string, string>  [name => value] */
 	private $options = [];
 
-	/** @var PDO */
+	/** @var \PDO */
 	private $db;
 
 	/** @var bool */
@@ -532,7 +532,7 @@ class Table
 			case 'float':
             case 'double':
 			case 'decimal':
-				return ["double", ((string)$length) ?: "25,3"];
+				return ["double", $length];
             case 'blob':
             case 'mediumblob':
             case 'longblob':
@@ -589,7 +589,7 @@ class Table
 				$output .= is_numeric($option) ? " ".strtoupper($value)." " : strtoupper($option). (in_array(strtolower($option), ["engine", "charset", "collate"]) ? "=" : " ") . $value." ";
 			}
 		}else{
-			$output .= " ENGINE=INNODB DEFAULT CHARSET=utf8";
+			$output .= " ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
 		}
 
 		if (strlen($this->comment) > 0) {
