@@ -351,7 +351,8 @@ class Response implements JsonSerializable
                 header('$key: $value', true);
             }
         }
-        header('Location: $location', true, $status);
+        header("Location: $location", true, $status);
+        exit;
     }
 
     /**
