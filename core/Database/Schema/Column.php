@@ -216,7 +216,7 @@ class Column
 	 */
 	public function default($defaultValue)
 	{
-		$this->defaultValue = $defaultValue;
+		$this->defaultValue = $defaultValue === false ? 0 : $defaultValue;
 		return $this;
 	}
 
