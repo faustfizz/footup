@@ -251,11 +251,11 @@ class Column
 			$default = $this->defaultValue;
 		} else {
 			// quote the dafault value and if it nullable so default value is NULL right ?
-			$default = $this->defaultValue ? (is_string($this->defaultValue) ? Schema::quoteDescription( $this->defaultValue ) : $this->defaultValue) ." " : ($this->nullable ? "NULL " : "");
+			$default = $this->defaultValue ? (is_string($this->defaultValue) ? Schema::quoteDescription( $this->defaultValue ) : $this->defaultValue) ." " : ($this->nullable ? "NULL " : $this->defaultValue);
 		}
 		
-        if(!empty($default)) {
-            $sql .= " DEFAULT ". $default;
+        if(isset($default)) {
+            $sql .= " DEFAULT $default";
         }
         if ($this->autoIncrement) {
             $sql .= ' AUTO_INCREMENT ';
