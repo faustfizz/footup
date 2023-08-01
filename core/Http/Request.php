@@ -376,14 +376,14 @@ class Request
 
         $value = $this->json($key);
 
-        if(isset($value) && !is_array($value) && !is_object($value))
+        if(!empty($value))
         {
             return $value;
         }
-
+        
         $value = $this->env($key);
 
-        if(isset($value) && !is_array($value))
+        if(!empty($value))
         {
             return $value;
         }
