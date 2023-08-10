@@ -42,6 +42,7 @@ use Footup\Utils\Shared;
  * @method self patch(string $uri, Closure|string $handler, string|array $options = null)
  * @method self delete(string $uri, Closure|string $handler, string|array $options = null)
  * @method self head(string $uri, Closure|string $handler, string|array $options = null)
+ * @method self any(string $uri, Closure|string $handler, string|array $options = null)
  */
 class Router
 {

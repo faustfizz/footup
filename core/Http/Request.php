@@ -396,12 +396,9 @@ class Request
      */
     public function uri(): string
     {
-        $url = $this->scheme(true).rtrim($this->domain(), '/').$this->server('REQUEST_URI');
-        $base_url = trim((string) ($this->env("base_url") ?? Shared::loadConfig()->base_url), " \n\r\t\v\x00\/");
-
-        $uri = strtr($url, [
-            rtrim($base_url, '/') => ""
-        ]);
+        $rootDoc = explode(DS, BASE_PATH);
+        $rootDoc = join('/', array_slice($rootDoc, -2));
+        $uri = preg_replace('/.*'.preg_quote($rootDoc, '/').'/', '/', strtolower($this->server('REQUEST_URI')));
 
         return rtrim(preg_replace('/\/+/', '/', $uri), '/') ?: '/';
     }
@@ -413,7 +410,13 @@ class Request
      */
     public function url($withQuery = true, $base = false): string
     {
-        $base_url = trim((string) ($this->env("base_url") ?? Shared::loadConfig()->base_url), " \n\r\t\v\x00\/");
+        if (preg_match('/(localhost|127\.)/', $this->domain())) {
+            $rootDoc = explode(DS, BASE_PATH);
+            $rootDoc = join('/', array_slice($rootDoc, -2));
+            $base_url = trim((string) ($this->scheme(true).$this->domain().'/'.$rootDoc), " \n\r\t\v\x00\/");
+        } else {
+            $base_url = trim((string) ($this->scheme(true).$this->domain()), " \n\r\t\v\x00\/");
+        }
 
         if($base === true)
             return $base_url;
