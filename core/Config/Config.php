@@ -102,6 +102,9 @@ class Config
     public function __construct(?array $config = null, ?array $page_error = null, ?array $locale = null)
     {
         $env = new DotEnv();
+
+        // Not recommanded but we do it to be sure we get the right document_root
+        $_SERVER['DOCUMENT_ROOT'] = BASE_PATH;
         
         $config = (array)($config ? ["config" => $config] : new \App\Config\Config());
 

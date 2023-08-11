@@ -18,7 +18,6 @@ class Session
 
     /**
      * Session constructor.
-     * @param null $id session.id
      */
     public function __construct()
     {
