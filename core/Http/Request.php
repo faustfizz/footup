@@ -397,7 +397,7 @@ class Request
      * @return string|false
      */
     public function subdomain() {
-        preg_match('/^(\w+[^\.])(\.\w+\.*\/)/', $this->domain(), $matches);
+        preg_match('/(\w+[^\.])(\.\w+\.*)/', $this->domain(), $matches);
         return isset($matches[1]) ? $matches[1] : false;
     }
 
