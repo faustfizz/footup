@@ -392,11 +392,21 @@ class Request
     }
 
     /**
+     * Get if subdomain
+     *
+     * @return string|false
+     */
+    public function subdomain() {
+        preg_match('/^(\w+[^\.])(\.\w+\.*\/)/', $this->domain(), $matches);
+        return isset($matches[1]) ? $matches[1] : false;
+    }
+
+    /**
      * @return string
      */
     public function uri(): string
     {
-        $rootDoc = explode(DS, BASE_PATH);
+        $rootDoc = array_filter(explode(DS, BASE_PATH));
         $rootDoc = join('/', array_slice($rootDoc, -2));
         $uri = preg_replace('/.*'.preg_quote($rootDoc, '/').'/', '/', strtolower($this->server('REQUEST_URI')));
 
@@ -411,17 +421,18 @@ class Request
     public function url($withQuery = true, $base = false): string
     {
         if (preg_match('/(localhost|127\.)/', $this->domain())) {
-            $rootDoc = explode(DS, BASE_PATH);
+            $rootDoc = array_filter(explode(DS, BASE_PATH));
             $rootDoc = join('/', array_slice($rootDoc, -2));
-            $base_url = trim((string) ($this->scheme(true).$this->domain().'/'.$rootDoc), " \n\r\t\v\x00\/");
+            $fullTestUrl = trim( $this->scheme(true).$this->domain().'/'. strtolower($this->server('REQUEST_URI')), " \n\r\t\v\x00\/");
+            $baseUrl = preg_match('/'.preg_quote(trim($rootDoc, '/'), '/').'/', $fullTestUrl) ? $this->scheme(true).$this->domain().'/'. $rootDoc : $this->scheme(true).$this->domain();
         } else {
-            $base_url = trim((string) ($this->scheme(true).$this->domain()), " \n\r\t\v\x00\/");
+            $baseUrl = trim($this->scheme(true).$this->domain(), " \n\r\t\v\x00\/");
         }
 
         if($base === true)
-            return $base_url;
+            return $baseUrl;
 
-        $url = $base_url . $this->path();
+        $url = $baseUrl . $this->path();
 
         if ($withQuery && !empty($this->query())) {
             $url .= "?" . http_build_query($this->query(), "_key", "&");
@@ -453,7 +464,7 @@ class Request
      */
     public function domain(): string
     {
-        return $this->server('SERVER_NAME');
+        return $this->server('SERVER_NAME'). ($this->port() !== 80 ? ':'.$this->port() : null);
     }
 
     /**
@@ -461,7 +472,7 @@ class Request
      */
     public function scheme(bool $suffix = false): string
     {
-        return $suffix ? $this->server('REQUEST_SCHEME') . '://' : $this->server('REQUEST_SCHEME');
+        return $suffix ? $this->server('REQUEST_SCHEME', 'http') . '://' : $this->server('REQUEST_SCHEME', 'http');
     }
 
     /**
