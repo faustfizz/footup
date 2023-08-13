@@ -12,7 +12,6 @@
 
 namespace Footup\Http;
 
-use Footup\Config\Config;
 use Footup\Files\File;
 use Footup\Utils\Arrays\ArrDots;
 use Footup\Utils\Shared;
@@ -26,6 +25,13 @@ class Request
      * @var string
      */
     public $lang;
+
+    /**
+     * Current logged in user
+     *
+     * @var \Footup\Model|\stdClass|null
+     */
+    public $loggedInUser;
 
     /**
      * Current Controller
@@ -623,6 +629,30 @@ class Request
     public function setLang($lang)
     {
         $this->lang = $lang;
+
+        return $this;
+    }
+
+    /**
+     * Get current logged in user
+     *
+     * @return  \Footup\Model|\stdClass|null
+     */ 
+    public function user()
+    {
+        return $this->loggedInUser;
+    }
+
+    /**
+     * Set current logged in user
+     *
+     * @param  \Footup\Model|\stdClass|null  $loggedInUser  Current logged in user
+     *
+     * @return  self
+     */ 
+    public function setUser($loggedInUser)
+    {
+        $this->loggedInUser = $loggedInUser;
 
         return $this;
     }
