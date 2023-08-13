@@ -24,7 +24,7 @@ abstract class Middle implements MiddleInterface
      * @param Response $response
      * @param callable|\Closure $next
      * 
-     * @return Response|string|void -- to continue to the next middle return $next($request, $response),
+     * @return Response|mixed|void -- to continue to the next middle return $next($request, $response),
      * return $response to skip all other middle and return a string or void if you need to stop here
      */
     abstract public function execute(Request $request, Response $response, $next);
