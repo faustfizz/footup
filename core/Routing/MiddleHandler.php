@@ -75,9 +75,9 @@ class MiddleHandler
      * 
      * @param Request $request 
      * @param Response $response
-     * @return Response
+     * @return Response|mixed
      */
-    public function dispatch(Request $request, Response $response): Response
+    public function dispatch(Request $request, Response $response)
     {
         reset($this->middlewares);
         $this->response = $response;
@@ -89,7 +89,7 @@ class MiddleHandler
      * next middleware.
      * 
      * @param Request $request 
-     * @return Response|void
+     * @return Response|mixed|void
      */
     public function handle(Request $request, Response $response)
     {
@@ -97,23 +97,23 @@ class MiddleHandler
             return $this->response;
         }
 
+        /**
+         * @var Middle|\Closure
+         */
         $middleware = $this->middlewares[$this->index];
-        if(is_object($middleware) && method_exists($middleware, "execute"))
-        {
+        if(is_object($middleware) && method_exists($middleware, "execute")) {
             $result = $middleware->execute($request, $response, $this->next());
-        }else{
+        } else {
             $result = $middleware($request, $response, $this->next());
         }
-
+        
         // If the result is not an instance of Response so you don't need to continue
-        if($result)
-        {
-            return $response->body($result);
-        }else{
-            // We are facing a middle that return void that mean it delegate itself the request so we don't continue
-            // Yes we stop because you don't return a response, nor string or callable but nothing that we need
-            exit;
+        if ($result instanceof Response) {
+            return $result;
+        } elseif (is_scalar($result) || is_array($result) || is_object($result) ) {
+            return $response->body($result)->send();
         }
+        return null;
     }
 
     /**
