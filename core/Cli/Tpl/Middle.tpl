@@ -16,8 +16,9 @@ class {class_name}
      *
      * @param Request $request
      * @param Response $response
-     * @param callable $next to queue middles
-     * @return Response|string|void -- to continue to the next middle return $next($request, $response),
+     * @param callable|\Closure $next to queue middles
+     *
+     * @return Response|mixed|void -- to continue to the next middle return $next($request, $response),
      * return $response to skip all other middle and return a string or void if you need to stop here
      */
     public function execute(Request $request, Response $response, $next)
