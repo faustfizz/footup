@@ -156,7 +156,7 @@ class Response implements JsonSerializable
             $this->header('Date', (new DateTime('now', new \DateTimeZone(date_default_timezone_get())))->format('D, d M Y H:i:s') . ' GMT');
         }
 
-        if(is_string($data) && substr($data, 0, 3) === 'php')
+        if(is_string($data) && substr($data, 0, 6) === 'php://')
         {
             $data = file_get_contents($data);
         }
@@ -211,7 +211,7 @@ class Response implements JsonSerializable
     public function body($body)
     {
         $this->body = $this->check($body);
-        return $this->setOriginalBody($body);
+        return $this;
     }
 
     /**
@@ -220,8 +220,10 @@ class Response implements JsonSerializable
      */
     private function check($body)
     {
+        $this->setOriginalBody($body);
+
         if ($body instanceof Response) {
-            $body = $this->status($body->status)->reason;
+            $body = $this->status($body->status)->getOriginalBody();
         }
 
         if (!is_scalar($body) && !is_callable([$body, '__toString']) && !is_object($body) && !is_array($body)) {
@@ -239,6 +241,7 @@ class Response implements JsonSerializable
 
         if ($this->itCanBeJson($body)) {
             $this->cache()->header(array_merge($this->header, ['Content-Type' => 'application/json; charset=UTF-8']));
+
             $body = $this->convertToJson($body);
         }
 
@@ -296,7 +299,7 @@ class Response implements JsonSerializable
     public function json(array $data = [], int $status = 200, array $header = [], int $option = 0)
     {
         return $this->status($status)
-            ->body(empty($data) ? $this->reason : $data)
+            ->body(empty($data) ? ($this->originalBody ?? $this->reason) : $data)
             ->header(array_merge($header, ['Content-Type' => 'application/json; charset=UTF-8']))
             ->send();
     }
