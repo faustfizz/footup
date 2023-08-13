@@ -72,18 +72,19 @@ class Footup
             {
                 $this->endTime($request);
                 $responseOrContent = $handler(...array_values($route->getArgs()));
-                return $response->body($responseOrContent ?? '')->send();
+                if ($responseOrContent)
+                    return $response->body($responseOrContent ?? '')->send();
             }
             /**
              * @var \Footup\Controller $controller
              */
-            $controller = $this->runMiddles(new $handler(), $method, $request, $response);
+            list($controller, $middleResult) = $this->runMiddles(new $handler(), $method, $request, $response);
             // Recalculate endTime as we can run many Middles before
             $this->endTime($request);
-            $responseOrContent = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
-            
-            return $response->body($responseOrContent ?? '')->send();
-
+            if  ($middleResult) {
+                $responseOrContent = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
+                return $response->body($responseOrContent ?? '')->send();
+            }
         } catch (\ErrorException $exception) {
             $this->endTime($request);
             // Erreur 500.
@@ -98,7 +99,7 @@ class Footup
      * @param string $method
      * @param Request $request
      * @param Response $response
-     * @return \Footup\Controller|mixed
+     * @return array<\Footup\Controller, mixed>
      */
     protected function runMiddles($controller, $method, Request $request, Response &$response)
     {
@@ -132,11 +133,13 @@ class Footup
             }
         }
 
+        $middleResult = null;
+
         if (!empty($middlesStack)) {
-            (new MiddleHandler($middlesStack))->dispatch($request, $response);
+            $middleResult = (new MiddleHandler($middlesStack))->dispatch($request, $response);
         }
         
-        return $controller;
+        return [$controller, $middleResult];
     }
     
     protected function endTime(Request $request)
