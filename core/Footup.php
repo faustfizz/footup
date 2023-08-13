@@ -83,7 +83,8 @@ class Footup
             $this->endTime($request);
             if  ($middleResult) {
                 $responseOrContent = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
-                return $response->body($responseOrContent ?? '')->send();
+                if ($responseOrContent)
+                    return $response->body($responseOrContent ?? '')->send();
             }
         } catch (\ErrorException $exception) {
             $this->endTime($request);
