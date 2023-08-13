@@ -94,7 +94,7 @@ class Response implements JsonSerializable
         410 => 'Gone',
         411 => 'Length Required',
         412 => 'Precondition Failed',
-        413 => 'Request Entity Too Large',
+        413 => 'Request Content Too Large',
         414 => 'Request-URI Too Long',
         415 => 'Unsupported Media Type',
         416 => 'Requested Range Not Satisfiable',
@@ -102,7 +102,7 @@ class Response implements JsonSerializable
         418 => 'I\'m A Teapot',
         419 => 'Authentication Timeout',
         420 => 'Enhance Your Calm',
-        422 => 'Unprocessable Entity',
+        422 => 'Unprocessable Content',
         423 => 'Locked',
         424 => 'Method Failure',
         425 => 'Unordered Collection',
@@ -156,9 +156,9 @@ class Response implements JsonSerializable
             $this->header('Date', (new DateTime('now', new \DateTimeZone(date_default_timezone_get())))->format('D, d M Y H:i:s') . ' GMT');
         }
 
-        if(empty($data))
+        if(is_string($data) && substr($data, 0, 3) === 'php')
         {
-            $data = $this->message[$status];
+            $data = file_get_contents($data);
         }
 
         $this->status($status)->body($data);
@@ -192,7 +192,7 @@ class Response implements JsonSerializable
      */#[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
-        return ['data' => empty($this->body) ? $this->reason : $this->getBody(), 'status' => $this->status];
+        return empty($this->originalBody) ? $this->reason($this->status) : $this->getOriginalBody(); //['data' => ];
     }
 
     /**
@@ -210,7 +210,7 @@ class Response implements JsonSerializable
      */
     public function body($body)
     {
-        $this->body = $this->check($body ?? '');
+        $this->body = $this->check($body);
         return $this->setOriginalBody($body);
     }
 
@@ -220,6 +220,10 @@ class Response implements JsonSerializable
      */
     private function check($body)
     {
+        if ($body instanceof Response) {
+            $body = $this->status($body->status)->reason;
+        }
+
         if (!is_scalar($body) && !is_callable([$body, '__toString']) && !is_object($body) && !is_array($body)) {
             // Ooops we don't handle your type here
             throw new Exception(text('Http.invalidBodyType', [gettype($body)]));
@@ -227,6 +231,10 @@ class Response implements JsonSerializable
 
         if (is_callable([$body, '__toString'])) {
             $body = $body->__toString();
+        }
+
+        if (empty($body)) {
+            $body = $this->reason;
         }
 
         if ($this->itCanBeJson($body)) {
@@ -287,14 +295,10 @@ class Response implements JsonSerializable
      */
     public function json(array $data = [], int $status = 200, array $header = [], int $option = 0)
     {
-        $this->status($status)->header(array_merge($header, ['Content-Type' => 'application/json; charset=UTF-8']));
-
-        $data = json_encode(
-            empty($data) ? $this : $data,
-            $option
-        );
-
-        return $this->body($data)->send();
+        return $this->status($status)
+            ->body(empty($data) ? $this->reason : $data)
+            ->header(array_merge($header, ['Content-Type' => 'application/json; charset=UTF-8']))
+            ->send();
     }
 
     /**
@@ -394,7 +398,7 @@ class Response implements JsonSerializable
      */
     public function reason(int $status) : string
     {
-        return $this->message[$status] ?? 'Unknown';
+        return $this->reason = $this->message[$status] ?? 'Unknown';
     }
 
     /**
