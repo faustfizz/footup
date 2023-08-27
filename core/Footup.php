@@ -5,7 +5,7 @@
  * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1.7-alpha.2
+ * @version 0.1.7-alpha.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
@@ -21,7 +21,7 @@ class Footup
     protected $router;
     public const NAME = "FootUP Framework";
 
-    public const VERSION = "0.1.7-alpha.2";
+    public const VERSION = "0.1.7-alpha.3";
 
     public function __construct(Router &$router)
     {
@@ -81,8 +81,8 @@ class Footup
             list($controller, $middleResult) = $this->runMiddles(new $handler(), $method, $request, $response);
             // Recalculate endTime as we can run many Middles before
             $this->endTime($request);
-            if  ($middleResult) {
-                $responseOrContent = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
+            if  ($middleResult instanceof Response) {
+                $responseOrContent = $controller->__boot($request, $response->body($middleResult))->{$method}(...array_values($route->getArgs()));
                 if ($responseOrContent)
                     return $response->body($responseOrContent ?? '')->send();
             }
@@ -133,9 +133,9 @@ class Footup
                 }
             }
         }
-
-        $middleResult = null;
-
+        
+        $middleResult = $response;
+        
         if (!empty($middlesStack)) {
             $middleResult = (new MiddleHandler($middlesStack))->dispatch($request, $response);
         }

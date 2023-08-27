@@ -96,7 +96,6 @@ class MiddleHandler
         if (!isset($this->middlewares[$this->index])) {
             return $this->response;
         }
-
         /**
          * @var Middle|\Closure
          */
@@ -113,7 +112,7 @@ class MiddleHandler
         } elseif (is_scalar($result) || is_array($result) || is_object($result) ) {
             return $response->body($result)->send();
         }
-        return null;
+        return;
     }
 
     /**
