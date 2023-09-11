@@ -36,6 +36,7 @@ trait MigrateTrait
     protected function updateMigrationStatus($id, $status)
     {
         $DB = DbConnection::getDb(true);
+        
         if(in_array($status, ['pending', 'applied', 'dropped', 'emptied']))
         {
             $stmt = $DB->query("UPDATE ". Schema::quoteIdentifier(Migration::$table) ." SET status = '$status' WHERE id = $id");
@@ -60,7 +61,6 @@ trait MigrateTrait
         $io = $this->app()->io();
         $method = strtolower($method);
         $expl = explode("/", trim(APP_PATH, DIRECTORY_SEPARATOR));
-
 
 		if(!in_array($method, ["up", "down", "empty"])) {
             $io->error("Status should be one of [". implode(',', ['up', 'down', 'empty']) ."]", true);

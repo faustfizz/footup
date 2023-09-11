@@ -36,29 +36,34 @@ class Migrate extends Command
         $this->alias("mg-create");
 
         parent::__construct('migrate:create', 'Generate migration file', false, $cli);
-
-        if(DbConnection::getDb(true))
-        {
-            DbConnection::getDb()->query("CREATE TABLE IF NOT EXISTS ". Schema::quoteIdentifier(Migration::$table) ."(
-                `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                `version` VARCHAR(250) NOT NULL,
-                `class` VARCHAR(250) NOT NULL,
-                `status` ENUM('pending', 'applied', 'dropped', 'emptied') NOT NULL DEFAULT 'pending',
-                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP()
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-        }
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance
     public function interact(Interactor $io) :void
     {
+        try {
+            //code...
+            if(DbConnection::getDb(true))
+            {
+                DbConnection::getDb()->query("CREATE TABLE IF NOT EXISTS ". Schema::quoteIdentifier(Migration::$table) ."(
+                    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                    `version` VARCHAR(250) NOT NULL,
+                    `class` VARCHAR(250) NOT NULL,
+                    `status` ENUM('pending', 'applied', 'dropped', 'emptied') NOT NULL DEFAULT 'pending',
+                    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP()
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            $io->warn($th->getMessage(). ". It means you cannot run migrations commands")->eol();
+            exit;
+        }
         // Collect missing opts/args
         if ($this->filename && !is_string($this->filename)) {
             $this->set("filename", $io->prompt("Please enter the filename "));
         }
 
         $this->table = strtolower($this->filename);
-        // ...
     }
 
     // When app->handle() locates `init` command it automatically calls `execute()`

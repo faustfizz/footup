@@ -31,13 +31,20 @@ class Migrup extends Command
         $this->alias("migrate");
 
         parent::__construct('migrate:up', 'Run up a migration or all migrations', false, $cli);
-
-        $this->schema = new Schema(DbConnection::getDb(true));
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance
     public function interact(Interactor $io) :void
     {
+        try {
+            //code...
+            $this->schema = new Schema(DbConnection::getDb(true));
+        } catch (\Throwable $th) {
+            //throw $th;
+            $io->warn($th->getMessage(). ". It means you cannot run migrations commands")->eol();
+            exit;
+        }
+
         if($this->classname && !is_string($this->classname))
         {
             $io->warn("No name provided, if you don't give one, We will up all tables created with migrations.")->eol();
