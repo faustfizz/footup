@@ -119,7 +119,7 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * @var array|string $tableInfo informations de la table
      */
-    protected $tableInfo  = [];
+    protected $tableInfo = [];
 
     /**
      * QueryBuilder constructor
@@ -164,16 +164,16 @@ class QueryBuilder implements \IteratorAggregate
      */
     public function reset()
     {
-        $this->where        =
-        $this->selectFields =
-        $this->joins        =
-        $this->order        =
-        $this->groups       =
-        $this->having       =
-        $this->distinct     =
-        $this->limit        =
-        $this->offset       =
-        $this->sql          = '';
+        $this->where =
+            $this->selectFields =
+            $this->joins =
+            $this->order =
+            $this->groups =
+            $this->having =
+            $this->distinct =
+            $this->limit =
+            $this->offset =
+            $this->sql = '';
 
         return $this;
     }
@@ -210,13 +210,13 @@ class QueryBuilder implements \IteratorAggregate
     public function join($table, $fields, $type = ' INNER ', $operator = " = ")
     {
         static $joins = array(
-            'INNER',
-            'LEFT OUTER',
-            'RIGHT OUTER',
-            'FULL OUTER',
-            'LEFT',
-            'RIGHT',
-            'FULL'
+        'INNER',
+        'LEFT OUTER',
+        'RIGHT OUTER',
+        'FULL OUTER',
+        'LEFT',
+        'RIGHT',
+        'FULL'
         );
 
         if (!in_array($type, $joins)) {
@@ -301,10 +301,10 @@ class QueryBuilder implements \IteratorAggregate
                 $this->where .= $counter == 0 && count($key) > 1 ? ') ' : '';
             }
         } else if (is_string($key) && is_null($val)) {
-            $link = !empty($this->where) && trim(strtolower($this->where)) != 'where'  ? $link : '';
+            $link = !empty($this->where) && trim(strtolower($this->where)) != 'where' ? $link : '';
             $this->where .= $link . $key;
         } else {
-            $link = !empty($this->where) && trim(strtolower($this->where)) != 'where'  ? $link : '';
+            $link = !empty($this->where) && trim(strtolower($this->where)) != 'where' ? $link : '';
             if (trim(strtolower($operator)) != 'is') {
                 if (is_null($val)) {
                     $operator = "IS NOT NULL";
@@ -478,14 +478,14 @@ class QueryBuilder implements \IteratorAggregate
      */
     public function orderBy($field, $direction = 'ASC')
     {
-        $this->order = (empty($this->order)) ? 'ORDER BY ' : $this->order.',';
+        $this->order = (empty($this->order)) ? 'ORDER BY ' : $this->order . ',';
 
         if (is_array($field)) {
             foreach ($field as $key => $value) {
                 $field[$key] = $value . ' ' . $direction;
             }
         } else {
-            $field = ($field ?? $this->getPrimaryKey()) .' ' . $direction;
+            $field = ($field ?? $this->getPrimaryKey()) . ' ' . $direction;
         }
 
         $fields = (is_array($field)) ? implode(', ', $field) : $field;
@@ -523,15 +523,15 @@ class QueryBuilder implements \IteratorAggregate
     public function having($field, $value = null)
     {
         $join = (empty($this->having)) ? 'HAVING ' : '';
-        if(is_array($field))
-        {   $thisModel = $this;
-            $fields = array_map(function($key, $value) use ($thisModel){
-                $chain = is_numeric($key) ? $thisModel->primaryKey." = ".$thisModel->quote($value) : "$key = ".$thisModel->quote($value);
+        if (is_array($field)) {
+            $thisModel = $this;
+            $fields = array_map(function ($key, $value) use ($thisModel) {
+                $chain = is_numeric($key) ? $thisModel->primaryKey . " = " . $thisModel->quote($value) : "$key = " . $thisModel->quote($value);
                 return $chain;
             }, array_keys($field), array_values($field));
             $join .= implode(',', $fields);
-        }else{
-            $join .= !empty($value) ? $field." = ".$this->quote($value) : $field;
+        } else {
+            $join .= !empty($value) ? $field . " = " . $this->quote($value) : $field;
         }
         $this->having .= $join;
 
@@ -628,9 +628,10 @@ class QueryBuilder implements \IteratorAggregate
         $fields = (is_array($fields)) ? implode(',', $fields) : $fields;
         $this->limit($limit, $offset);
 
-        if($fields === "*" && !empty($this->selectFields)) return $this;
+        if ($fields === "*" && !empty($this->selectFields))
+            return $this;
 
-        $this->selectFields .= !empty($this->selectFields) ?  ", ".$fields : $fields;
+        $this->selectFields .= !empty($this->selectFields) ? ", " . $fields : $fields;
 
         return $this;
     }
@@ -647,13 +648,13 @@ class QueryBuilder implements \IteratorAggregate
     {
         $this->checkTable();
 
-        if (empty($data)) return false;
+        if (empty($data))
+            return false;
 
-        if(!empty($values))
-        {
+        if (!empty($values)) {
             $keys = implode(',', array_values($data));
             $vals = str_repeat("? , ", count($values));
-        }else{
+        } else {
             $keys = implode(',', array_keys($data));
             $vals = implode(',', array_values(
                 array_map(
@@ -662,7 +663,7 @@ class QueryBuilder implements \IteratorAggregate
                 )
             ));
         }
-        
+
         $this->sql(array(
             'INSERT INTO',
             ($this->getTable()),
@@ -688,25 +689,24 @@ class QueryBuilder implements \IteratorAggregate
         $data = is_object($data) ? get_object_vars($data) : $data;
 
         $values = array();
-        
+
         $id && $this->where($this->getPrimaryKey() . " = " . $id);
-        
+
         if (empty($this->where)) {
-            if(!empty($data[$this->getPrimaryKey()])) {
+            if (!empty($data[$this->getPrimaryKey()])) {
                 $this->where($this->getPrimaryKey() . " = " . $this->quote($data[$this->getPrimaryKey()]));
-            }else{
+            } else {
                 throw new Exception(text("Db.dontUse", ["UPDATE"]));
             }
         }
-        
+
         foreach ($data as $key => $value) {
-            if(is_numeric($key))
-            {
+            if (is_numeric($key)) {
                 throw new Exception("Data array should be in format [field => value] !");
             }
             $values[] = $key . " = " . $this->quote($value);
         }
-        
+
         $this->sql(array(
             'UPDATE',
             $this->getTable(),
@@ -729,7 +729,7 @@ class QueryBuilder implements \IteratorAggregate
     {
         $this->checkTable();
 
-        $where && $this->where(is_int($where) ? $this->getPrimaryKey()." = ".$where : $where);
+        $where && $this->where(is_int($where) ? $this->getPrimaryKey() . " = " . $where : $where);
 
         if (empty($this->where)) {
             throw new Exception(text("Db.dontUse", ["DELETE"]));
@@ -790,8 +790,7 @@ class QueryBuilder implements \IteratorAggregate
             ->setInsertId(-1)
             ->setLastQuery($this->sql);
 
-        if (!empty($this->sql))
-        {
+        if (!empty($this->sql)) {
             $error = null;
 
             try {
@@ -821,8 +820,8 @@ class QueryBuilder implements \IteratorAggregate
         }
 
         $this->reset();
-        
-        return (object)['ok' => ($bool && $this->getInsertID() ? $this->getInsertID() : $bool), 'result' => $result];
+
+        return (object) ['ok' => ($bool && $this->getInsertID() ? $this->getInsertID() : $bool), 'result' => $result];
     }
 
     /**
@@ -1024,7 +1023,8 @@ class QueryBuilder implements \IteratorAggregate
      */
     public function quote($value)
     {
-        if ($value === null) return 'NULL';
+        if ($value === null)
+            return 'NULL';
 
         if (is_string($value)) {
             if (self::$db !== null) {
@@ -1089,20 +1089,18 @@ class QueryBuilder implements \IteratorAggregate
      */
     public function getPrimaryKey()
     {
-        if(empty($this->primaryKey))
-        {
+        if (empty($this->primaryKey)) {
             $columns = $this->getTableInfo();
-            
+
             foreach ($columns as $key => $column) {
                 # code...
-                if($column["Key"] === "PRI")
-                {
+                if ($column["Key"] === "PRI") {
                     $this->primaryKey = $column["Field"];
                     break;
                 }
             }
         }
-        
+
         return $this->primaryKey;
     }
 
@@ -1130,9 +1128,9 @@ class QueryBuilder implements \IteratorAggregate
             $stmt->execute();
             $this->tableInfo = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
-        
-        return $fetchType === PDO::FETCH_OBJ ? array_map(function($field){
-            return (object)$field;
+
+        return $fetchType === PDO::FETCH_OBJ ? array_map(function ($field) {
+            return (object) $field;
         }, $this->tableInfo) : $this->tableInfo;
     }
 
@@ -1140,7 +1138,7 @@ class QueryBuilder implements \IteratorAggregate
      * Get $last_query dernière requête sql
      *
      * @return string
-     */ 
+     */
     public function getLastQuery()
     {
         return $this->last_query;
@@ -1152,7 +1150,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $last_query  $last_query dernière requête sql
      *
      * @return self
-     */ 
+     */
     public function setLastQuery(string $last_query)
     {
         $this->last_query = $last_query;
@@ -1164,7 +1162,7 @@ class QueryBuilder implements \IteratorAggregate
      * Get $num_rows
      *
      * @return int
-     */ 
+     */
     public function getNumRows()
     {
         return $this->num_rows;
@@ -1174,7 +1172,7 @@ class QueryBuilder implements \IteratorAggregate
      * Get $insert_id id dernièrement ajouté
      *
      * @return int|string
-     */ 
+     */
     public function getInsertID()
     {
         return $this->insert_id;
@@ -1184,7 +1182,7 @@ class QueryBuilder implements \IteratorAggregate
      * Get $affcted_rows
      *
      * @return int
-     */ 
+     */
     public function getAffectedRows()
     {
         return $this->affected_rows;
@@ -1209,7 +1207,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $returnType
      *
      * @return self
-     */ 
+     */
     public function setReturnType(string $returnType)
     {
         $this->returnType = $returnType;
@@ -1223,7 +1221,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $primaryKey
      *
      * @return self
-     */ 
+     */
     public function setPrimaryKey(string $primaryKey)
     {
         $this->primaryKey = $primaryKey;
@@ -1237,7 +1235,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param int|string $insert_id  $insert_id id dernièrement ajouté
      *
      * @return self
-     */ 
+     */
     public function setInsertId($insert_id)
     {
         $this->insert_id = $insert_id;
@@ -1251,7 +1249,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param int $num_rows  $num_rows
      *
      * @return self
-     */ 
+     */
     public function setNumRows(int $num_rows)
     {
         $this->num_rows = $num_rows;
@@ -1265,7 +1263,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param int $affected_rows  $affcted_rows
      *
      * @return self
-     */ 
+     */
     public function setAffectedRows(int $affected_rows)
     {
         $this->affected_rows = $affected_rows;
@@ -1277,7 +1275,7 @@ class QueryBuilder implements \IteratorAggregate
      * Get $db connection
      *
      * @return \PDO
-     */ 
+     */
     public function getDb()
     {
         return self::$db;

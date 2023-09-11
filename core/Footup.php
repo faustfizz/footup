@@ -39,7 +39,7 @@ class Footup
      * @return void
      */
     public function terminate()
-    { 
+    {
         return $this->go();
     }
 
@@ -53,7 +53,7 @@ class Footup
     {
         // Find a route
         $route = $this->router->match();
-        
+
         /**
          * Controller
          */
@@ -68,8 +68,7 @@ class Footup
         $response = new Response();
 
         try {
-            if($handler instanceof \Closure)
-            {
+            if ($handler instanceof \Closure) {
                 $this->endTime($request);
                 $responseOrContent = $handler(...array_values($route->getArgs()));
                 if ($responseOrContent)
@@ -81,7 +80,7 @@ class Footup
             list($controller, $middleResult) = $this->runMiddles(new $handler(), $method, $request, $response);
             // Recalculate endTime as we can run many Middles before
             $this->endTime($request);
-            if  ($middleResult instanceof Response) {
+            if ($middleResult instanceof Response) {
                 $responseOrContent = $controller->__boot($request, $response->body($middleResult))->{$method}(...array_values($route->getArgs()));
                 if ($responseOrContent)
                     return $response->body($responseOrContent ?? '')->send();
@@ -92,7 +91,7 @@ class Footup
             throw new \ErrorException(text("Http.error500", [self::NAME, $exception->getMessage()]), $exception->getCode(), $exception->getSeverity(), $exception->getFile(), $exception->getLine(), $exception);
         }
     }
-    
+
     /**
      * Execute les middleWare
      *
@@ -109,7 +108,7 @@ class Footup
          * For globaux Middles
          */
         foreach ($controller->getGlobalMiddles($method) as $key => $value) {
-            if($value instanceof \Closure || class_exists($value) || $method === $key) {
+            if ($value instanceof \Closure || class_exists($value) || $method === $key) {
                 $middlesStack[] = $value;
             }
         }
@@ -124,8 +123,7 @@ class Footup
         if ($middles) {
             if ($middles instanceof \Closure || !is_array($middles) && class_exists($middles)) {
                 $middlesStack[] = $middles;
-            }
-            elseif (is_array($middles)) {
+            } elseif (is_array($middles)) {
                 foreach ($middles as $key => $middle) {
                     if ($middle instanceof \Closure || class_exists($middle) && $method === $key) {
                         $middlesStack[] = $middle;
@@ -133,28 +131,28 @@ class Footup
                 }
             }
         }
-        
+
         $middleResult = $response;
-        
+
         if (!empty($middlesStack)) {
             $middleResult = (new MiddleHandler($middlesStack))->dispatch($request, $response);
         }
-        
+
         return [$controller, $middleResult];
     }
-    
+
     protected function endTime(Request $request)
     {
-        $request->setEnv("end_time",  microtime(true));
+        $request->setEnv("end_time", microtime(true));
 
-        list($start_time, $end_time) = [(float)$request->env("start_time"), (float)$request->env("end_time")];
+        list($start_time, $end_time) = [(float) $request->env("start_time"), (float) $request->env("end_time")];
 
-        $request->setEnv("delayed_time",  (float) number_format($end_time - $start_time, 4));
+        $request->setEnv("delayed_time", (float) number_format($end_time - $start_time, 4));
     }
 
     /**
      * Get the value of VERSION
-     */ 
+     */
     public function version()
     {
         return self::VERSION;
@@ -162,7 +160,7 @@ class Footup
 
     /**
      * Get the value of NAME
-     */ 
+     */
     public function name()
     {
         return self::NAME;

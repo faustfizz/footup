@@ -64,7 +64,7 @@ class Validate
             ->addRule('uuid', [static::class, 'uuid'])
 
             ->addRule('card-number', [static::class, 'cardNumber'])
-            
+
             ->addRule('regex', [static::class, 'regex'])
             ->addRule('not-regex', [static::class, 'notRegex']);
     }
@@ -77,14 +77,15 @@ class Validate
      * 
      * @return bool true when $value is filled, elsewise false
      */
-    protected static function isFilled($value) {
+    protected static function isFilled($value)
+    {
         return !(
             (is_null($value)) ||
             (is_string($value) && $value === '') ||
             ((is_array($value) || is_a($value, Countable::class)) && empty($value))
         );
     }
-    
+
     /**
      * present
      *
@@ -142,7 +143,7 @@ class Validate
         $values = array_slice($parameters, 1);
         print_r($parameters);
         print_r($values);
-        
+
         // Calculate comparability
         list($field, $isWild, $overlap) = static::_isComparable($validator, $parameters, $pattern);
 
@@ -162,7 +163,7 @@ class Validate
         // Check value is not null
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
             $fieldAttribute = $isWild ? Str::overlapLeftMerge($overlap, $attribute, $field) : $field;
-            $fieldValue     = ArrDots::get($data, $fieldAttribute);
+            $fieldValue = ArrDots::get($data, $fieldAttribute);
 
             if (!static::isFilled($fieldValue) || !in_array($fieldValue, $values)) {
                 continue;
@@ -198,7 +199,7 @@ class Validate
         // Check value is not null
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
             $fieldAttribute = $isWild ? Str::overlapLeftMerge($overlap, $attribute, $field) : $field;
-            $fieldValue     = ArrDots::get($data, $fieldAttribute);
+            $fieldValue = ArrDots::get($data, $fieldAttribute);
 
             if (!static::isFilled($fieldValue)) {
                 continue;
@@ -224,13 +225,13 @@ class Validate
     {
         // Find the overlaps and if the fields are wild
         $overlaps = [];
-        $longest  = 0;
+        $longest = 0;
         foreach ($parameters as $k => $field) {
-        
+
             // Calculate comparability
             list($isWild, $overlap) = static::_isComparable($validator, $field, $pattern);
             $overlaps[$k] = $overlap;
-            
+
             // Store the longest overlap
             $longest = $isWild && strlen($overlaps[$k]) > strlen($overlaps[$longest]) ? $k : $longest;
         }
@@ -243,8 +244,8 @@ class Validate
                 $required = true;
                 foreach ($parameters as $k => $field) {
                     $fieldAttribute = $overlaps[$k] ? Str::overlapLeftMerge($overlaps[$k], $attribute, $field) : $field;
-                    $fieldValue     = ArrDots::get($data, $fieldAttribute);
-                    $required       = $required && static::isFilled($fieldValue);
+                    $fieldValue = ArrDots::get($data, $fieldAttribute);
+                    $required = $required && static::isFilled($fieldValue);
                     if (!$required) {
                         break;
                     }
@@ -266,8 +267,8 @@ class Validate
             $required = true;
             foreach ($parameters as $k => $field) {
                 $fieldAttribute = $overlaps[$k] ? Str::overlapLeftMerge($overlaps[$k], $attribute, $field) : $field;
-                $fieldValue     = ArrDots::get($data, $fieldAttribute);
-                $required       = $required && static::isFilled($fieldValue);
+                $fieldValue = ArrDots::get($data, $fieldAttribute);
+                $required = $required && static::isFilled($fieldValue);
                 if (!$required) {
                     break;
                 }
@@ -293,13 +294,13 @@ class Validate
     {
         // Find the overlaps and if the fields are wild
         $overlaps = [];
-        $longest  = 0;
+        $longest = 0;
         foreach ($parameters as $k => $field) {
-        
+
             // Calculate comparability
             list($isWild, $overlap) = static::_isComparable($validator, $field, $pattern);
             $overlaps[$k] = $overlap;
-            
+
             // Store the longest overlap
             $longest = $isWild && strlen($overlaps[$k]) > strlen($overlaps[$longest]) ? $k : $longest;
         }
@@ -329,8 +330,8 @@ class Validate
             $required = false;
             foreach ($parameters as $k => $field) {
                 $fieldAttribute = $overlaps[$k] ? Str::overlapLeftMerge($overlaps[$k], $attribute, $field) : $field;
-                $fieldValue     = ArrDots::get($data, $fieldAttribute);
-                $required       = $required || static::isFilled($fieldValue);
+                $fieldValue = ArrDots::get($data, $fieldAttribute);
+                $required = $required || static::isFilled($fieldValue);
                 if ($required) {
                     break;
                 }
@@ -369,7 +370,7 @@ class Validate
             }
 
             $fieldAttribute = $isWild ? Str::overlapLeftMerge($overlap, $attribute, $field) : $field;
-            $fieldValue     = ArrDots::get($data, $fieldAttribute);
+            $fieldValue = ArrDots::get($data, $fieldAttribute);
             if (static::isFilled($fieldValue)) {
                 continue;
             }
@@ -396,7 +397,7 @@ class Validate
         // Check values are equal
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
             $fieldAttribute = $isWild ? Str::overlapLeftMerge($overlap, $attribute, $field) : $field;
-            $fieldValue     = ArrDots::get($data, $fieldAttribute);
+            $fieldValue = ArrDots::get($data, $fieldAttribute);
 
             if ($fieldValue == $value) {
                 continue;
@@ -423,7 +424,7 @@ class Validate
         // Check values are equal
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
             $fieldAttribute = $isWild ? Str::overlapLeftMerge($overlap, $attribute, $field) : $field;
-            $fieldValue     = ArrDots::get($data, $fieldAttribute);
+            $fieldValue = ArrDots::get($data, $fieldAttribute);
 
             if ($fieldValue != $value) {
                 continue;
@@ -450,7 +451,7 @@ class Validate
         // Check values are equal
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
             $fieldAttribute = $isWild ? Str::overlapLeftMerge($overlap, $attribute, $field) : $field;
-            $fieldValue     = ArrDots::get($data, $fieldAttribute);
+            $fieldValue = ArrDots::get($data, $fieldAttribute);
 
             if ($fieldValue === $value) {
                 continue;
@@ -477,7 +478,7 @@ class Validate
         // Check values are equal
         foreach (Validator::getValues($data, $pattern) as $attribute => $value) {
             $fieldAttribute = $isWild ? Str::overlapLeftMerge($overlap, $attribute, $field) : $field;
-            $fieldValue     = ArrDots::get($data, $fieldAttribute);
+            $fieldValue = ArrDots::get($data, $fieldAttribute);
 
             if ($fieldValue !== $value) {
                 continue;
@@ -1054,7 +1055,7 @@ class Validate
 
             // Set the string length and parity
             $numberLength = strlen($number);
-            $parity       = $numberLength % 2;
+            $parity = $numberLength % 2;
 
             // Loop through each digit and do the maths
             $total = 0;
@@ -1107,7 +1108,7 @@ class Validate
             if (is_string($value) && preg_match($regexPattern, $value)) {
                 continue;
             }
-            
+
             $validator->addError($attribute, $rule);
         }
     }
@@ -1138,7 +1139,7 @@ class Validate
             if (is_string($value) && !preg_match($regexPattern, $value)) {
                 continue;
             }
-            
+
             $validator->addError($attribute, $rule);
         }
     }
@@ -1153,8 +1154,8 @@ class Validate
      */
     private static function _isComparable($validator, $parameters, $pattern)
     {
-        $field   = $parameters[0];
-        $isWild  = strpos($field, $validator::WILD) !== false;
+        $field = $parameters[0];
+        $isWild = strpos($field, $validator::WILD) !== false;
         $overlap = Str::overlapLeft($field, $pattern);
 
         // Check that the pattern and field can be compared

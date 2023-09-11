@@ -24,13 +24,13 @@ class Form
     protected $fields = [];
 
     protected $config = [
-        'open'      => true,
-        'close'     => true,
-        'from_db'   => true
+        'open' => true,
+        'close' => true,
+        'from_db' => true
     ];
 
     public ConfigForm $ConfigForm;
-    
+
     /**
      * Contruct
      *
@@ -38,7 +38,8 @@ class Form
      * @param array $fields
      * @param array|null $data
      */
-    public function __construct(string $action = "#", array $fields = null, array $data = []) {
+    public function __construct(string $action = "#", array $fields = null, array $data = [])
+    {
         $this->config = array_merge($this->config, ConfigForm::$config);
         $this->action = $action;
         $this->ConfigForm = new ConfigForm;
@@ -52,9 +53,8 @@ class Form
      */
     public function addHtmlInput($field, array $data)
     {
-        $field = is_array($field) ? (object)$field : $field; 
-        if(!empty($field->isPrimaryKey) && !empty($data[$field->name]))
-        {
+        $field = is_array($field) ? (object) $field : $field;
+        if (!empty($field->isPrimaryKey) && !empty($data[$field->name])) {
             $field->crudType = $field->type = "hidden";
         }
 
@@ -62,11 +62,11 @@ class Form
 
         $field->inline_attributes = $this->inlineAttributes($field);
 
-        if(!empty($field->options)){
+        if (!empty($field->options)) {
             $field->htmlOptions = $this->buildOptions($field, $data);
         }
         $html = $this->ConfigForm::getHtmlInput($field);
-            
+
         $this->fields[$field->name] = $html;
 
         return $this;
@@ -74,9 +74,8 @@ class Form
 
     public function build()
     {
-        if($this->config['open'] === true)
-        {
-            $this->output .= $this->open($this->action)."<div class='row'>";
+        if ($this->config['open'] === true) {
+            $this->output .= $this->open($this->action) . "<div class='row'>";
         }
 
         foreach ($this->fields as $fieldName => $fieldHtml) {
@@ -86,9 +85,8 @@ class Form
 
         $this->output .= $this->ConfigForm::submitBtn();
 
-        if($this->config['close'] === true)
-        {
-            $this->output .= "</div> ".$this->close();
+        if ($this->config['close'] === true) {
+            $this->output .= "</div> " . $this->close();
         }
         return $this;
     }
@@ -106,8 +104,7 @@ class Form
     private function switchType(object $field)
     {
         $type = $field->crudType;
-        switch($field->name)
-        {
+        switch ($field->name) {
             case 'image':
             case 'picture':
             case 'photo':
@@ -151,22 +148,22 @@ class Form
      */
     public function prepareFields(array $fields = array(), $data = array())
     {
-        if(empty($fields))
+        if (empty($fields))
             return $this;
 
 
-        foreach($fields as $name => $field)
-        {
+        foreach ($fields as $name => $field) {
             $field = (object) $field;
             $field->type = $field->crudType;
             $field = $this->switchType($field);
 
-            if(!empty($field->isPrimaryKey) && (empty($data) || empty($data[$field->name])) ) continue;
-            
+            if (!empty($field->isPrimaryKey) && (empty($data) || empty($data[$field->name])))
+                continue;
+
             $this->addHtmlInput(
-                    $field,
-                    $data
-                );
+                $field,
+                $data
+            );
         }
 
         return $this;
@@ -191,12 +188,11 @@ class Form
     {
         $attrsString = "";
         $acceptedAttrs = $this->inputAttributes();
-        $field->checked =  ($field->value && !$field->null || $field->value == $field->default) && in_array($field->type, ['radio', 'checkbox']);
-        if($field->type == "file" && in_array($field->name, ['picture', 'cover', 'image', 'photo']))
-        {
+        $field->checked = ($field->value && !$field->null || $field->value == $field->default) && in_array($field->type, ['radio', 'checkbox']);
+        if ($field->type == "file" && in_array($field->name, ['picture', 'cover', 'image', 'photo'])) {
             $field->accept = ".jpeg,.png,.jpg";
         }
-        $attrs = array_intersect_key((array)$field, array_flip($acceptedAttrs));
+        $attrs = array_intersect_key((array) $field, array_flip($acceptedAttrs));
         // filter values
         $attrs = array_filter($attrs);
 
@@ -212,19 +208,16 @@ class Form
         $opt = [];
         foreach ($field->options as $key => $value) {
             # code...
-            if(is_numeric($key))
-            {
+            if (is_numeric($key)) {
                 $attr = array("value" => strtolower($value));
-                
-                if($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name]))
-                {
+
+                if ($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name])) {
                     $attr['selected'] = true;
                 }
-            }else{
+            } else {
                 $attr = array("value" => strtolower($key));
 
-                if($field->default && strtolower($field->default) == strtolower($value['value']) || (isset($data[$field->name]) && $value['value'] == $data[$field->name]))
-                {
+                if ($field->default && strtolower($field->default) == strtolower($value['value']) || (isset($data[$field->name]) && $value['value'] == $data[$field->name])) {
                     $attr['selected'] = true;
                 }
             }
@@ -237,10 +230,9 @@ class Form
 
     public function print($display = false)
     {
-        if($display)
-        {
+        if ($display) {
             echo $this->output;
-        }else{
+        } else {
             return $this->output;
         }
     }
@@ -251,10 +243,10 @@ class Form
 
         throw new \Exception(text("Core.classNoMethod", [$name, get_class()]));
     }
-    
+
     public function __toString()
     {
         return $this->build()->print();
     }
-    
+
 }

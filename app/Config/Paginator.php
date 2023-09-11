@@ -32,16 +32,16 @@ class Paginator
 	public $perPage = 20;
 
 	/**
-     * Default value for query string key to specify the current page.
-     *
-     * https://example.com?page=1
+	 * Default value for query string key to specify the current page.
+	 *
+	 * https://example.com?page=1
 	 *
 	 * @var string
 	 */
 	public $pageName = "page";
 
 	/**
-     * items on each side
+	 * items on each side
 	 *
 	 * @var integer
 	 */
@@ -49,17 +49,14 @@ class Paginator
 
 	public function __construct(array $config = [])
 	{
-		if(!empty($config))
-		{
-			foreach($config as $key => $val)
-			{
-				if(property_exists($this, $key))
-				{
+		if (!empty($config)) {
+			foreach ($config as $key => $val) {
+				if (property_exists($this, $key)) {
 					$this->{$key} = $val;
 				}
 			}
 		}
 	}
-	
+
 
 }

@@ -23,7 +23,7 @@ class Controller
      * @var array [ \Footup\Routing\Middle ] or [ controllerMethod => \Footup\Routing\Middle ]
      */
     protected $globalMiddles = [];
-    
+
     /**
      * @var array [ \App\Controller\Home => \Footup\Routing\Middle ] or [ \App\Controller\Home => 
      *                                                                 [ controllerMethod => \Footup\Routing\Middle ]
@@ -48,7 +48,7 @@ class Controller
 
     public function __construct()
     {
-        $this->session  = Shared::loadSession();
+        $this->session = Shared::loadSession();
     }
 
     /**
@@ -60,21 +60,19 @@ class Controller
      */
     public function __boot(Request $request, Response $response)
     {
-        $this->request  = $request;
+        $this->request = $request;
         $this->response = $response;
 
         /**
          * Default lang
          */
-        if(function_exists("setlocale"))
-        {
+        if (function_exists("setlocale")) {
             \setlocale(LC_ALL, $this->request->getLang());
         }
-        if(class_exists("Locale"))
-        {
+        if (class_exists("Locale")) {
             Locale::setDefault($this->request->getLang());
         }
-        
+
         return $this;
     }
 
@@ -98,17 +96,16 @@ class Controller
      * @param string $ext
      * @return Response|void
      */
-    function view( $path , $data = null, $ext = VIEW_EXT )
+    function view($path, $data = null, $ext = VIEW_EXT)
     {
         extract($data);
         $path = trim($path, "/");
-        
-        if(!file_exists(VIEW_PATH . $path . ".". $ext))
-        {
-            throw new Exception(text("View.missedFile", [$path . ".". $ext]));
+
+        if (!file_exists(VIEW_PATH . $path . "." . $ext)) {
+            throw new Exception(text("View.missedFile", [$path . "." . $ext]));
         }
         ob_start();
-        include_once(VIEW_PATH . $path . ".". $ext);
+        include_once(VIEW_PATH . $path . "." . $ext);
         $body = ob_get_clean();
         return $this->response->body($body)->send();
     }
@@ -119,7 +116,7 @@ class Controller
      *
      * @param string|null $index
      * @return  string|array
-     */ 
+     */
     public function getGlobalMiddles($index)
     {
         return $this->globalMiddles[$index] ?? $this->globalMiddles;
@@ -132,7 +129,7 @@ class Controller
      *
      * @param  string|null $index
      * @return  array|string|null
-     */ 
+     */
     public function getMiddles($index)
     {
         return $this->middles[$index] ?? null;

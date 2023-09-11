@@ -61,11 +61,11 @@ class Str
      */
     public static function overlapLeftMerge($overlap, $attribute, $field)
     {
-        $overlap   = explode('.', $overlap);
+        $overlap = explode('.', $overlap);
         $attribute = explode('.', $attribute);
-        $field     = explode('.', $field);
+        $field = explode('.', $field);
 
-        for ($i=0; $i<count($overlap); $i++) {
+        for ($i = 0; $i < count($overlap); $i++) {
             $field[$i] = $attribute[$i];
         }
         return implode('.', $field);

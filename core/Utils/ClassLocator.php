@@ -30,13 +30,13 @@ class ClassLocator
 
     protected static function translateNamespacePath(string $namespace): string
     {
-        $namespace = strtr($namespace, ['Footup\\' => SYS_PATH, 'App\\' => APP_PATH, "\\"   =>  DS]);
+        $namespace = strtr($namespace, ['Footup\\' => SYS_PATH, 'App\\' => APP_PATH, "\\" => DS]);
 
         if (empty($namespace)) {
             return '';
         }
 
-        return realpath(strtr($namespace, ['\\' =>    "/", "//"  =>  "/"])) ?: '';
+        return realpath(strtr($namespace, ['\\' => "/", "//" => "/"])) ?: '';
     }
 
     private static function searchClasses(string $namespace, string $namespacePath): array
@@ -61,12 +61,11 @@ class ClassLocator
                 continue;
             }
             if ($item->isFile() && $item->getExtension() === 'php') {
-                $class = $namespace. '\\' . $item->getBasename('.php');
+                $class = $namespace . '\\' . $item->getBasename('.php');
                 if (!class_exists($class)) {
                     continue;
                 }
-                if(!in_array($class, $classes))
-                {
+                if (!in_array($class, $classes)) {
                     $classes[] = $class;
                 }
             }

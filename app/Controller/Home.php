@@ -22,5 +22,5 @@ class Home extends BaseController
             "titre" => text("Core.classNotFound", ["Home"])
         ]);
     }
-    
+
 }

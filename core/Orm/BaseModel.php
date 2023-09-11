@@ -101,32 +101,32 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * @var int
      */
     protected $page_count = null;
-    
+
     /**
      * @var int
      */
     protected $current_page = 0;
-    
+
     /**
      * @var int
      */
     protected $per_page = 10;
-    
-    /**
-     * @var array
-     */
-    protected $originalData         = [];
 
     /**
      * @var array
      */
-    protected $data         = [];
+    protected $originalData = [];
+
+    /**
+     * @var array
+     */
+    protected $data = [];
 
     /**
      * @var ModelQueryBuilder
      */
     protected $builder;
-    
+
     /**
      * @var \App\Config\Paginator
      */
@@ -144,8 +144,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
     {
         $this->setBuilder(new ModelQueryBuilder($this, DbConnection::setDb($config, $init)));
 
-        if(!empty($data))
-        {
+        if (!empty($data)) {
             $this->fill($data, true);
         }
         // allow callbacks
@@ -165,22 +164,23 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * @param array $data
      * @return BaseModel
      */
-    public function fill(array $data, $original = false) 
+    public function fill(array $data, $original = false)
     {
         $fields = $this->getFieldNames();
-        
+
         if ($original) {
             $this->setOriginalData($data);
         }
 
         foreach ($fields as $field) {
 
-            if($original == false && !$this->isFillable($field)) continue;
+            if ($original == false && !$this->isFillable($field))
+                continue;
 
             # code...
-            if(isset($data[$field]))
+            if (isset($data[$field]))
                 $this->data[$field] = $data[$field];
-                
+
         }
         return $this;
     }
@@ -197,23 +197,21 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
 
         if (empty($data)) {
             throw new Exception("No data to insert !");
-        } 
+        }
 
         $eventData = ['data' => $data];
 
-		if ($this->tmp_callbacks)
-		{
-			$eventData = $this->trigger('beforeInsert', $eventData);
-		}
+        if ($this->tmp_callbacks) {
+            $eventData = $this->trigger('beforeInsert', $eventData);
+        }
 
         $inserted = $this->getBuilder()->insert(array_intersect_key($eventData['data'], $this->getFillableKeys()));
 
-        $eventData['id']     = $this->getBuilder()->getInsertID();
+        $eventData['id'] = $this->getBuilder()->getInsertID();
 
-        if($inserted) {
+        if ($inserted) {
             $this->setOriginalData($eventData["data"]);
-            if ($this->tmp_callbacks)
-            {
+            if ($this->tmp_callbacks) {
                 $eventData = $this->trigger('afterInsert', $eventData);
                 $eventData["data"][$this->getPrimaryKey()] = $eventData["id"];
             }
@@ -237,44 +235,42 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
 
         if (empty($data)) {
             throw new Exception("No data to update !");
-        } 
+        }
 
         $id = $this->id();
 
-        if(empty($id) && empty($this->builder->where)){
+        if (empty($id) && empty($this->builder->where)) {
             throw new Exception("No primary key value to use as reference & no where specified !");
         }
 
         $eventData = [
-			'id'   => $id,
-			'data' => $data,
-		];
+            'id' => $id,
+            'data' => $data,
+        ];
 
-		if ($this->tmp_callbacks)
-		{
-			$eventData = $this->trigger('beforeUpdate', $eventData);
-		}
+        if ($this->tmp_callbacks) {
+            $eventData = $this->trigger('beforeUpdate', $eventData);
+        }
 
-        if($this->hasChanged()) {
+        if ($this->hasChanged()) {
             $executed = $this->getBuilder()->update(array_intersect_key($eventData['data'], $this->getFillableKeys()), $id);
-        }else{
+        } else {
             // as nothing was changed, we don't throw error. just return a success to our user
             $executed = true;
         }
 
-		$eventData['result'] = $executed;
+        $eventData['result'] = $executed;
 
-        if($executed) {
+        if ($executed) {
             $this->setOriginalData($eventData["data"]);
-            if ($this->tmp_callbacks)
-            {
+            if ($this->tmp_callbacks) {
                 $eventData = $this->trigger('afterUpdate', $eventData);
                 $eventData["data"][$this->getPrimaryKey()] = $eventData["id"];
             }
             $this->fill($eventData['data']);
         }
 
-		$this->tmp_callbacks = $this->allow_callbacks;
+        $this->tmp_callbacks = $this->allow_callbacks;
 
         return $executed;
     }
@@ -291,7 +287,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
         $object = is_null($object) ? $this : $object;
 
         $this->from($object->getTable());
-        
+
         $data = $object->getData();
 
         if ($fields !== null) {
@@ -318,32 +314,29 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      */
     public function delete($where = null)
     {
-        if(empty($where) && $this->id())
-        {
-            $where = $this->getPrimaryKey()." = ".$this->getBuilder()->quote($this->id());
+        if (empty($where) && $this->id()) {
+            $where = $this->getPrimaryKey() . " = " . $this->getBuilder()->quote($this->id());
         }
 
         $eventData = [
-            'id'    => $this->id()
+            'id' => $this->id()
         ];
 
-		if ($this->tmp_callbacks)
-		{
-			// Call the before event and check for a return
-			$eventData = $this->trigger('beforeDelete', $eventData);
-		}
+        if ($this->tmp_callbacks) {
+            // Call the before event and check for a return
+            $eventData = $this->trigger('beforeDelete', $eventData);
+        }
 
         $executed = $this->getBuilder()->delete($where);
 
-		if ($this->tmp_callbacks && $executed)
-		{
+        if ($this->tmp_callbacks && $executed) {
             $eventData['result'] = $executed;
 
-			// Call the before event and check for a return
-			$this->trigger('afterDelete', $eventData);
-		}
+            // Call the before event and check for a return
+            $this->trigger('afterDelete', $eventData);
+        }
 
-		$this->tmp_callbacks = $this->allow_callbacks;
+        $this->tmp_callbacks = $this->allow_callbacks;
 
         return $executed;
     }
@@ -364,15 +357,16 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      *
      * @return boolean
      */
-    public function hasChanged() {
+    public function hasChanged()
+    {
         // if the length of original data and the current data is different, we have make a change
-        if(count($this->originalData) != count($this->data)){
+        if (count($this->originalData) != count($this->data)) {
             return true;
         }
 
         // if the length for the two arrays is the same we check for data value
-        foreach($this->data as $field => $value) {
-            if(isset($this->originalData[$field]) && $value != $this->originalData[$field]) {
+        foreach ($this->data as $field => $value) {
+            if (isset($this->originalData[$field]) && $value != $this->originalData[$field]) {
                 return true;
             }
         }
@@ -384,7 +378,8 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      *
      * @return array
      */
-    public function getFillableKeys() {
+    public function getFillableKeys()
+    {
         $returnedKeys = $this->getRealFillableKeys($this->getFieldNames());
 
         return array_flip($returnedKeys);
@@ -401,30 +396,28 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      */
     public function get($select = "*", $where = null, $limit = null, $offset = null)
     {
-        if ($this->tmp_callbacks)
-		{
-			$eventData = $this->trigger('beforeFind', [
-                'data'      => [],
-                'where'     => $where,
-				'limit'     => $limit,
-				'offset'    => $offset
-			]);
-		}
+        if ($this->tmp_callbacks) {
+            $eventData = $this->trigger('beforeFind', [
+                'data' => [],
+                'where' => $where,
+                'limit' => $limit,
+                'offset' => $offset
+            ]);
+        }
 
         $data = $this->getBuilder()->get($select, $where, $limit, $offset);
 
-		if ($this->tmp_callbacks && !empty($data))
-		{
-			$eventData = $this->trigger('afterFind', [
-                'data'      => $data
+        if ($this->tmp_callbacks && !empty($data)) {
+            $eventData = $this->trigger('afterFind', [
+                'data' => $data
             ]);
-		}
+        }
 
-		$this->tmp_callbacks = $this->allow_callbacks;
+        $this->tmp_callbacks = $this->allow_callbacks;
 
         return $eventData['data'];
     }
-    
+
     /**
      * Fonction de pagination | paginate function
      *
@@ -434,33 +427,32 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * @return  Collection<int, BaseModel|array|object>
      */
     public function paginate(int $perPage = null, string $pageName = 'page', int $page = 0)
-	{
+    {
         $this->paginatorConfig = new \App\Config\Paginator();
 
         $this->per_page = $perPage ?? $this->per_page ?? $this->paginatorConfig->perPage;
 
-        if($pageName)
-        {
+        if ($pageName) {
             $this->paginatorConfig->pageName = $pageName;
         }
 
 
-        $page = (int)request()->get($this->paginatorConfig->pageName, $page);
-		$page  = $page >= 1 ? $page : 1;
+        $page = (int) request()->get($this->paginatorConfig->pageName, $page);
+        $page = $page >= 1 ? $page : 1;
 
-		$total = (int)$this->getBuilder()->count();
+        $total = (int) $this->getBuilder()->count();
 
-		// Store it in the Pager library so it can be
-		// paginated in the views.
-		$this->page_count = $total / $this->per_page;
-		$this->current_page = $page;
+        // Store it in the Pager library so it can be
+        // paginated in the views.
+        $this->page_count = $total / $this->per_page;
+        $this->current_page = $page;
 
-		$offset      = ($page - 1) * $this->per_page;
+        $offset = ($page - 1) * $this->per_page;
 
         $this->setPaginator(new Paginator($total, $this->per_page, $page, request()->url(), $this->paginatorConfig));
 
-        return $this->get("*", null, (int)$this->per_page, (int)$offset);
-	}
+        return $this->get("*", null, (int) $this->per_page, (int) $offset);
+    }
 
     /**
      * Get the table name for this ER class.
@@ -472,7 +464,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
     {
         if (empty($this->table))
             return $this->table = strtolower(basename(strtr(get_class($this), ['\\' => '/'])));
-            
+
         return $this->table;
     }
 
@@ -483,11 +475,10 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      */
     public function getPrimaryKey()
     {
-        if (empty($this->primaryKey))
-        {
-            $this->primaryKey = "id_".strtolower(basename(strtr(get_class($this), ['\\' => '/'])));
+        if (empty($this->primaryKey)) {
+            $this->primaryKey = "id_" . strtolower(basename(strtr(get_class($this), ['\\' => '/'])));
         }
-            
+
         return $this->primaryKey;
     }
 
@@ -498,34 +489,30 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      */
     public function getReturnType()
     {
-        if (empty($this->returnType))
-        {
+        if (empty($this->returnType)) {
             // We use our default 
             $this->returnType = "self";
         }
-            
+
         return $this->returnType;
     }
 
     public function __get($name)
     {
-        if(isset($this->data[$name]))
-        {
+        if (isset($this->data[$name])) {
             return $this->castValue($name);
         }
-        if(in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany))))
-        {
+        if (in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany)))) {
             return $this->loadRelations($name);
         }
-        if(property_exists($this->builder, $name))
-        {
+        if (property_exists($this->builder, $name)) {
             return $this->builder->{$name};
         }
     }
 
     public function __set($property, $val)
     {
-        if($this->isFillable($property))
+        if ($this->isFillable($property))
             $this->data[$property] = $val;
     }
 
@@ -544,7 +531,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
         if (!method_exists($this, $name) && preg_match('/^findBy/', $name) == 1) {
             // it's a findBy{fieldname} dynamic method
             $fieldname = substr($name, 6); // remove find by
-            $match     = isset($arguments[0]) ? $arguments[0] : null;
+            $match = isset($arguments[0]) ? $arguments[0] : null;
             return $this->getBuilder()->find($match, strtolower($fieldname));
         }
 
@@ -563,19 +550,16 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
         $setter = substr($name, 0, 3);
         $field = strtolower(substr($name, 3));
 
-        if($setter === "set" && in_array($field, $this->getFieldNames()))
-        {
+        if ($setter === "set" && in_array($field, $this->getFieldNames())) {
             $this->data[$field] = isset($arguments[0]) ? $arguments[0] : null;
             return $this;
         }
 
-        if($setter === "get" && in_array($field, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany))))
-        {
+        if ($setter === "get" && in_array($field, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany)))) {
             return $this->loadRelations($field, (isset($arguments[0]) ? $arguments[0] : $this->per_page), (isset($arguments[1]) ? $arguments[1] : 0));
         }
 
-        if(in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany))))
-        {
+        if (in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany)))) {
             return $this->loadRelations($name, (isset($arguments[0]) ? $arguments[0] : $this->per_page), (isset($arguments[1]) ? $arguments[1] : 0));
         }
 
@@ -585,7 +569,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
             return $this->getBuilder()->{$name}(...$arguments);
         }
 
-        throw new Exception(text("Db.undefinedMethod", [$name , get_class($this)]));
+        throw new Exception(text("Db.undefinedMethod", [$name, get_class($this)]));
     }
 
     /**
@@ -604,9 +588,9 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
         $fields = array();
         foreach ($this->getBuilder()->getTableInfo(PDO::FETCH_OBJ) as $field) {
             $type = explode("(", $field->Type);
-            
+
             $_type = $type[0];
-            
+
             if (isset($type[1])) {
                 if (substr($type[1], -1) == ')') {
                     $length = substr($type[1], 0, -1);
@@ -618,23 +602,23 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
                 $length = '';
             }
 
-            if(in_array(strtolower($_type), ['set', 'enum']))
-            {   $opt = strtr($length, ["'" => ""]);
+            if (in_array(strtolower($_type), ['set', 'enum'])) {
+                $opt = strtr($length, ["'" => ""]);
                 $field->options = explode(",", $opt);
             }
 
-            $field->maxLength       = (int)$length;
-            $field->label           = ucwords(strtr($field->Field, ["_"     => " "]));
-            $field->placeholder     = ucwords(strtr($field->Field, ["_"     => " "]));
-            $field->name            = $field->Field;
-            $field->id              = 'field_'.$field->Field;
-            $field->isPrimaryKey    = $field->Key == "PRI" ? true : false;
-            $field->type            = $_type;
-            $field->null            = $field->Null == 'YES' ? true : false;
-            $field->required        = !$field->null;
-            $field->extra           = $field->Extra;
-            $field->default         = $field->Default === "current_timestamp()" ? date("Y-m-d H:i:s") : $field->Default;
-            $field->crudType        = $this->getCrudType($_type, $length);
+            $field->maxLength = (int) $length;
+            $field->label = ucwords(strtr($field->Field, ["_" => " "]));
+            $field->placeholder = ucwords(strtr($field->Field, ["_" => " "]));
+            $field->name = $field->Field;
+            $field->id = 'field_' . $field->Field;
+            $field->isPrimaryKey = $field->Key == "PRI" ? true : false;
+            $field->type = $_type;
+            $field->null = $field->Null == 'YES' ? true : false;
+            $field->required = !$field->null;
+            $field->extra = $field->Extra;
+            $field->default = $field->Default === "current_timestamp()" ? date("Y-m-d H:i:s") : $field->Default;
+            $field->crudType = $this->getCrudType($_type, $length);
 
             $fields[$field->Field] = $field;
         }
@@ -734,8 +718,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
 
     public function getForm($action = "#", $data = [], $print = false)
     {
-        if(empty($data))
-        {
+        if (empty($data)) {
             $data = $this->getData();
         }
 
@@ -766,7 +749,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * Get the value of builder
      *
      * @return  ModelQueryBuilder
-     */ 
+     */
     public function getBuilder()
     {
         return $this->builder;
@@ -778,7 +761,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * @param  ModelQueryBuilder  $builder
      *
      * @return  self
-     */ 
+     */
     public function setBuilder(ModelQueryBuilder $builder)
     {
         $this->builder = $builder;
@@ -790,7 +773,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * Get the value of paginator
      *
      * @return  \Footup\Paginator\Paginator
-     */ 
+     */
     public function getPaginator()
     {
         return $this->paginator;
@@ -802,7 +785,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * @param  \Footup\Paginator\Paginator  $paginator
      *
      * @return  self
-     */ 
+     */
     public function setPaginator(Paginator $paginator)
     {
         $this->paginator = $paginator;
@@ -819,7 +802,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * Get the value of originalData
      *
      * @return  array
-     */ 
+     */
     public function getOriginalData()
     {
         return $this->originalData;
@@ -831,7 +814,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * @param  array  $originalData
      *
      * @return  self
-     */ 
+     */
     public function setOriginalData(array $originalData)
     {
         $this->originalData = $originalData;
@@ -843,13 +826,13 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * Get the value of data
      *
      * @return  array
-     */ 
+     */
     public function toArray()
     {
         if (empty($this->data)) {
             $object = $this->getBuilder()->last();
             if ($object) {
-                $this->fill(($object instanceof BaseModel) ? $object->getData() : (array)$object);
+                $this->fill(($object instanceof BaseModel) ? $object->getData() : (array) $object);
             }
         }
         $relations = array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany));
@@ -873,7 +856,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * Get the value of data
      *
      * @return  array
-     */ 
+     */
     public function getData()
     {
         return $this->data;
@@ -885,7 +868,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      * @param  array  $data
      *
      * @return  self
-     */ 
+     */
     public function setData(array $data)
     {
         $this->data = $data;
@@ -896,7 +879,8 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
     /**
      * @return array
      */
-    public function jsonSerialize(){
+    public function jsonSerialize()
+    {
         return $this->toArray();
     }
 

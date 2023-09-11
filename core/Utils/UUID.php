@@ -11,7 +11,8 @@
  */
 namespace Footup\Utils;
 
-class UUID{
+class UUID
+{
     /**
      * @var string
      */
@@ -25,7 +26,7 @@ class UUID{
      */
     public static function isValid($uuid)
     {
-        return preg_match('/'.self::VALID_PATTERN.'/i', $uuid) === 1;
+        return preg_match('/' . self::VALID_PATTERN . '/i', $uuid) === 1;
     }
 
     /**
@@ -54,7 +55,7 @@ class UUID{
         if (!is_int($version) || empty($version)) {
             return 0x40;
         }
-        return 16 * (int)$version;
+        return 16 * (int) $version;
     }
 
     /**
@@ -68,14 +69,14 @@ class UUID{
     private static function uuid($string = null, $version = 4, $upper = false)
     {
         // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
-        $data = sha1(time().($string ?? random_bytes(8)));
-        
+        $data = sha1(time() . ($string ?? random_bytes(8)));
+
         // Binary Value
         $nstr = '';
 
         // Convert Namespace UUID to bits
-        for($i = 0; $i < strlen($data); $i+=2) {
-            $nstr .= chr(ord($data[$i]).ord($data[$i+1]));
+        for ($i = 0; $i < strlen($data); $i += 2) {
+            $nstr .= chr(ord($data[$i]) . ord($data[$i + 1]));
         }
 
         // Set version to 4
@@ -83,7 +84,7 @@ class UUID{
         $nstr[7] = chr(ord($nstr[7]) & 0x0f | self::bitVersion($version));
         // Set bits 6-7 to 10
         $nstr[8] = chr(ord($nstr[8]) & 0x3f | 0x80);
-    
+
         // Output the 36 character UUID.
         $uuid = vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($nstr), 4));
 
@@ -137,7 +138,7 @@ class UUID{
     {
         return self::uuid($string, 4, $upper);
     }
-    
+
     /**
      * Generate an UUID v5 based on a string. This UUID is intended
      * to be used as a unique identifier for things.

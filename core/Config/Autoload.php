@@ -11,12 +11,13 @@
  */
 namespace Footup\Config;
 
-class Autoload{
+class Autoload
+{
 
     protected $classmap = [];
     protected $psr4 = [
-        "Footup"    =>  SYS_PATH,
-        "App"       =>  APP_PATH,
+        "Footup" => SYS_PATH,
+        "App" => APP_PATH,
     ];
 
     public function __construct()
@@ -34,15 +35,13 @@ class Autoload{
         spl_autoload_register([$this, 'mount'], true, true);
 
         spl_autoload_register(function ($class) {
-			if (empty($this->classmap[$class]))
-			{
-				return false;
-			}
-            if(file_exists($this->classmap[$class]))
-            {
+            if (empty($this->classmap[$class])) {
+                return false;
+            }
+            if (file_exists($this->classmap[$class])) {
                 include_once $this->classmap[$class];
             }
-		}, true, true);
+        }, true, true);
 
         /**
          * @todo DON'T EDIT | NE TOUCHER JAMAIS CETTE LIGNE
@@ -63,62 +62,57 @@ class Autoload{
     {
         foreach ($this->psr4 as $namespace => $match) {
             # code...
-            $file = strtr($class, [rtrim($namespace, "\\")."\\" => rtrim($match, DS).DS, "\\" => DS]);
-    
-            if(file_exists($file. ".php"))
-            {
-                return require_once($file.'.php');
+            $file = strtr($class, [rtrim($namespace, "\\") . "\\" => rtrim($match, DS) . DS, "\\" => DS]);
+
+            if (file_exists($file . ".php")) {
+                return require_once($file . '.php');
             }
         }
     }
-	//--------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
-	/**
-	 * Locates all PSR4 & classMap compatible namespaces from Composer.
-	 */
-	protected function copyComposerNamespaces()
-	{
-        $composer_autoloader = ROOT_PATH."vendor/autoload.php";
+    /**
+     * Locates all PSR4 & classMap compatible namespaces from Composer.
+     */
+    protected function copyComposerNamespaces()
+    {
+        $composer_autoloader = ROOT_PATH . "vendor/autoload.php";
 
-		if (! is_file($composer_autoloader))
-		{
-			return false;
-		}
+        if (!is_file($composer_autoloader)) {
+            return false;
+        }
 
         /**
          * @var \Composer\Autoload\ClassLoader
          */
-		$composer = include $composer_autoloader;
+        $composer = include $composer_autoloader;
 
-		$paths = $composer->getPrefixesPsr4();
+        $paths = $composer->getPrefixesPsr4();
         $classmaps = $composer->getClassMap();
 
         foreach ($classmaps as $key => $value) {
             # code...
-            if(is_string($key) && stripos($key, "composer"))
-            {
+            if (is_string($key) && stripos($key, "composer")) {
                 unset($classmaps[$key]);
             }
         }
 
-		$this->classmap = array_merge($this->classmap, $classmaps);
+        $this->classmap = array_merge($this->classmap, $classmaps);
 
-		unset($composer);
+        unset($composer);
 
-		// Get rid of FootUp so we don't have duplicates
-		if (isset($paths['Footup\\']))
-		{
-			unset($paths['Footup\\']);
-		}
+        // Get rid of FootUp so we don't have duplicates
+        if (isset($paths['Footup\\'])) {
+            unset($paths['Footup\\']);
+        }
 
-		// Composer stores namespaces with trailing slash. We don't.
-		$newPaths = [];
-		foreach ($paths as $key => $value)
-		{
-			$newPaths[rtrim($key, '\\ ')] = $value;
-		}
+        // Composer stores namespaces with trailing slash. We don't.
+        $newPaths = [];
+        foreach ($paths as $key => $value) {
+            $newPaths[rtrim($key, '\\ ')] = $value;
+        }
 
-		$this->psr4 = array_merge($this->psr4, $newPaths);
-	}
+        $this->psr4 = array_merge($this->psr4, $newPaths);
+    }
 
 }

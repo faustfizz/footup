@@ -74,10 +74,10 @@ class Command extends Parser implements Groupable
      */
     public function __construct(string $name, string $desc = '', bool $allowUnknown = false, App $app = null)
     {
-        $this->_name         = $name;
-        $this->_desc         = $desc;
+        $this->_name = $name;
+        $this->_desc = $desc;
         $this->_allowUnknown = $allowUnknown;
-        $this->_app          = $app;
+        $this->_app = $app;
 
         $this->defaults();
     }
@@ -355,7 +355,7 @@ class Command extends Parser implements Groupable
      */
     public function showHelp()
     {
-        $io     = $this->io();
+        $io = $this->io();
         $helper = new OutputHelper($io->writer());
 
         $io->eol()->bold("Command ")->boldBlue($this->_name)->bold(", version {$this->_version}", true)->eol();

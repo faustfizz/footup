@@ -13,7 +13,7 @@ class Multiple extends Command
     public function __construct(App $cli)
     {
         $this
-			->argument('<classname> [...]', 'The name of classes to generate')
+            ->argument('<classname> [...]', 'The name of classes to generate')
             ->option('-n --namespace', 'The namespace of these classes')
             ->option('-T --type', 'The type can be controller, model, middle, migration, seeder or view class')
             ->option('-t --table', 'The table name if you generate Model class')
@@ -28,7 +28,7 @@ class Multiple extends Command
                 '<bold>  $0</end> <comment> <classname> -n namespace </end> ## Generate the class with namespace<eol/>' .
                 '<comment> ## All options not matching the selected type are ignored<eol/>'
             );
-            
+
         $this->inGroup("Helper");
 
         $this->alias("multiple");
@@ -37,7 +37,7 @@ class Multiple extends Command
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance
-    public function interact(Interactor $io) :void
+    public function interact(Interactor $io): void
     {
         // Collect missing opts/args
         if ($this->namespace && !is_string($this->namespace)) {
@@ -63,17 +63,15 @@ class Multiple extends Command
     public function execute()
     {
         $io = $this->app()->io();
-        
-        if(!$this->returnType)
-        {
+
+        if (!$this->returnType) {
             $this->returnType = "self";
         }
 
         $classnames = array_unique($this->values(0)["classname"]);
         // more codes ...
         foreach ($classnames as $value) {
-            switch($this->type)
-            {
+            switch ($this->type) {
                 case "controller":
                 case "middle":
                     # code...
@@ -115,7 +113,7 @@ class Multiple extends Command
                     $value && $seederCommand->set("classname", $value);
                     $this->force && $seederCommand->set("force", true);
                     $seederCommand->execute();
-                break;
+                    break;
             }
         }
 

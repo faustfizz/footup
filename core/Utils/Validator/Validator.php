@@ -192,7 +192,7 @@ class Validator
             }
             $errors[$error['attribute']][$error['rule']] = strtr($message, $this->displayAs);
         }
-        
+
         return $this->processedErrors = $errors;
     }
 
@@ -203,11 +203,10 @@ class Validator
      */
     public function getProcessedErrors()
     {
-        if(empty($this->processedErrors))
-        {
+        if (empty($this->processedErrors)) {
             return $this->processErrors();
         }
-        
+
         return $this->processedErrors;
     }
 
@@ -220,8 +219,7 @@ class Validator
      */
     public function getErrors(string $field = null)
     {
-        if($this->hasError($field))
-        {
+        if ($this->hasError($field)) {
             return is_null($field) ? $this->processedErrors : $this->processedErrors[$field];
         }
         return [];
@@ -236,8 +234,7 @@ class Validator
      */
     public function getError(string $field, $rule = null)
     {
-        if($this->hasError($field, $rule))
-        {
+        if ($this->hasError($field, $rule)) {
             return $rule ? $this->processedErrors[$field][$rule] : implode("\n", array_values($this->processedErrors[$field]));
         }
         return null;
@@ -252,23 +249,20 @@ class Validator
      */
     public function hasError(string $field = null, $rule = null)
     {
-        if(empty($this->processedErrors))
-        {
+        if (empty($this->processedErrors)) {
             $this->processErrors();
 
-            if(is_null($field))
-            {
+            if (is_null($field)) {
                 return $this->hasErrors();
             }
         }
 
         $hasError = isset($this->processedErrors[$field]) && !empty($this->processedErrors[$field]);
 
-        if($rule && $hasError)
-        {
+        if ($rule && $hasError) {
             return isset($this->processedErrors[$field][$rule]) && !empty($this->processedErrors[$field][$rule]);
         }
-        
+
         return $hasError;
     }
 
@@ -279,20 +273,19 @@ class Validator
      *
      * @return bool true if validated false if not
      */
-    public function validate($values, array $ruleSet, string $prefix = null) : bool
+    public function validate($values, array $ruleSet, string $prefix = null): bool
     {
         // It have done a validation before, we reset it
-        if($this->hasErrors())
-        {
+        if ($this->hasErrors()) {
             $this->clear();
         }
 
         // If there are no rules, there is nothing to validate
-        if(empty($ruleSet)) {
+        if (empty($ruleSet)) {
             return false;
         }
         // If there are no values, there is nothing to validate
-        if(empty($values)) {
+        if (empty($values)) {
             return false;
         }
 
@@ -328,17 +321,17 @@ class Validator
     public function addError($attribute, $rule, $replacements = [])
     {
         $replacements = array_merge([
-            ':attribute'    => $this->prefix . $attribute,
+            ':attribute' => $this->prefix . $attribute,
             '!(\S+)\|(\S+)' => true,
         ], $replacements ?? []);
 
         $this->errors[] = [
-            'attribute'    => $this->prefix . $attribute,
-            'rule'         => $rule,
+            'attribute' => $this->prefix . $attribute,
+            'rule' => $rule,
             'replacements' => $replacements,
         ];
 
-        $this->messages['rules'][$rule] = lang("validator.".$rule);
+        $this->messages['rules'][$rule] = lang("validator." . $rule);
     }
 
     /**
@@ -363,7 +356,7 @@ class Validator
     public static function getValue(&$array, $pattern)
     {
         $imploded = ArrDots::implode($array);
-        $pattern  = sprintf('/^%s$/', str_replace(static::WILD, '[0-9]+', $pattern));
+        $pattern = sprintf('/^%s$/', str_replace(static::WILD, '[0-9]+', $pattern));
 
         foreach ($imploded as $attribute => $value) {
             if (preg_match($pattern, $attribute) == 0) {
@@ -383,10 +376,10 @@ class Validator
      * @param bool $merge if you want to merge | default is a replacement
      *
      * @return  Validator
-     */ 
+     */
     public function setDisplayAs($displayAs, $merge = false)
     {
-        $this->displayAs = $merge ? array_merge($this->displayAs, $displayAs) :$displayAs;
+        $this->displayAs = $merge ? array_merge($this->displayAs, $displayAs) : $displayAs;
 
         return $this;
     }

@@ -33,7 +33,7 @@ class BaseController extends Controller
      * ];
      */
     protected $globalMiddles = [];
-    
+
     /**
      * Si vous voulez ajouter des middles (middleware) spécifiques pour un controlleur, c'est par ici
      * 

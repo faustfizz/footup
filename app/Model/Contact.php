@@ -4,7 +4,8 @@ namespace App\Model;
 use Footup\I18n\Time;
 use Footup\Model;
 
-class Contact extends Model{
+class Contact extends Model
+{
     /**
      * PrimaryKey
      *
@@ -12,16 +13,16 @@ class Contact extends Model{
      */
     protected $primaryKey = 'idcont';
 
-    protected $casts         = [
-        'created_at'    =>  Time::class
+    protected $casts = [
+        'created_at' => Time::class
     ];
-    protected $beforeInsert         = [];
-	protected $beforeFind           = [];
-	protected $beforeDelete         = [];
-	protected $beforeUpdate         = [];
-	protected $afterInsert          = [];
-	protected $afterFind            = [];
-	protected $afterDelete          = [];
-	protected $afterUpdate          = [];
+    protected $beforeInsert = [];
+    protected $beforeFind = [];
+    protected $beforeDelete = [];
+    protected $beforeUpdate = [];
+    protected $afterInsert = [];
+    protected $afterFind = [];
+    protected $afterDelete = [];
+    protected $afterUpdate = [];
 
 }

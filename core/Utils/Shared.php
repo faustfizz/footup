@@ -17,8 +17,9 @@ use Footup\Routing\Router;
 use Footup\Config\Config;
 use Footup\Utils\Validator\Validator;
 
-class Shared{
-    
+class Shared
+{
+
     /**
      * Models instances
      * 
@@ -39,7 +40,7 @@ class Shared{
      * @var Config
      */
     protected static $config;
-    
+
     /**
      * Session instance
      * 
@@ -64,11 +65,11 @@ class Shared{
      */
     public static function loadModels($class, $shared = true)
     {
-        if(!class_exists("App\\Model\\".$class, true)){
-            throw new \Exception(text("Core.classNotFound", ["App\\Model\\".$class]));
+        if (!class_exists("App\\Model\\" . $class, true)) {
+            throw new \Exception(text("Core.classNotFound", ["App\\Model\\" . $class]));
         }
 
-        if(isset(self::$models[$class]) && $shared){
+        if (isset(self::$models[$class]) && $shared) {
             return self::$models[$class];
         }
         $initializable = "App\\Model\\$class";
@@ -84,7 +85,7 @@ class Shared{
      */
     public static function loadRouter($shared = true)
     {
-        if(isset(self::$router) && $shared){
+        if (isset(self::$router) && $shared) {
             return self::$router;
         }
         return self::$router = new Router(new Request);
@@ -99,7 +100,7 @@ class Shared{
      */
     public static function loadConfig($shared = true)
     {
-        if(isset(self::$config) && $shared){
+        if (isset(self::$config) && $shared) {
             return self::$config;
         }
         return self::$config = new Config();
@@ -114,7 +115,7 @@ class Shared{
      */
     public static function loadSession($shared = true)
     {
-        if(isset(self::$session) && $shared){
+        if (isset(self::$session) && $shared) {
             return self::$session;
         }
         return self::$session = new Session();
@@ -129,7 +130,7 @@ class Shared{
      */
     public static function loadValidator($shared = true)
     {
-        if(isset(self::$validator) && $shared){
+        if (isset(self::$validator) && $shared) {
             return self::$validator;
         }
         return self::$validator = new Validator();

@@ -23,7 +23,7 @@ class Autoload
      * ]
      *
      * @var array
-     */ 
+     */
     public static $classmap = [];
 
     /**
@@ -35,7 +35,7 @@ class Autoload
      * ]
      *
      * @var array
-     */ 
-    public static $psr4 = [ ];
+     */
+    public static $psr4 = [];
 
 }

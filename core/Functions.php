@@ -179,181 +179,172 @@ defined("STRTR") or define("STRTR", array(
 	'/Ĳ/' => 'IJ',
 	'/ĳ/' => 'ij',
 
-	'/ß/'=> 'ss',
+	'/ß/' => 'ss',
 
 ));
 
 ////////////#--------------------------#///////////
 
-if (! function_exists('directory_map')) {
-    /**
-     * Create a Directory Map
-     *
-     * Reads the specified directory and builds an array
-     * representation of it. Sub-folders contained with the
-     * directory will be mapped as well.
+if (!function_exists('directory_map')) {
+	/**
+	 * Create a Directory Map
+	 *
+	 * Reads the specified directory and builds an array
+	 * representation of it. Sub-folders contained with the
+	 * directory will be mapped as well.
 	 * 
 	 * @copyright CodeIgniter 4 FileSystem Helper
-     *
-     * @param string $sourceDir      Path to source
-     * @param int    $directoryDepth Depth of directories to traverse
-     *                               (0 = fully recursive, 1 = current dir, etc)
-     * @param bool   $hidden         Whether to show hidden files
-     */
-    function directory_map(string $sourceDir, int $directoryDepth = 0, bool $hidden = false): array
-    {
-        try {
-            $fp = opendir($sourceDir);
+	 *
+	 * @param string $sourceDir      Path to source
+	 * @param int    $directoryDepth Depth of directories to traverse
+	 *                               (0 = fully recursive, 1 = current dir, etc)
+	 * @param bool   $hidden         Whether to show hidden files
+	 */
+	function directory_map(string $sourceDir, int $directoryDepth = 0, bool $hidden = false): array
+	{
+		try {
+			$fp = opendir($sourceDir);
 
-            $fileData  = [];
-            $newDepth  = $directoryDepth - 1;
-            $sourceDir = rtrim($sourceDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+			$fileData = [];
+			$newDepth = $directoryDepth - 1;
+			$sourceDir = rtrim($sourceDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
-            while (false !== ($file = readdir($fp))) {
-                // Remove '.', '..', and hidden files [optional]
-                if ($file === '.' || $file === '..' || ($hidden === false && $file[0] === '.')) {
-                    continue;
-                }
+			while (false !== ($file = readdir($fp))) {
+				// Remove '.', '..', and hidden files [optional]
+				if ($file === '.' || $file === '..' || ($hidden === false && $file[0] === '.')) {
+					continue;
+				}
 
-                if (is_dir($sourceDir . $file)) {
-                    $file .= DIRECTORY_SEPARATOR;
-                }
+				if (is_dir($sourceDir . $file)) {
+					$file .= DIRECTORY_SEPARATOR;
+				}
 
-                if (($directoryDepth < 1 || $newDepth > 0) && is_dir($sourceDir . $file)) {
-                    $fileData[$file] = directory_map($sourceDir . $file, $newDepth, $hidden);
-                } else {
-                    $fileData[] = $file;
-                }
-            }
+				if (($directoryDepth < 1 || $newDepth > 0) && is_dir($sourceDir . $file)) {
+					$fileData[$file] = directory_map($sourceDir . $file, $newDepth, $hidden);
+				} else {
+					$fileData[] = $file;
+				}
+			}
 
-            closedir($fp);
+			closedir($fp);
 
-            return $fileData;
-        } catch (Throwable $e) {
-            return [];
-        }
-    }
+			return $fileData;
+		} catch (Throwable $e) {
+			return [];
+		}
+	}
 }
 
-if (! function_exists('directory_mirror')) {
-    /**
-     * Recursively copies the files and directories of the origin directory
-     * into the target directory, i.e. "mirror" its contents.
+if (!function_exists('directory_mirror')) {
+	/**
+	 * Recursively copies the files and directories of the origin directory
+	 * into the target directory, i.e. "mirror" its contents.
 	 * 
 	 * @copyright CodeIgniter 4 FileSystem Helper
-     *
-     * @param string $originDir orignal directory (source)
-     * @param string $targetDir destination directory (target)
+	 *
+	 * @param string $originDir orignal directory (source)
+	 * @param string $targetDir destination directory (target)
 	 * 
-     * @param bool $overwrite Whether individual files overwrite on collision
-     *
-     * @throws InvalidArgumentException
-     */
-    function directory_mirror(string $originDir, string $targetDir, bool $overwrite = true): void
-    {
-        if (! is_dir($originDir = rtrim($originDir, '\\/'))) {
-            throw new InvalidArgumentException(text('file.dirNotExist', [$originDir]));
-        }
+	 * @param bool $overwrite Whether individual files overwrite on collision
+	 *
+	 * @throws InvalidArgumentException
+	 */
+	function directory_mirror(string $originDir, string $targetDir, bool $overwrite = true): void
+	{
+		if (!is_dir($originDir = rtrim($originDir, '\\/'))) {
+			throw new InvalidArgumentException(text('file.dirNotExist', [$originDir]));
+		}
 
-        if (! is_dir($targetDir = rtrim($targetDir, '\\/'))) {
-            @mkdir($targetDir, 0755, true);
-        }
+		if (!is_dir($targetDir = rtrim($targetDir, '\\/'))) {
+			@mkdir($targetDir, 0755, true);
+		}
 
-        $dirLen = strlen($originDir);
+		$dirLen = strlen($originDir);
 
-        /**
-         * @var SplFileInfo $file
-         */
-        foreach (new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($originDir, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
-        ) as $file) {
-            $origin = $file->getPathname();
-            $target = $targetDir . substr($origin, $dirLen);
+		/**
+		 * @var SplFileInfo $file
+		 */
+		foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($originDir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $file) {
+			$origin = $file->getPathname();
+			$target = $targetDir . substr($origin, $dirLen);
 
-            if ($file->isDir()) {
-                if (! is_dir($target)) {
-                    mkdir($target, 0755);
-                }
-            } elseif (! is_file($target) || ($overwrite && is_file($target))) {
-                copy($origin, $target);
-            }
-        }
-    }
+			if ($file->isDir()) {
+				if (!is_dir($target)) {
+					mkdir($target, 0755);
+				}
+			} elseif (!is_file($target) || ($overwrite && is_file($target))) {
+				copy($origin, $target);
+			}
+		}
+	}
 }
 
-if(!function_exists("request"))
-{
-    /**
-     * Une fonction pour exposer l'objet Request
-     *
-     * @param mixed $method_or_index
-     * @param mixed $arg
-     * @return Request|mixed
-     */
-    function request($method_or_index = null, $arg = null)
-    {
-        $req = router()->getRequest();
+if (!function_exists("request")) {
+	/**
+	 * Une fonction pour exposer l'objet Request
+	 *
+	 * @param mixed $method_or_index
+	 * @param mixed $arg
+	 * @return Request|mixed
+	 */
+	function request($method_or_index = null, $arg = null)
+	{
+		$req = router()->getRequest();
 
-		if($val = $req->$method_or_index)
-        {
-            return !empty($arg) ? $req->$method_or_index = $arg : $val;
-        }else{
-            return $req;
-        }
-    }
+		if ($val = $req->$method_or_index) {
+			return !empty($arg) ? $req->$method_or_index = $arg : $val;
+		} else {
+			return $req;
+		}
+	}
 }
 
-if(!function_exists("model"))
-{
-    /**
-     * Une fonction pour retrouver un model d'instance partagée ou non
+if (!function_exists("model")) {
+	/**
+	 * Une fonction pour retrouver un model d'instance partagée ou non
 	 * 
 	 * Get the model (Shared Instance or non shared)
-     *
-     * @param string $modelName
-     * @param bool $shared
+	 *
+	 * @param string $modelName
+	 * @param bool $shared
 	 * 
-     * @return Model
-     */
-    function model($modelName, $shared = true)
-    {
+	 * @return Model
+	 */
+	function model($modelName, $shared = true)
+	{
 		return Shared::loadModels($modelName, $shared);
-    }
+	}
 }
 
-if(!function_exists("validator"))
-{
-    /**
-     * Une fonction pour exposer l'objet Validator
-     *
-     * @return Validator
-     */
-    function validator()
-    {
+if (!function_exists("validator")) {
+	/**
+	 * Une fonction pour exposer l'objet Validator
+	 *
+	 * @return Validator
+	 */
+	function validator()
+	{
 		return Shared::loadValidator();
-    }
+	}
 }
 
-if(!function_exists("validate"))
-{
-    /**
-     * Une fonction pour exposer l'objet Validator
-     *
-     * @param array|object $dataToValidate like ["name" => "Said Ali"]
-     * @param array $ruleSet like ["name" => "present|min-str-len:3"]
-     * @param string $prefixOfAllFields like if you have user[name] it should be user as prefix
-     * @return bool
-     */
-    function validate($dataToValidate, array $ruleSet, string $prefixOfAllFields = null)
-    {
+if (!function_exists("validate")) {
+	/**
+	 * Une fonction pour exposer l'objet Validator
+	 *
+	 * @param array|object $dataToValidate like ["name" => "Said Ali"]
+	 * @param array $ruleSet like ["name" => "present|min-str-len:3"]
+	 * @param string $prefixOfAllFields like if you have user[name] it should be user as prefix
+	 * @return bool
+	 */
+	function validate($dataToValidate, array $ruleSet, string $prefixOfAllFields = null)
+	{
 		return validator()->validate($dataToValidate, $ruleSet, $prefixOfAllFields);
-    }
+	}
 }
 
 // --------------------------------------------------------------------
-if (! function_exists('function_usable'))
-{
+if (!function_exists('function_usable')) {
 	/**
 	 * ################## function prise dans CodeIgniter 4 ###################
 	 * Function usable
@@ -384,14 +375,12 @@ if (! function_exists('function_usable'))
 	{
 		static $_suhosin_func_blacklist;
 
-		if (function_exists($functionName))
-		{
-			if (! isset($_suhosin_func_blacklist))
-			{
+		if (function_exists($functionName)) {
+			if (!isset($_suhosin_func_blacklist)) {
 				$_suhosin_func_blacklist = extension_loaded('suhosin') ? explode(',', trim(ini_get('suhosin.executor.func.blacklist'))) : [];
 			}
 
-			return ! in_array($functionName, $_suhosin_func_blacklist, true);
+			return !in_array($functionName, $_suhosin_func_blacklist, true);
 		}
 
 		return false;
@@ -399,132 +388,122 @@ if (! function_exists('function_usable'))
 }
 
 if (!function_exists('is_countable')) {
-    function is_countable($var) {
-        return (is_array($var) || $var instanceof Countable);
-    }
+	function is_countable($var)
+	{
+		return (is_array($var) || $var instanceof Countable);
+	}
 }
 
-if(!function_exists("calledController"))
-{
-    /**
-     * Retrouve le controlleur en cours d'utilisation
-     *
-     * @param boolean $withNamespace
-     * @return string
-     */
-    function calledController($withNamespace = true)
-    {
-        $controller = explode("\\", router()->getControllerName());
-        return $withNamespace ? router()->getControllerName() : end($controller);
-    }
+if (!function_exists("calledController")) {
+	/**
+	 * Retrouve le controlleur en cours d'utilisation
+	 *
+	 * @param boolean $withNamespace
+	 * @return string
+	 */
+	function calledController($withNamespace = true)
+	{
+		$controller = explode("\\", router()->getControllerName());
+		return $withNamespace ? router()->getControllerName() : end($controller);
+	}
 }
 
-if(!function_exists("calledMethod"))
-{
-    /**
-     * Retrouve la méthode couremment utilisée
-     *
-     * @return string
-     */
-    function calledMethod()
-    {
-        return router()->getControllerMethod();
-    }
-}
-
-// --------------------------------------------------------------------
-
-if(!function_exists("router"))
-{
-    /**
-     * Exposition de l'objet Router
-     *
-     * @return \Footup\Routing\Router
-     */
-    function router()
-    {
-        return Shared::loadRouter();
-    }
-}
-
-if(!function_exists("frameworkName"))
-{
-    /**
-     * Exposition du nom du framework
-     *
-     * @return string
-     */
-    function frameworkName()
-    {
-        return Footup::NAME;
-    }
-}
-
-if(!function_exists("frameworkVersion"))
-{
-    /**
-     * Exposition de la version
-     *
-     * @return string
-     */
-    function frameworkVersion()
-    {
-        return Footup::VERSION;
-    }
-}
-
-if(!function_exists("response"))
-{
-    /**
-     * Exposition de l'objet Response
-     *
-     * @param mixed $data
-     * @param integer $status
-     * @param array $header
-     * @return Response
-     */
-    function response($data = '', $status = 200, $header = [])
-    {
-        return new Response($data, $status, $header);
-    }
+if (!function_exists("calledMethod")) {
+	/**
+	 * Retrouve la méthode couremment utilisée
+	 *
+	 * @return string
+	 */
+	function calledMethod()
+	{
+		return router()->getControllerMethod();
+	}
 }
 
 // --------------------------------------------------------------------
 
-if(!function_exists("session"))
-{
-    /**
-     * Exposition de l'objet Session
-     *
-     * @param mixed $key
-     * @param string $value
-     * @return Session|mixed
-     */
-    function session($key = null, $value = null)
-    {
-        $session = Shared::loadSession();
+if (!function_exists("router")) {
+	/**
+	 * Exposition de l'objet Router
+	 *
+	 * @return \Footup\Routing\Router
+	 */
+	function router()
+	{
+		return Shared::loadRouter();
+	}
+}
 
-        if(is_array($key))
-        {
-            return $session->set($key);
-        }
-        elseif(is_string($key) && !empty($key))
-        {
-            return !empty($value) ? $session->set($key, $value) : $session->get($key);
-        }
+if (!function_exists("frameworkName")) {
+	/**
+	 * Exposition du nom du framework
+	 *
+	 * @return string
+	 */
+	function frameworkName()
+	{
+		return Footup::NAME;
+	}
+}
+
+if (!function_exists("frameworkVersion")) {
+	/**
+	 * Exposition de la version
+	 *
+	 * @return string
+	 */
+	function frameworkVersion()
+	{
+		return Footup::VERSION;
+	}
+}
+
+if (!function_exists("response")) {
+	/**
+	 * Exposition de l'objet Response
+	 *
+	 * @param mixed $data
+	 * @param integer $status
+	 * @param array $header
+	 * @return Response
+	 */
+	function response($data = '', $status = 200, $header = [])
+	{
+		return new Response($data, $status, $header);
+	}
+}
+
+// --------------------------------------------------------------------
+
+if (!function_exists("session")) {
+	/**
+	 * Exposition de l'objet Session
+	 *
+	 * @param mixed $key
+	 * @param string $value
+	 * @return Session|mixed
+	 */
+	function session($key = null, $value = null)
+	{
+		$session = Shared::loadSession();
+
+		if (is_array($key)) {
+			return $session->set($key);
+		} elseif (is_string($key) && !empty($key)) {
+			return !empty($value) ? $session->set($key, $value) : $session->get($key);
+		}
 
 		return $session;
-    }
+	}
 }
 
-if (!function_exists('url'))
-{
-    /**
-     * @param mixed $uri
-     * @param boolean $withQuery
-     * @param string|null $scheme
-     * @return string
-     */
+if (!function_exists('url')) {
+	/**
+	 * @param mixed $uri
+	 * @param boolean $withQuery
+	 * @param string|null $scheme
+	 * @return string
+	 */
 	function url($uri = '', bool $withQuery = false, string $scheme = null): string
 	{
 		return base_url($uri, $withQuery, $scheme);
@@ -533,21 +512,19 @@ if (!function_exists('url'))
 
 //--------------------------------------------------------------------
 
-if (!function_exists('config'))
-{
-    /**
+if (!function_exists('config')) {
+	/**
 	 * Retrouve les configurations
 	 *
 	 * @param string $item
 	 * @param mixed $value
 	 * @return mixed|Config
 	 */
-	function config($item = null, $value  = null)
+	function config($item = null, $value = null)
 	{
 		$config = Shared::loadConfig();
 
-		if(!empty($item) && !empty($value))
-		{
+		if (!empty($item) && !empty($value)) {
 			return $config->{$item} = $value;
 		}
 
@@ -557,56 +534,51 @@ if (!function_exists('config'))
 
 //--------------------------------------------------------------------
 
-if (! function_exists('base_url'))
-{
-    /**
-     * Génére des urls 
-     *
-     * @param array|string $uri
-     * @param boolean $withQuery
-     * @param string|null $scheme
-     * @return string
-     */
+if (!function_exists('base_url')) {
+	/**
+	 * Génére des urls 
+	 *
+	 * @param array|string $uri
+	 * @param boolean $withQuery
+	 * @param string|null $scheme
+	 * @return string
+	 */
 	function base_url($uri = '', bool $withQuery = false, string $scheme = null): string
 	{
-		$base_url = trim((string) request()->url(false, true), " \n\r\t\v\x00\/")."/";
+		$base_url = trim((string) request()->url(false, true), " \n\r\t\v\x00\/") . "/";
 		$query = "";
 
-		if($scheme)
-		{
+		if ($scheme) {
 			$scheme = strtr($scheme, ["://" => ""]);
 			$url = parse_url($base_url);
 			$base_url = strtr($base_url, [$url["scheme"] => $scheme]);
 		}
 
-		if($withQuery)
-		{
+		if ($withQuery) {
 			$q = request()->query();
-			$query = !empty($q) ? "?".http_build_query($q, "_key", "&") : $query;
+			$query = !empty($q) ? "?" . http_build_query($q, "_key", "&") : $query;
 		}
 
-        if(empty($uri) || $uri == '/')
-        {
-            return $base_url.$query;
-        }
+		if (empty($uri) || $uri == '/') {
+			return $base_url . $query;
+		}
 
-        // convert segment array to string
-        $uri = trim(is_array($uri) ? implode('/', $uri) : $uri, " \n\r\t\v\x00\/");
-		
-        return trim((string) $base_url, " \n\r\t\v\x00\/")."/".$uri.$query;
-    }
+		// convert segment array to string
+		$uri = trim(is_array($uri) ? implode('/', $uri) : $uri, " \n\r\t\v\x00\/");
+
+		return trim((string) $base_url, " \n\r\t\v\x00\/") . "/" . $uri . $query;
+	}
 }
 
 //--------------------------------------------------------------------
 
-if (! function_exists('current_url'))
-{
-    /**
-     * Url actif
-     * 
-     * @param boolean $withQuery
-     * @return string
-     */
+if (!function_exists('current_url')) {
+	/**
+	 * Url actif
+	 * 
+	 * @param boolean $withQuery
+	 * @return string
+	 */
 	function current_url($withQuery = true)
 	{
 		return request()->url($withQuery);
@@ -615,46 +587,42 @@ if (! function_exists('current_url'))
 
 //--------------------------------------------------------------------
 
-if (! function_exists('previous_url'))
-{
-    /**
-     * Ancien URL
-     *
-     * @param boolean $withQuery
-     * @return string
-     */
+if (!function_exists('previous_url')) {
+	/**
+	 * Ancien URL
+	 *
+	 * @param boolean $withQuery
+	 * @return string
+	 */
 	function previous_url(bool $withQuery = true)
 	{
-        $url = filter_var(request()->referer(), FILTER_SANITIZE_URL);
-        if($url && !$withQuery)
-        {
-            $pos = strpos($url, "?") !== false ? strpos($url, "?") : strlen($url);
-            $url = substr($url, 0, $pos);
-        }
-		return  $url;
+		$url = filter_var(request()->referer(), FILTER_SANITIZE_URL);
+		if ($url && !$withQuery) {
+			$pos = strpos($url, "?") !== false ? strpos($url, "?") : strlen($url);
+			$url = substr($url, 0, $pos);
+		}
+		return $url;
 	}
 }
 
 //--------------------------------------------------------------------
 
-if (! function_exists('path'))
-{
-    /**
-     * Path de l'url
-     *
-     * @return string
-     */
+if (!function_exists('path')) {
+	/**
+	 * Path de l'url
+	 *
+	 * @return string
+	 */
 	function path(): string
 	{
-        return request()->path();
+		return request()->path();
 	}
 }
 
 //--------------------------------------------------------------------
 
-if (! function_exists('lang'))
-{
-    /**
+if (!function_exists('lang')) {
+	/**
 	 * Translation
 	 * get language entry
 	 *
@@ -666,12 +634,11 @@ if (! function_exists('lang'))
 	function lang(string $indice, array $params = [], string $locale = null): string
 	{
 		$lang = new Lang($locale);
-        return $lang->getText($indice, $params);
+		return $lang->getText($indice, $params);
 	}
 }
-if (! function_exists('text'))
-{
-    /**
+if (!function_exists('text')) {
+	/**
 	 * Translation
 	 * get language entry
 	 *
@@ -683,15 +650,14 @@ if (! function_exists('text'))
 	function text(string $indice, array $params = [], string $locale = null): string
 	{
 		$lang = new Lang($locale);
-        return $lang->getText($indice, $params);
+		return $lang->getText($indice, $params);
 	}
 }
 
 //--------------------------------------------------------------------
 
-if (! function_exists('setLang'))
-{
-    /**
+if (!function_exists('setLang')) {
+	/**
 	 * Translation
 	 * set language entry
 	 *
@@ -703,17 +669,15 @@ if (! function_exists('setLang'))
 	function setLang($indice, string $value, string $locale = null): string
 	{
 		$lang = new Lang($locale);
-		if(is_array($indice))
-		{
+		if (is_array($indice)) {
 			return $lang->setInput($value, $indice);
-		}else{
+		} else {
 			return $lang->setText($indice, $value);
 		}
 	}
 }
-if (! function_exists('setText'))
-{
-    /**
+if (!function_exists('setText')) {
+	/**
 	 * Translation
 	 * set language entry
 	 *
@@ -725,10 +689,9 @@ if (! function_exists('setText'))
 	function setText($indice, string $value, string $locale = null): string
 	{
 		$lang = new Lang($locale);
-		if(is_array($indice))
-		{
+		if (is_array($indice)) {
 			return $lang->setInput($value, $indice);
-		}else{
+		} else {
 			return $lang->setText($indice, $value);
 		}
 	}
@@ -736,9 +699,8 @@ if (! function_exists('setText'))
 
 //--------------------------------------------------------------------
 
-if (! function_exists('unsetLang'))
-{
-    /**
+if (!function_exists('unsetLang')) {
+	/**
 	 * Translation
 	 * unset language entry
 	 *
@@ -753,10 +715,9 @@ if (! function_exists('unsetLang'))
 		return $lang->removeLine($file, $key);
 	}
 }
-if (! function_exists('unsetText'))
-{
-    
-    /**
+if (!function_exists('unsetText')) {
+
+	/**
 	 * Translation
 	 * unset language entry
 	 *
@@ -774,42 +735,39 @@ if (! function_exists('unsetText'))
 
 // ------------------------------------------------------------------------
 
-if (! function_exists('redirect'))
-{
+if (!function_exists('redirect')) {
 	/**
-     * Redirection
-     *
-     * @param string $route Route ou url
-     * @return void
-     */
+	 * Redirection
+	 *
+	 * @param string $route Route ou url
+	 * @return void
+	 */
 	function redirect(string $route = '/')
 	{
 		return response()->redirect(url($route));
 	}
 }
 
-if (! function_exists('goback'))
-{
+if (!function_exists('goback')) {
 	/**
-     * Redirection en arrière
-     *
-     * @param string $route Route ou url
-     * @return void
-     */
+	 * Redirection en arrière
+	 *
+	 * @param string $route Route ou url
+	 * @return void
+	 */
 	function goback()
 	{
 		return response()->back();
 	}
 }
 
-if (! function_exists('to'))
-{
+if (!function_exists('to')) {
 	/**
-     * Redirection
-     *
-     * @param string $route Route ou url
-     * @return void
-     */
+	 * Redirection
+	 *
+	 * @param string $route Route ou url
+	 * @return void
+	 */
 	function to(string $route = '/')
 	{
 		return response()->to(url($route));
@@ -818,8 +776,7 @@ if (! function_exists('to'))
 
 // ------------------------------------------------------------------------
 
-if (! function_exists('mailto'))
-{
+if (!function_exists('mailto')) {
 	/**
 	 * Mailto Link
 	 *
@@ -831,20 +788,18 @@ if (! function_exists('mailto'))
 	 */
 	function mailto(string $email, string $title = '', $attributes = []): string
 	{
-		if (trim($title) === '')
-		{
+		if (trim($title) === '') {
 			$title = $email;
 		}
-        $attributes['href'] = "mailto:".$email;
+		$attributes['href'] = "mailto:" . $email;
 
-        return Html::a($title, $attributes);
+		return Html::a($title, $attributes);
 	}
 }
 
 // ------------------------------------------------------------------------
 
-if (! function_exists('slugify'))
-{
+if (!function_exists('slugify')) {
 	/**
 	 * Create URL Title
 	 *
@@ -862,21 +817,19 @@ if (! function_exists('slugify'))
 		$qSeparator = preg_quote($separator, '#');
 
 		$trans = [
-			'\s+'                    => $separator,
+			'\s+' => $separator,
 			'(' . $qSeparator . ')+' => $separator,
-			'&.+?;'                  => '',
-			'[^\w\d\pL\pM _-]'       => ''
+			'&.+?;' => '',
+			'[^\w\d\pL\pM _-]' => ''
 		];
 
-        $str = preg_replace(array_keys(STRTR), array_values(STRTR), $str);
+		$str = preg_replace(array_keys(STRTR), array_values(STRTR), $str);
 		$str = strip_tags($str);
-		foreach ($trans as $key => $val)
-		{
+		foreach ($trans as $key => $val) {
 			$str = preg_replace('#' . $key . '#iu', $val, $str);
 		}
 
-		if ($lowercase === true)
-		{
+		if ($lowercase === true) {
 			$str = strtolower($str);
 		}
 
@@ -886,49 +839,46 @@ if (! function_exists('slugify'))
 
 // ---------------------------------------------------------------------
 
-if(!function_exists("getMimeType"))
-{
-    /**
-     * getMimeType
-     *
-     * @param string $file
-     * @return string
-     */
-    function getMimeType($file)
-    {
+if (!function_exists("getMimeType")) {
+	/**
+	 * getMimeType
+	 *
+	 * @param string $file
+	 * @return string
+	 */
+	function getMimeType($file)
+	{
 		return Mime::getMime(pathinfo($file, PATHINFO_EXTENSION));
-    }
+	}
 }
 
-if(!function_exists("favicon"))
-{
-    /**
-     * Link Favicon
-     *
-     * @param string $file
-     * @return string
-     */
-    function favicon($file)
-    {
+if (!function_exists("favicon")) {
+	/**
+	 * Link Favicon
+	 *
+	 * @param string $file
+	 * @return string
+	 */
+	function favicon($file)
+	{
 		$mime = Mime::getMime(pathinfo($file, PATHINFO_EXTENSION));
-        return file_exists(BASE_PATH.$file) ? Html::link(null, [
-            "rel"       =>  "icon",
-            "href"      =>  base_url($file),
-            "type"      =>  $mime
-        ]) : "";
-    }
+		return file_exists(BASE_PATH . $file) ? Html::link(null, [
+			"rel" => "icon",
+			"href" => base_url($file),
+			"type" => $mime
+		]) : "";
+	}
 }
 
-if(!function_exists("assets"))
-{
-    /**
-     * Link assets
-     *
-     * @param string $file
-     * @return string
-     */
-    function assets($file)
-    {
+if (!function_exists("assets")) {
+	/**
+	 * Link assets
+	 *
+	 * @param string $file
+	 * @return string
+	 */
+	function assets($file)
+	{
 		switch (pathinfo($file, PATHINFO_EXTENSION)) {
 			case "css":
 				return css($file);
@@ -942,12 +892,11 @@ if(!function_exists("assets"))
 			default:
 				return "";
 		}
-    }
+	}
 }
 
-if(!function_exists("img"))
-{
-    /**
+if (!function_exists("img")) {
+	/**
 	 * Link image
 	 *
 	 * @param string $file
@@ -956,75 +905,70 @@ if(!function_exists("img"))
 	 * @param int|string $height
 	 * @return string
 	 */
-    function img($file, $class = "img-fluid", $width = null, $height = null)
-    {
-		if(file_exists(ASSETS_DIR."img/".$file))
-		{
+	function img($file, $class = "img-fluid", $width = null, $height = null)
+	{
+		if (file_exists(ASSETS_DIR . "img/" . $file)) {
 			return Html::img(null, array_filter([
-				"rel"       =>  "image",
-				"src"      	=>  base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"])."img/".$file),
-				"width"     =>  $width,
-				"height"    =>  $height,
-				"class"		=>	$class
+				"rel" => "image",
+				"src" => base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"]) . "img/" . $file),
+				"width" => $width,
+				"height" => $height,
+				"class" => $class
 			]));
 		}
 
-		if(file_exists(BASE_PATH."uploads/".$file))
-		{
+		if (file_exists(BASE_PATH . "uploads/" . $file)) {
 			return Html::img(null, array_filter([
-				"rel"       =>  "image",
-				"src"      	=>  base_url("uploads/".$file),
-				"width"     =>  $width,
-				"height"    =>  $height,
-				"class"		=>	$class
+				"rel" => "image",
+				"src" => base_url("uploads/" . $file),
+				"width" => $width,
+				"height" => $height,
+				"class" => $class
 			]));
 		}
 
-        return "";
-    }
+		return "";
+	}
 }
 
-if(!function_exists("css"))
-{
-    /**
-     * Link stylesheet
-     *
-     * @param string $file
-     * @return string
-     */
-    function css($file)
-    {
-		$file = strtr($file, [".css" => ""]).".css";
-		
-        return file_exists(ASSETS_DIR."css/".$file) ? Html::link(null, [
-            "rel"       =>  "stylesheet",
-            "href"      =>  base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"])."css/".$file),
-            "type"      =>  "text/css"
-        ]) : "";
-    }
+if (!function_exists("css")) {
+	/**
+	 * Link stylesheet
+	 *
+	 * @param string $file
+	 * @return string
+	 */
+	function css($file)
+	{
+		$file = strtr($file, [".css" => ""]) . ".css";
+
+		return file_exists(ASSETS_DIR . "css/" . $file) ? Html::link(null, [
+			"rel" => "stylesheet",
+			"href" => base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"]) . "css/" . $file),
+			"type" => "text/css"
+		]) : "";
+	}
 }
 
-if(!function_exists("js"))
-{
-    /**
-     * Link javaScript
-     *
-     * @param string $file
-     * @return string
-     */
-    function js($file)
-    {
-		$file = strtr($file, [".js" => ""]).".js";
-		
-        return file_exists(ASSETS_DIR."js/".$file) ? Html::script(null, [
-            "src"      =>  base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"])."js/".$file),
-            "type"      =>  "text/javascript"
-        ]) : "";
-    }
+if (!function_exists("js")) {
+	/**
+	 * Link javaScript
+	 *
+	 * @param string $file
+	 * @return string
+	 */
+	function js($file)
+	{
+		$file = strtr($file, [".js" => ""]) . ".js";
+
+		return file_exists(ASSETS_DIR . "js/" . $file) ? Html::script(null, [
+			"src" => base_url(strtr(ASSETS_DIR, [BASE_PATH => "/"]) . "js/" . $file),
+			"type" => "text/javascript"
+		]) : "";
+	}
 }
 
-if (! function_exists('url_is'))
-{
+if (!function_exists('url_is')) {
 	/**
 	 * Determines si le path d'url a le path donné en parametre
 	 *
@@ -1037,8 +981,7 @@ if (! function_exists('url_is'))
 	}
 }
 
-if (! function_exists('in_url'))
-{
+if (!function_exists('in_url')) {
 	/**
 	 * Determines si le path d'url a le path donné en parametre
 	 *
@@ -1054,33 +997,31 @@ if (! function_exists('in_url'))
 
 //  -------------------------------------------------------------------------
 
-if(! function_exists("json"))
-{
-    /**
-     * Affiche ou retourne des données en JSON
-     *
-     * @param array $data
-     * @param integer $status
-     * @param array $headers
+if (!function_exists("json")) {
+	/**
+	 * Affiche ou retourne des données en JSON
+	 *
+	 * @param array $data
+	 * @param integer $status
+	 * @param array $headers
 	 * 
-     * @return Response|void
-     */
-    function json(array $data, $status = 200, $headers = [])
-    {
-        return response()->json($data, $status, $headers);
-    }
+	 * @return Response|void
+	 */
+	function json(array $data, $status = 200, $headers = [])
+	{
+		return response()->json($data, $status, $headers);
+	}
 }
 
-if(! function_exists("dtime"))
-{
-    /**
-     * DateTime function
-     *
-     * @param string $datetime
-     * @return Time
-     */
-    function dtime($datetime = null)
-    {
-        return !is_null($datetime) ? new Time($datetime) : Time::now();
-    }
+if (!function_exists("dtime")) {
+	/**
+	 * DateTime function
+	 *
+	 * @param string $datetime
+	 * @return Time
+	 */
+	function dtime($datetime = null)
+	{
+		return !is_null($datetime) ? new Time($datetime) : Time::now();
+	}
 }

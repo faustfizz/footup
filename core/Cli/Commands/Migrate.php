@@ -16,21 +16,21 @@ class Migrate extends Command
     protected $namespace = "App\\Migration";
 
     protected $replacements = array(
-            "{class_name}"  =>  null
-        );
+        "{class_name}" => null
+    );
     protected $generated = [];
 
     public function __construct(App $cli)
     {
         $this
-			->argument('<filename>', 'The name of the migration class to generate')
+            ->argument('<filename>', 'The name of the migration class to generate')
             ->option('-f --force', 'Force override file', null, false)
             // Usage examples:
             ->usage(
                 // $0 will be interpolated to actual command name
-                '<bold>  $0</end> <comment> <filename> </end> ## Generate the class without specifying anything than the name<eol/>' 
+                '<bold>  $0</end> <comment> <filename> </end> ## Generate the class without specifying anything than the name<eol/>'
             );
-            
+
         $this->inGroup("Migration");
 
         $this->alias("mg-create");
@@ -39,7 +39,7 @@ class Migrate extends Command
 
         try {
             //code...
-            DbConnection::getDb(true)->query("CREATE TABLE IF NOT EXISTS ". Schema::quoteIdentifier(Migration::$table) ."(
+            DbConnection::getDb(true)->query("CREATE TABLE IF NOT EXISTS " . Schema::quoteIdentifier(Migration::$table) . "(
                 `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 `version` VARCHAR(250) NOT NULL,
                 `class` VARCHAR(250) NOT NULL,
@@ -52,14 +52,14 @@ class Migrate extends Command
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance
-    public function interact(Interactor $io) :void
+    public function interact(Interactor $io): void
     {
         try {
             //code...
             DbConnection::getDb(true);
         } catch (\Throwable $th) {
             //throw $th;
-            $io->warn($th->getMessage(). ". It means you cannot run migrations commands")->eol();
+            $io->warn($th->getMessage() . ". It means you cannot run migrations commands")->eol();
             exit;
         }
 
@@ -80,13 +80,12 @@ class Migrate extends Command
         // more codes ...
         $this->generate();
 
-        if($this->scaffold)
+        if ($this->scaffold)
             return $this->generated;
 
-        
+
         !empty($this->generated) && $io->info("All generated files :", true);
-        foreach($this->generated as $file)
-        {
+        foreach ($this->generated as $file) {
             $io->success($file, true);
         }
         $io->eol();
@@ -97,48 +96,44 @@ class Migrate extends Command
     private function normalize()
     {
         $this->replacements = array(
-            "{table}"  =>  $this->table,
-            "{class_name}"  =>  ucfirst($this->filename)
+            "{table}" => $this->table,
+            "{class_name}" => ucfirst($this->filename)
         );
     }
 
     protected function replace($key, $value = null)
     {
-        if(is_array($key))
-        {
+        if (is_array($key)) {
             foreach ($key as $k => $v) {
                 # code...
                 $this->replacements[$k] = $v;
             }
-        }else{
+        } else {
             $this->replacements[$key] = $value;
         }
         return $this;
     }
 
     protected function parse_file_content($file)
-    {   
+    {
         $tpl = file_exists($file) ? file_get_contents($file) : "";
         return strtr($tpl, $this->replacements);
     }
 
     protected function exists($class)
     {
-        $stmt = DbConnection::getDb(true)->query("SELECT * FROM ". Schema::quoteIdentifier(Migration::$table) ." WHERE class = '".$class."'");
+        $stmt = DbConnection::getDb(true)->query("SELECT * FROM " . Schema::quoteIdentifier(Migration::$table) . " WHERE class = '" . $class . "'");
         $migration = null;
-        if($stmt instanceof \PDOStatement){
+        if ($stmt instanceof \PDOStatement) {
             $migration = $stmt->fetchObject();
         }
 
-        if($migration)
-        {
-            $file = $migration->version.'_'.$migration->class.'.php';
+        if ($migration) {
+            $file = $migration->version . '_' . $migration->class . '.php';
 
-            if(file_exists(APP_PATH."Migration/".$migration->version.'_'.$migration->class.'.php'))
-            {
-                $this->app()->io()->info("A migration file for this class already exists : '$file' And in status of '".$migration->status."' !")->eol();
-                if($this->app()->io()->confirm("Do you need to continue with new file ? [y]", "y"))
-                {
+            if (file_exists(APP_PATH . "Migration/" . $migration->version . '_' . $migration->class . '.php')) {
+                $this->app()->io()->info("A migration file for this class already exists : '$file' And in status of '" . $migration->status . "' !")->eol();
+                if ($this->app()->io()->confirm("Do you need to continue with new file ? [y]", "y")) {
                     return $migration;
                 }
                 $this->app()->io()->info("As of your confirmation, we don't continue. Thanks !")->eol()->eol();
@@ -151,54 +146,52 @@ class Migrate extends Command
     public function generate()
     {
         $this->normalize();
-        
+
         $expl = explode("/", trim(APP_PATH, DIRECTORY_SEPARATOR));
 
-        if(!is_dir(APP_PATH."Migration")){
-            @mkdir(APP_PATH."Migration");
+        if (!is_dir(APP_PATH . "Migration")) {
+            @mkdir(APP_PATH . "Migration");
         }
 
         $migration = $this->exists(ucfirst($this->filename));
 
         $version = date('ymd_His');
-		$filename = $version.'_'.ucfirst($this->filename);
-        
-        if(!$this->force && file_exists(APP_PATH."Migration/".$filename.'.php'))
-        {
-            $this->app()->io()->eol()->warn('"'.end($expl)."/Migration/".$filename.'.php" exists, use --force to override !', true)->eol();
+        $filename = $version . '_' . ucfirst($this->filename);
+
+        if (!$this->force && file_exists(APP_PATH . "Migration/" . $filename . '.php')) {
+            $this->app()->io()->eol()->warn('"' . end($expl) . "/Migration/" . $filename . '.php" exists, use --force to override !', true)->eol();
             exit(0);
         }
         $DB = DbConnection::getDb(true);
-        
-        if(file_put_contents(
-            APP_PATH."Migration/".$filename.'.php',
+
+        if (file_put_contents(
+            APP_PATH . "Migration/" . $filename . '.php',
             $this->replace([
                 "{table}" => $this->table,
                 "{class_name}" => ucfirst($this->filename)
-            ])->parse_file_content(__DIR__."/../Tpl/Migrate.tpl")
-        )){
-            if($migration)
-            {
-                $stmt = $DB->prepare("UPDATE ". Schema::quoteIdentifier(Migration::$table) ." SET `version` = ?, `status` = ? WHERE id = ?");
-    
-                if(!$stmt->execute([$version, "pending", $migration->id]))
-                {
-                    $this->app()->io()->error('Migrations table not updated : "'. $DB->errorInfo()[2].'" !', true)->eol();
+            ])->parse_file_content(__DIR__ . "/../Tpl/Migrate.tpl")
+        )) {
+            if ($migration) {
+                $stmt = $DB->prepare("UPDATE " . Schema::quoteIdentifier(Migration::$table) . " SET `version` = ?, `status` = ? WHERE id = ?");
+
+                if (!$stmt->execute([$version, "pending", $migration->id])) {
+                    $this->app()->io()->error('Migrations table not updated : "' . $DB->errorInfo()[2] . '" !', true)->eol();
                     exit(0);
-                };
-            }else{
-                $stmt = $DB->prepare("INSERT INTO ". Schema::quoteIdentifier(Migration::$table) ."(
+                }
+                ;
+            } else {
+                $stmt = $DB->prepare("INSERT INTO " . Schema::quoteIdentifier(Migration::$table) . "(
                             `version`, `class`
                         ) VALUES (? , ?)");
-    
-                if(!$stmt->execute([$version, ucfirst($this->filename)]))
-                {
-                    $this->app()->io()->error('Migrations table not updated : "'. $DB->errorInfo()[2].'" !', true)->eol();
+
+                if (!$stmt->execute([$version, ucfirst($this->filename)])) {
+                    $this->app()->io()->error('Migrations table not updated : "' . $DB->errorInfo()[2] . '" !', true)->eol();
                     exit(0);
-                };
+                }
+                ;
             }
 
-            $this->generated[] =  end($expl)."/Migration/".$filename.'.php';
+            $this->generated[] = end($expl) . "/Migration/" . $filename . '.php';
         }
 
 

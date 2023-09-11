@@ -40,7 +40,7 @@ class Dots implements \ArrayAccess, Arrayable
             $this->array = $array;
         }
     }
-    
+
     /**
      * Get the instance as an array.
      *

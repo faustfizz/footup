@@ -20,26 +20,26 @@ namespace App\Config;
  * 
  * I did it also for ease to me to declare all contants related to path
  */
-class Fuel{
+class Fuel
+{
     /**
      * The app directory
      *
      * @var string
      */
-    const appDir = __DIR__."/../";
+    const appDir = __DIR__ . "/../";
 
     /**
      * The directory of the core files
      *
      * @var string
      */
-    const sysDir = __DIR__."/../../core/";
+    const sysDir = __DIR__ . "/../../core/";
 
     /**
      * Yo ! Where you hold your view files
      *
      * @var string
      */
-    const viewDir = __DIR__."/../View/";
+    const viewDir = __DIR__ . "/../View/";
 }
-

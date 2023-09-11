@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /**
  * FOOTUP FRAMEWORK
@@ -40,12 +40,10 @@ class DbConnection
      */
     public static function setDb($config = null, $init = false)
     {
-        if($config instanceof PDO)
-        {
+        if ($config instanceof PDO) {
             return self::$db = $config;
         }
-        if($config instanceof DbConnection)
-        {
+        if ($config instanceof DbConnection) {
             return self::$db = $config::getDb();
         }
 
@@ -61,8 +59,7 @@ class DbConnection
                  */
                 $Config = Shared::loadConfig()->config;
 
-                if(!in_array($Config['db_type'], self::$db_types))
-                {
+                if (!in_array($Config['db_type'], self::$db_types)) {
                     throw new Exception(text("Db.unsupportedType", [$Config['db_type'], self::$db_types]));
                 }
 

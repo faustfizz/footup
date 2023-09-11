@@ -62,13 +62,12 @@ class ModelQueryBuilder extends QueryBuilder
      */
     public function delete($where = null)
     {
-        if($this->model->id() && empty($where))
-        {
-            return parent::delete($this->getPrimaryKey()." = ".$this->model->id());
+        if ($this->model->id() && empty($where)) {
+            return parent::delete($this->getPrimaryKey() . " = " . $this->model->id());
         }
         return parent::delete($where);
     }
-    
+
     /**
      * Fetch a value from a field.
      *
@@ -79,10 +78,10 @@ class ModelQueryBuilder extends QueryBuilder
     {
         $returnType = $this->getReturnType();
 
-        if($this->getReturnType() !== 'object') {
+        if ($this->getReturnType() !== 'object') {
             $this->setReturnType('object');
         }
-        
+
         $row = $this->one();
 
         $this->setReturnType($returnType);
@@ -152,16 +151,16 @@ class ModelQueryBuilder extends QueryBuilder
             case 'object':
                 $items = $result->fetchAll(PDO::FETCH_OBJ);
                 break;
-            
+
             case 'array':
                 $items = $result->fetchAll(PDO::FETCH_ASSOC);
                 break;
-                
+
             case 'self':
-                default:{
+            default: {
                     $items = $result->fetchAll(PDO::FETCH_ASSOC);
                     $model = get_class($this->model);
-                    $items =  array_map(function ($item) use ($model) {
+                    $items = array_map(function ($item) use ($model) {
                         return new $model($item);
                     }, $items);
                 }
@@ -178,7 +177,8 @@ class ModelQueryBuilder extends QueryBuilder
      */
     public function getTable()
     {
-        if(empty($this->table)) $this->table = $this->model->getTable();
+        if (empty($this->table))
+            $this->table = $this->model->getTable();
 
         return $this->table;
     }
@@ -190,10 +190,11 @@ class ModelQueryBuilder extends QueryBuilder
      */
     public function getPrimaryKey()
     {
-        if(empty($this->primaryKey)) $this->primaryKey = $this->model->getPrimaryKey();
+        if (empty($this->primaryKey))
+            $this->primaryKey = $this->model->getPrimaryKey();
 
         parent::setPrimaryKey($this->primaryKey);
-        
+
         return $this->primaryKey;
     }
 
@@ -204,8 +205,9 @@ class ModelQueryBuilder extends QueryBuilder
      */
     public function getReturnType()
     {
-        if(empty($this->returnType)) $this->returnType = $this->model->getReturnType();
-        
+        if (empty($this->returnType))
+            $this->returnType = $this->model->getReturnType();
+
         return $this->returnType;
     }
 
@@ -213,7 +215,7 @@ class ModelQueryBuilder extends QueryBuilder
      * Get $model classe courrante
      *
      * @return  string|object
-     */ 
+     */
     public function getModel()
     {
         return $this->model;
