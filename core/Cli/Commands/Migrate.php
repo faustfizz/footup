@@ -122,79 +122,87 @@ class Migrate extends Command
 
     protected function exists($class)
     {
-        $stmt = DbConnection::getDb(true)->query("SELECT * FROM " . Schema::quoteIdentifier(Migration::$table) . " WHERE class = '" . $class . "'");
-        $migration = null;
-        if ($stmt instanceof \PDOStatement) {
-            $migration = $stmt->fetchObject();
-        }
-
-        if ($migration) {
-            $file = $migration->version . '_' . $migration->class . '.php';
-
-            if (file_exists(APP_PATH . "Migration/" . $migration->version . '_' . $migration->class . '.php')) {
-                $this->app()->io()->info("A migration file for this class already exists : '$file' And in status of '" . $migration->status . "' !")->eol();
-                if ($this->app()->io()->confirm("Do you need to continue with new file ? [y]", "y")) {
-                    return $migration;
-                }
-                $this->app()->io()->info("As of your confirmation, we don't continue. Thanks !")->eol()->eol();
-                exit;
+        try {
+            $stmt = DbConnection::getDb(true)->query("SELECT * FROM " . Schema::quoteIdentifier(Migration::$table) . " WHERE class = '" . $class . "'");
+            $migration = null;
+            if ($stmt instanceof \PDOStatement) {
+                $migration = $stmt->fetchObject();
             }
+
+            if ($migration) {
+                $file = $migration->version . '_' . $migration->class . '.php';
+
+                if (file_exists(APP_PATH . "Migration/" . $migration->version . '_' . $migration->class . '.php')) {
+                    $this->app()->io()->info("A migration file for this class already exists : '$file' And in status of '" . $migration->status . "' !")->eol();
+                    if ($this->app()->io()->confirm("Do you need to continue with new file ? [y]", "y")) {
+                        return $migration;
+                    }
+                    $this->app()->io()->info("As of your confirmation, we don't continue. Thanks !")->eol()->eol();
+                    exit;
+                }
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->app()->io()->warn($th->getMessage() . ". It means you cannot run migrations commands")->eol();
+            return false;
         }
-        return false;
     }
 
     public function generate()
     {
-        $this->normalize();
+        try {
+            $this->normalize();
 
-        $expl = explode("/", trim(APP_PATH, DIRECTORY_SEPARATOR));
+            $expl = explode("/", trim(APP_PATH, DIRECTORY_SEPARATOR));
 
-        if (!is_dir(APP_PATH . "Migration")) {
-            @mkdir(APP_PATH . "Migration");
-        }
+            if (!is_dir(APP_PATH . "Migration")) {
+                @mkdir(APP_PATH . "Migration");
+            }
 
-        $migration = $this->exists(ucfirst($this->filename));
+            $migration = $this->exists(ucfirst($this->filename));
 
-        $version = date('ymd_His');
-        $filename = $version . '_' . ucfirst($this->filename);
+            $version = date('ymd_His');
+            $filename = $version . '_' . ucfirst($this->filename);
 
-        if (!$this->force && file_exists(APP_PATH . "Migration/" . $filename . '.php')) {
-            $this->app()->io()->eol()->warn('"' . end($expl) . "/Migration/" . $filename . '.php" exists, use --force to override !', true)->eol();
-            exit(0);
-        }
-        $DB = DbConnection::getDb(true);
+            if (!$this->force && file_exists(APP_PATH . "Migration/" . $filename . '.php')) {
+                $this->app()->io()->eol()->warn('"' . end($expl) . "/Migration/" . $filename . '.php" exists, use --force to override !', true)->eol();
+                exit(0);
+            }
+            $DB = DbConnection::getDb(true);
 
-        if (file_put_contents(
-            APP_PATH . "Migration/" . $filename . '.php',
-            $this->replace([
-                "{table}" => $this->table,
-                "{class_name}" => ucfirst($this->filename)
-            ])->parse_file_content(__DIR__ . "/../Tpl/Migrate.tpl")
-        )) {
-            if ($migration) {
-                $stmt = $DB->prepare("UPDATE " . Schema::quoteIdentifier(Migration::$table) . " SET `version` = ?, `status` = ? WHERE id = ?");
+            if (file_put_contents(
+                APP_PATH . "Migration/" . $filename . '.php',
+                $this->replace([
+                    "{table}" => $this->table,
+                    "{class_name}" => ucfirst($this->filename)
+                ])->parse_file_content(__DIR__ . "/../Tpl/Migrate.tpl")
+            )) {
+                if ($migration) {
+                    $stmt = $DB->prepare("UPDATE " . Schema::quoteIdentifier(Migration::$table) . " SET `version` = ?, `status` = ? WHERE id = ?");
 
-                if (!$stmt->execute([$version, "pending", $migration->id])) {
-                    $this->app()->io()->error('Migrations table not updated : "' . $DB->errorInfo()[2] . '" !', true)->eol();
-                    exit(0);
-                }
-                ;
-            } else {
-                $stmt = $DB->prepare("INSERT INTO " . Schema::quoteIdentifier(Migration::$table) . "(
+                    if (!$stmt->execute([$version, "pending", $migration->id])) {
+                        $this->app()->io()->error('Migrations table not updated : "' . $DB->errorInfo()[2] . '" !', true)->eol();
+                        exit(0);
+                    }
+                    ;
+                } else {
+                    $stmt = $DB->prepare("INSERT INTO " . Schema::quoteIdentifier(Migration::$table) . "(
                             `version`, `class`
                         ) VALUES (? , ?)");
 
-                if (!$stmt->execute([$version, ucfirst($this->filename)])) {
-                    $this->app()->io()->error('Migrations table not updated : "' . $DB->errorInfo()[2] . '" !', true)->eol();
-                    exit(0);
+                    if (!$stmt->execute([$version, ucfirst($this->filename)])) {
+                        $this->app()->io()->error('Migrations table not updated : "' . $DB->errorInfo()[2] . '" !', true)->eol();
+                        exit(0);
+                    }
+                    ;
                 }
-                ;
+
+                $this->generated[] = end($expl) . "/Migration/" . $filename . '.php';
             }
-
-            $this->generated[] = end($expl) . "/Migration/" . $filename . '.php';
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->app()->io()->warn($th->getMessage() . ". It means you cannot run migrations commands")->eol();
         }
-
-
         return $this->generated;
     }
 }

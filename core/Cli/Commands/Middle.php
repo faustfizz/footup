@@ -10,7 +10,6 @@ class Middle extends Command
 {
     public $scaffold = false;
     protected $name_space = "App\\Middle";
-    protected string $classname;
 
     protected $replacements = array(
         "{name_space}" => null,

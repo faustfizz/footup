@@ -8,14 +8,11 @@ use Footup\Cli\Konsole as App;
 
 class Assets extends Command
 {
-    protected $filename;
     public $scaffold = false;
     protected $generated = [];
 
     public function __construct(App $cli, $filename = null)
     {
-        $this->filename = $filename;
-
         $this
             ->argument('<filename>', 'The name without extension of the js and css files')
             ->option('-a --all', 'Generate CSS and JS', null, true)
@@ -33,6 +30,8 @@ class Assets extends Command
         $this->inGroup("Generator");
 
         $this->alias("assets");
+
+        $this->filename = $filename;
 
         parent::__construct('make:assets', 'Generate Assets files (CSS and JS)', false, $cli);
     }
