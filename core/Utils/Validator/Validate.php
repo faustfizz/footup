@@ -141,8 +141,6 @@ class Validate
     public static function requiredIf(Validator $validator, $data, $pattern, $rule, $parameters)
     {
         $values = array_slice($parameters, 1);
-        print_r($parameters);
-        print_r($values);
 
         // Calculate comparability
         list($field, $isWild, $overlap) = static::_isComparable($validator, $parameters, $pattern);

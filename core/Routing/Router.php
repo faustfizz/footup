@@ -356,8 +356,6 @@ class Router
                 PREG_SET_ORDER
             );
 
-            print_r($placeholders);
-
             // Create a copy of the URI (we'll need it later on)
             $expression = $uri;
 
