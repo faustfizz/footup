@@ -839,8 +839,17 @@ class QueryBuilder implements \IteratorAggregate
         if (!empty($where)) {
             $this->where($where);
         }
+
         if (empty($this->sql)) {
-            $this->select($select, $limit, $offset);
+            $this->select($select);
+        }
+
+        if ($limit && is_int($limit)) {
+            $this->limit($limit);
+        }
+
+        if ($offset && is_int($offset)) {
+            $this->offset($offset);
         }
 
         $this->sql(array(
@@ -872,16 +881,12 @@ class QueryBuilder implements \IteratorAggregate
      * Fetch a single row from a select query.
      * 
      * @param string $fields
-     * @param string|array $where
      *
      * @return object|null Row
      */
     public function one($fields = null, $where = null)
     {
-        if (empty($this->sql)) {
-            $this->limit(1)->select();
-        }
-        $data = $this->get($fields ?? "*");
+        $data = $this->get($fields ?? "*", $where, 1);
 
         return !empty($data) ? $data[0] : null;
     }
@@ -890,33 +895,42 @@ class QueryBuilder implements \IteratorAggregate
      * Fetch a single row from a select query.
      *
      * @param string $field
-     * @param string|array $where
+     * @param string|array $value
      *
      * @return object|null Row
      */
-    public function first($field = null, $where = null)
+    public function first($field = null, $value = null)
     {
-        if (empty($this->sql)) {
+        if (empty($this->order)) {
             $this->asc($field);
         }
-        return $this->one(null, $where);
+
+        if ($field && $value) {
+            is_array($value) ? $this->whereIn($field, $value) : $this->where($field, $value);
+        }
+
+        return $this->one();
     }
 
     /**
      * Fetch a single row from a select query.
      *
      * @param string $field
-     * @param string|array $where
+     * @param string|array $value
      *
      * @return object|null Row
      */
-    public function last($field = null, $where = null)
+    public function last($field = null, $value = null)
     {
-        if (empty($this->sql)) {
+        if (empty($this->order)) {
             $this->desc($field);
         }
 
-        return $this->one(null, $where);
+        if ($field && $value) {
+            is_array($value) ? $this->whereIn($field, $value) : $this->where($field, $value);
+        }
+
+        return $this->one();
     }
 
     /**

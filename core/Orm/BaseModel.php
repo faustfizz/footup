@@ -161,6 +161,24 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
     }
 
     /**
+     * @param int $offset
+     * @return BaseModel
+     */
+    public function skip($offset) {
+        $this->offset($offset);
+        return $this;
+    }
+
+    /**
+     * @param int $limit
+     * @return BaseModel
+     */
+    public function take($limit) {
+        $this->limit($limit);
+        return $this;
+    }
+
+    /**
      * @param array $data
      * @return BaseModel
      */
@@ -530,21 +548,23 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
         // Note: value of $name is case sensitive.
         if (!method_exists($this, $name) && preg_match('/^findBy/', $name) == 1) {
             // it's a findBy{fieldname} dynamic method
-            $fieldname = substr($name, 6); // remove find by
+            $fieldname = lcfirst(substr($name, 6)); // remove find by
             $match = isset($arguments[0]) ? $arguments[0] : null;
-            return $this->getBuilder()->find($match, strtolower($fieldname));
+            return $this->getBuilder()->find($match, $fieldname);
         }
 
         if (!method_exists($this, $name) && preg_match('/^firstBy/', $name) == 1) {
             // it's a findBy{fieldname} dynamic method
-            $fieldname = substr($name, 7);
-            return $this->getBuilder()->first(strtolower($fieldname));
+            $fieldname = lcfirst(substr($name, 7));
+            $match = isset($arguments[0]) ? $arguments[0] : null;
+            return $this->getBuilder()->first($fieldname, $match);
         }
 
         if (!method_exists($this, $name) && preg_match('/^lastBy/', $name) == 1) {
             // it's a findBy{fieldname} dynamic method
-            $fieldname = substr($name, 6);
-            return $this->getBuilder()->last(strtolower($fieldname));
+            $fieldname = lcfirst(substr($name, 6));
+            $match = isset($arguments[0]) ? $arguments[0] : null;
+            return $this->getBuilder()->last($fieldname, $match);
         }
 
         $setter = substr($name, 0, 3);

@@ -120,8 +120,17 @@ class ModelQueryBuilder extends QueryBuilder
         if (!empty($where)) {
             $this->where($where);
         }
+
         if (empty($this->sql)) {
-            $this->select($select, $limit, $offset);
+            $this->select($select);
+        }
+
+        if ($limit && is_int($limit)) {
+            $this->limit($limit);
+        }
+
+        if ($offset && is_int($offset)) {
+            $this->offset($offset);
         }
 
         $this->sql(array(
