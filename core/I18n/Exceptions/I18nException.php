@@ -26,7 +26,7 @@ class I18nException extends \Exception
 	 */
 	public static function forInvalidFormat(string $format)
 	{
-		return new static('Le format '.$format.' est invalide !');
+		return new static(text('Date.invalidFormat', [$format]));
 	}
 
 	/**
@@ -39,7 +39,7 @@ class I18nException extends \Exception
 	 */
 	public static function forInvalidMonth(string $month)
 	{
-		return new static('Mois '.$month.' est invalide !');
+		return new static(text('Date.invalidMonth', [$month]));
 	}
 
 	/**
@@ -52,7 +52,7 @@ class I18nException extends \Exception
 	 */
 	public static function forInvalidDay(string $day)
 	{
-		return new static('Jour '.$day.' est invalide !');
+		return new static(text('Date.invalidDay', [$day]));
 	}
 
 	/**
@@ -66,7 +66,7 @@ class I18nException extends \Exception
 	 */
 	public static function forInvalidOverDay(string $lastDay, string $day)
 	{
-		return new static('Jour '.$day.' est invalide. Dernier jour '.$lastDay);
+		return new static(text('Date.invalidOverDay', [$day, $lastDay]));
 	}
 
 	/**
@@ -79,7 +79,7 @@ class I18nException extends \Exception
 	 */
 	public static function forInvalidHour(string $hour)
 	{
-		return new static('L\'heure '.$hour.' est invalide !');
+		return new static(text('Date.invalidHours', [$hour]));
 	}
 
 	/**
@@ -92,7 +92,7 @@ class I18nException extends \Exception
 	 */
 	public static function forInvalidMinutes(string $minutes)
 	{
-		return new static('Minute '.$minutes.' invalide !');
+		return new static(text('Date.invalidMinutes', [$minutes]));
 	}
 
 	/**
@@ -105,6 +105,6 @@ class I18nException extends \Exception
 	 */
 	public static function forInvalidSeconds(string $seconds)
 	{
-		return new static('Seconde '.$seconds.' invalide !');
+		return new static(text('Date.invalidDay', [$seconds]));
 	}
 }

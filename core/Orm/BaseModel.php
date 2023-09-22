@@ -214,7 +214,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
         empty($data) && $data = $this->getData();
 
         if (empty($data)) {
-            throw new Exception("No data to insert !");
+            throw new Exception(text("Db.emptyData", ['INSERT']));
         }
 
         $eventData = ['data' => $data];
@@ -252,13 +252,13 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
         empty($data) && $data = $this->getData();
 
         if (empty($data)) {
-            throw new Exception("No data to update !");
+            throw new Exception(text("Db.emptyData", ['UPDATE']));
         }
 
         $id = $this->id();
 
         if (empty($id) && empty($this->builder->where)) {
-            throw new Exception("No primary key value to use as reference & no where specified !");
+            throw new Exception(text("Db.noWhereRef"));
         }
 
         $eventData = [

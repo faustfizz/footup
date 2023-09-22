@@ -1,0 +1,4 @@
+{
+	"classNotFound" : "File not found : {0}",
+	"classNoMethod" : "The method {0} does not exists on class {1}"
+}

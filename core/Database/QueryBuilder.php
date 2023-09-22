@@ -702,7 +702,7 @@ class QueryBuilder implements \IteratorAggregate
 
         foreach ($data as $key => $value) {
             if (is_numeric($key)) {
-                throw new Exception("Data array should be in format [field => value] !");
+                throw new Exception(text("Db.invalidDataArray"));
             }
             $values[] = $key . " = " . $this->quote($value);
         }
@@ -815,7 +815,7 @@ class QueryBuilder implements \IteratorAggregate
                 if ($this->show_sql) {
                     $error .= "\nSQL: " . $this->sql;
                 }
-                throw new Exception('Database error: ' . $error);
+                throw new Exception(text("Db.databaseError", [$error]));
             }
         }
 

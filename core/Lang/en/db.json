@@ -1,0 +1,15 @@
+{
+	"missingDB"   		: "Database not found : {0} !",
+	"urlInvalid"   		: "Invalid connection url !",
+	"undefinedDB"   	: "Undefined database !",
+	"unsupportedType"   : "Unsupported database: {0}, should be one of {1} !",
+	"invalidJoin"  		: "Unsupported join type : {0} !",
+	"modelClassUndefined"  : "Model: undefined class !",
+	"undefinedTable"  	: "Undefined table !",
+	"undefinedMethod"   : "The method {0} does not exists on class {1} !",
+	"dontUse"   		: "Never use the {0} query without a WHERE clause !",
+	"invalidDataArray"  : "Data array should be in the [field => value] !",
+	"databaseError"  : "Database error: {0}",
+	"emptyData"  : "{0} : Empty data.",
+	"noWhereRef"  : "No primary key value or where condition was specified."
+}

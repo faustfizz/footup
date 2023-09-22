@@ -1,0 +1,21 @@
+{
+	"invalidMonth"   : "The months should be between 1 and 12. Provided: {0}",
+	"invalidDay"     : "The days should be between 1 and 31. Provided: {0}",
+	"invalidOverDay" : "The days should be between 1 and {0}. Provided : {1}",
+	"invalidHours"   : "he hours should be between 0 and 23. Provided : {0}",
+	"invalidMinutes" : "he minutes should be between 0 and 59. Provided : {0}",
+	"invalidSeconds" : "he seconds should be between 0 and 59. Provided : {0}",
+	"years"          : "{0, plural, =1{# year} other{# years}}",
+	"months"         : "{0, plural, =1{# month} other{# months}}",
+	"weeks"          : "{0, plural, =1{# week} other{# weeks}}",
+	"days"           : "{0, plural, =1{# day} other{# days}}",
+	"hours"          : "{0, plural, =1{# hour} other{# hours}}",
+	"minutes"        : "{0, plural, =1{# minute} other{# minutes}}",
+	"seconds"        : "{0, plural, =1{# second} other{# seconds}}",
+	"ago"            : "since {0}",
+	"future"     	 : "in {0}",
+	"yesterday"      : "Yesterday",
+	"tomorrow"       : "Tomorrow",
+	"now"            : "Now",
+	"invalidFormat"	 : "Invalid format {0}!"
+}

@@ -1,0 +1,21 @@
+{
+	"mustBeArray"          : "The email validation method accept only array as arguments.",
+	"invalidAddress"       : "Invalid email address : {0}",
+	"attachmentMissing"    : "Attachment file is missing : {0}",
+	"attachmentUnreadable" : "Can not open the attachment file : {0}",
+	"noFrom"               : "Can not send email without a 'From' header",
+	"noRecipients"         : "Recipient(s) should be specified : To, Cc, ou Bcc",
+	"sendFailurePHPMail"   : "Can not send email with the PHP mail function. Maybe your server is not configured to use this method.",
+	"sendFailureSendmail"  : "Can not send email with the PHP sendmail function. Maybe your server is not configured to use this method.",
+	"sendFailureSmtp"      : "Can not send email with the PHP SMTP function. Maybe your server is not configured to use this method.",
+	"sent"                 : "Your message is sent using the protocol : {0}",
+	"noSocket"             : "Can not send open Sendmail socket. Please verify your environment.",
+	"noHostname"           : "SMTP hostname is not specified.",
+	"SMTPError"            : "SMTP error : {0}",
+	"noSMTPAuth"           : "You should specify an SMTP username and password",
+	"failedSMTPLogin"      : "Failed to send AUTH LOGIN command. Error : {0}",
+	"SMTPAuthUsername"     : "Can not identify the SMTP username. Error : {0}",
+	"SMTPAuthPassword"     : "Can not identify the SMTP password. Error : {0}",
+	"SMTPDataFailure"      : "Can not send data : {0}",
+	"exitStatus"           : "Exit Error Code : {0}"
+}
