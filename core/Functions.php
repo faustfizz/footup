@@ -442,7 +442,7 @@ if (!function_exists("frameworkName")) {
 	 */
 	function frameworkName()
 	{
-		return Footup::NAME;
+		return class_exists(Footup::class) ? Footup::NAME : "FootUP Framework";
 	}
 }
 
@@ -454,7 +454,7 @@ if (!function_exists("frameworkVersion")) {
 	 */
 	function frameworkVersion()
 	{
-		return Footup::VERSION;
+		return class_exists(Footup::class) ? Footup::VERSION : "0.1.7-alpha.4";
 	}
 }
 

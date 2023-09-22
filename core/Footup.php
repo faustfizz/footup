@@ -5,7 +5,7 @@
  * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1.7-alpha.3
+ * @version 0.1.7-alpha.4
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
@@ -21,7 +21,7 @@ class Footup
     protected $router;
     public const NAME = "FootUP Framework";
 
-    public const VERSION = "0.1.7-alpha.3";
+    public const VERSION = "0.1.7-alpha.4";
 
     public function __construct(Router &$router)
     {
@@ -67,29 +67,25 @@ class Footup
         $request = $this->router->getRequest();
         $response = new Response();
 
-        try {
-            if ($handler instanceof \Closure) {
-                $this->endTime($request);
-                $responseOrContent = $handler(...array_values($route->getArgs()));
-                if ($responseOrContent)
-                    return $response->body($responseOrContent ?? '')->send();
-            }
-            /**
-             * @var \Footup\Controller $controller
-             */
-            list($controller, $middleResult) = $this->runMiddles(new $handler(), $method, $request, $response);
-            // Recalculate endTime as we can run many Middles before
+        if ($handler instanceof \Closure) {
             $this->endTime($request);
-            if ($middleResult instanceof Response) {
-                $responseOrContent = $controller->__boot($request, $response->body($middleResult))->{$method}(...array_values($route->getArgs()));
-                if ($responseOrContent)
-                    return $response->body($responseOrContent ?? '')->send();
-            }
-        } catch (\ErrorException $exception) {
-            $this->endTime($request);
-            // Erreur 500.
-            throw new \ErrorException(text("Http.error500", [self::NAME, $exception->getMessage()]), $exception->getCode(), $exception->getSeverity(), $exception->getFile(), $exception->getLine(), $exception);
+            $responseOrContent = $handler(...array_values($route->getArgs()));
+            if ($responseOrContent)
+                return $response->body($responseOrContent ?? '')->send();
         }
+        
+        /**
+         * @var \Footup\Controller $controller
+         */
+        list($controller, $middleResult) = $this->runMiddles(new $handler(), $method, $request, $response);
+        // Recalculate endTime as we can run many Middles before
+        $this->endTime($request);
+        if ($middleResult instanceof Response) {
+            $responseOrContent = $controller->__boot($request, $response->body($middleResult))->{$method}(...array_values($route->getArgs()));
+            if ($responseOrContent)
+                return $response->body($responseOrContent ?? '')->send();
+        }
+        
     }
 
     /**
