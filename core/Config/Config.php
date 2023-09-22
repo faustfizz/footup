@@ -120,16 +120,6 @@ class Config
             $this->locale = array_merge($this->locale, $_ENV["locale"]);
         }
 
-        if ($this->config["environment"] === "prod") {
-            error_reporting(0);
-            ini_set("display_errors", "Off");
-            ini_set("display_startup_errors", "Off");
-        } else {
-            error_reporting(E_ALL);
-            ini_set("display_errors", "On");
-            ini_set("display_startup_errors", "On");
-        }
-
         (new Reporter())->enableErrorHandler($this->config["environment"]);
 
 
