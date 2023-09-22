@@ -19,5 +19,5 @@ namespace Footup\Utils\Token;
 
 class JWTException extends \InvalidArgumentException
 {
-    // ;)
+    
 }

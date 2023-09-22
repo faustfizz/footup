@@ -148,7 +148,7 @@ class JWT
     public function decode(string $token, bool $verify = true): array
     {
         if (\substr_count($token, '.') < 2) {
-            throw new JWTException('Invalid token: Incomplete segments', static::ERROR_TOKEN_INVALID);
+            throw new JWTException(text('Token.invalidTokenSegments'), static::ERROR_TOKEN_INVALID);
         }
 
         $token = \explode('.', $token, 3);
@@ -160,7 +160,7 @@ class JWT
 
         // Validate signature.
         if (!$this->verify($token[0] . '.' . $token[1], $token[2])) {
-            throw new JWTException('Invalid token: Signature failed', static::ERROR_SIGNATURE_FAILED);
+            throw new JWTException(text('Token.invalidTokenSegment'), static::ERROR_SIGNATURE_FAILED);
         }
 
         $payload = (array) $this->urlSafeDecode($token[1]);
