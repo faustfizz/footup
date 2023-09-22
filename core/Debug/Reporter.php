@@ -50,6 +50,16 @@ class Reporter
      */
     public function enableErrorHandler(string $env = 'prod'): self
     {
+        if ($env === "prod") {
+            error_reporting(0);
+            ini_set("display_errors", "Off");
+            ini_set("display_startup_errors", "Off");
+        } else {
+            error_reporting(E_ALL);
+            ini_set("display_errors", "On");
+            ini_set("display_startup_errors", "On");
+        }
+
         $this->handler->setEnvirenment($env);
         $this->handler->setErrorHandler();
         $this->handler->setExceptionHandler();
