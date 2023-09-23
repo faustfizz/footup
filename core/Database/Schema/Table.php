@@ -354,7 +354,7 @@ class Table
 	 * @param  string[]|string $targetColumns
 	 * @return ForeignKey
 	 */
-	public function addForeignKey($name, $columns = [], $targetTable = NULL, $targetColumns = [])
+	private function addForeignKey($name, $columns = [], $targetTable = NULL, $targetColumns = [])
 	{
 		$foreignKey = NULL;
 
@@ -381,25 +381,11 @@ class Table
 	 * @param string|null $tagetTable
 	 * @return ForeignKey
 	 */
-	public function foreign(string $column, string $tagetTable = null) {
-		return $this->addForeignKey($this->getName().'_'.$column, [$column], $tagetTable, []);
-	}
-
-	/**
-	 * @param  ForeignKey[] $fks
-	 * 
-	 * @return Table
-	 */
-	public function foreignKeys(array $fks)
-	{
-		/**
-		 * @var ForeignKey[] $fks
-		 */
-		foreach ($fks as $fk) {
-			# code...
-			$this->addForeignKey($fk);
+	public function foreign(string $column, string $tagetTable = null, $targetColumn) {
+		if (!isset($this->columns[$column])) {
+			$this->bigint($column);
 		}
-		return $this;
+		return $this->addForeignKey($this->getName().'_'.$column, [$column], $tagetTable, []);
 	}
 
 	/**

@@ -28,10 +28,10 @@ class ForeignKey
 	private $columns = [];
 
 	/** @var string|null */
-	private $targetTable;
+	private $targetTable = null;
 
 	/** @var string[] */
-	private $targetColumns;
+	private $targetColumns = [];
 
 	/** @var string */
 	private $onUpdateAction = self::ACTION_CASCADE;
@@ -39,38 +39,45 @@ class ForeignKey
 	/** @var string */
 	private $onDeleteAction = self::ACTION_CASCADE;
 
-	/** @var Table */
-	private $caller;
+	/** @var Table|null */
+	private $caller = null;
 
 
 	/**
 	 * @param  string $name
-	 * @param  string[]|string $columns
+	 * @param  string[]|string|null $columns
 	 * @param  string|null $targetTable
-	 * @param  string[]|string $targetColumns
+	 * @param  string[]|string|null $targetColumns
 	 * @param  Table|null $caller
 	 */
-	public function __construct($name, $columns, $targetTable, $targetColumns, Table $caller = null)
+	public function __construct($name, $columns, $targetTable, $targetColumns, $caller = null)
 	{
 		$this->name = $name;
 		$this->caller = $caller;
-		$this->setTargetTable($targetTable);
 
-		if (!is_array($columns)) {
-			$columns = [$columns];
+		$columns = is_string($columns) ? [$columns] : $columns;
+		$targetColumns = is_string($targetColumns) ? [$targetColumns] : $targetColumns;
+		
+		if ($targetTable) {
+			$this->setTargetTable($targetTable);
 		}
 
-		foreach ($columns as $column) {
-			$this->addColumn($column);
+		if (!empty($columns)) {
+			foreach ($columns as $column) {
+				$this->addColumn($column);
+			}
 		}
 
-		if (!is_array($targetColumns)) {
-			$targetColumns = [$targetColumns];
+		if (!empty($targetColumns)) {
+			foreach ($targetColumns as $targetColumn) {
+				$this->addTargetColumn($targetColumn);
+			}
 		}
 
-		foreach ($targetColumns as $targetColumn) {
-			$this->addTargetColumn($targetColumn);
+		if ($caller) {
+			$this->caller = $caller;
 		}
+
 	}
 
 	/**
@@ -235,6 +242,12 @@ class ForeignKey
 
     public function toSQL()
     {
+		$anEmptyThing = empty($this->columns) ? 'columns' : empty($this->targetTable) ? 'targetTable' : empty($this->targetColumns) ? 'targetColumns' : null;
+
+		if ($anEmptyThing) {
+			throw new ErrorException("'$anEmptyThing' not specified for foreign key : {$this->getName()}.");
+		}
+
         $sql = "CONSTRAINT fk_" . join("_", [$this->getName(), $this->getTargetTable()]) . " FOREIGN KEY (" . 
 					join(',', array_map('\Footup\Database\Schema\Schema::quoteIdentifier', $this->getColumns())) . 
 				") REFERENCES " . Schema::quoteIdentifier($this->getTargetTable()) ." (" . 
