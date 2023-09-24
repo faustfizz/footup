@@ -33,6 +33,7 @@ use PDO;
  * @method ModelQueryBuilder rightJoin($table, $fields, $operator = " = ")
  * @method ModelQueryBuilder fullJoin($table, $fields, $operator = " = ")
  * @method ModelQueryBuilder where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
+ * @method ModelQueryBuilder when($expression, \Closure $callback)
  * @method ModelQueryBuilder orWhere(array|string $key, $val = null, $operator = null, $escape = true)
  * @method ModelQueryBuilder whereIn($key, array $val, $escape = true)
  * @method ModelQueryBuilder whereNotIn($key, array $val, $escape = true)
@@ -51,8 +52,13 @@ use PDO;
  * @method ModelQueryBuilder having(string|array $field, $value = null)
  * @method ModelQueryBuilder limit($limit = null, $offset = null)
  * @method ModelQueryBuilder offset($offset, $limit = null)
+ * @method ModelQueryBuilder skip($offset)
+ * @method ModelQueryBuilder take($limit)
  * @method ModelQueryBuilder distinct($value = true)
  * @method ModelQueryBuilder between(string $field, $value1, $value2)
+ * @method ModelQueryBuilder notBetween(string $field, $value1, $value2)
+ * @method ModelQueryBuilder orBetween(string $field, $value1, $value2)
+ * @method ModelQueryBuilder orNotBetween(string $field, $value1, $value2)
  * @method ModelQueryBuilder select($fields = '*', $limit = null, $offset = null)
  * @method bool|int insert(array $data = [])
  * @method bool delete($where = null)
@@ -161,24 +167,6 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
     }
 
     /**
-     * @param int $offset
-     * @return BaseModel
-     */
-    public function skip($offset) {
-        $this->offset($offset);
-        return $this;
-    }
-
-    /**
-     * @param int $limit
-     * @return BaseModel
-     */
-    public function take($limit) {
-        $this->limit($limit);
-        return $this;
-    }
-
-    /**
      * @param array $data
      * @return BaseModel
      */
@@ -196,8 +184,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
                 continue;
 
             # code...
-            if (isset($data[$field]))
-                $this->data[$field] = $data[$field];
+            $this->data[$field] = $data[$field] ?? null;
 
         }
         return $this;

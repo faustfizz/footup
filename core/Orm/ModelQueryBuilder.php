@@ -46,8 +46,6 @@ class ModelQueryBuilder extends QueryBuilder
         self::$db = $DbConnection instanceof PDO ? $DbConnection : DbConnection::getDb(true);
 
         $this->getTable();
-        $this->getPrimaryKey();
-        $this->getReturnType();
 
         parent::__construct($this->getTable(), self::$db);
     }
@@ -86,29 +84,7 @@ class ModelQueryBuilder extends QueryBuilder
 
         $this->setReturnType($returnType);
 
-        return (!empty($row)) ? $row->$name : null;
-    }
-
-    /**
-     * @inheritDoc 
-     */
-    public function find($value = [], $field = null)
-    {
-        $field = is_null($field) ? $this->getPrimaryKey() : $field;
-
-        if (!empty($value)) {
-            if ((is_int($value) || is_string($value)) && ($this->getPrimaryKey() == $field || isset($this->model->getFieldNames()[$field]))) {
-                $this->where($field, $value);
-            } else if (is_array($value)) {
-                $this->whereIn($field, $value);
-            }
-        }
-
-        if (empty($this->sql)) {
-            $this->select();
-        }
-
-        return $field == $this->getPrimaryKey() && is_array($value) ? $this->get() : $this->one($field);
+        return !empty($row) ? $row->$name : null;
     }
 
     /**
@@ -125,13 +101,7 @@ class ModelQueryBuilder extends QueryBuilder
             $this->select($select);
         }
 
-        if ($limit && is_int($limit)) {
-            $this->limit($limit);
-        }
-
-        if ($offset && is_int($offset)) {
-            $this->offset($offset);
-        }
+        $this->limit($limit)->offset($offset);
 
         $this->sql(array(
             'SELECT',
@@ -201,8 +171,6 @@ class ModelQueryBuilder extends QueryBuilder
     {
         if (empty($this->primaryKey))
             $this->primaryKey = $this->model->getPrimaryKey();
-
-        parent::setPrimaryKey($this->primaryKey);
 
         return $this->primaryKey;
     }
