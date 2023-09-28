@@ -5,8 +5,6 @@
  * *************************
  * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @uses Html::h1("Content !", ["attr" => "value", "..." => "..."]) | where h1 is in $pairs or $impairs arrays
- * 
  * @package Footup\Html
  * @version 0.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
@@ -17,22 +15,18 @@ namespace Footup\Html;
 /**
  * HTML Class
  * 
- * @method static string a(string $text, array $attributes = [])
- * @method static string abbr(string $text, array $attributes = [])
- * @method static string address(string $htmlContent, $attributes = [])
- * @method static string article(string $html, array $attributes = [])
- * @method static string aside(string $html, array attributes = [])
- * @method static string audio(string $html, array $attributes = [])
- * @method static string b(string $text, array $attributes = [])
+ * @example ```
+ *      Html::h1("Content !", ["attr" => "value", "..." => "..."])
+ * ``` | where h1 is in PAIRS or IMPAIRS arrays
  * 
- * @see Html::$pairs and Html::$impairs
+ * @see Html::PAIRS and Html::IMPAIRS
  */
 class Html
 {
     /**
-     * @var array
+     * @var string[]
      */
-    public static $pairs = array(
+    public const PAIRS = array(
         'a',
         'abbr',
         'address', // NORMAL | BLOCK_TAG
@@ -140,9 +134,9 @@ class Html
     );
 
     /**
-     * @var array
+     * @var string[]
      */
-    public static $impairs = array(
+    public const IMPAIRS = array(
         'area', // NORMAL | VOID_TAG
         'base', // NORMAL | VOID_TAG
         'br', // NORMAL | VOID_TAG
@@ -168,10 +162,15 @@ class Html
         'isindex', // VOID_TAG
     );
 
+    /**
+     * @param value-of<Html::PAIRS|Html::IMPAIRS> $name
+     * @param array $arguments
+     * @return string
+     */
     public static function __callStatic($name, $arguments)
     {
         $name = strtolower($name);
-        if(in_array($name, self::$pairs))
+        if(in_array($name, self::PAIRS))
         {
             $content = $arguments && count($arguments) >= 1 ? array_shift($arguments) : "";
             $attributes = $arguments && count($arguments) >= 1 ? self::attributes($arguments) : "";
@@ -179,7 +178,7 @@ class Html
             return "<{$name} {$attributes}>{$content}</{$name}>";
         }
 
-        if(in_array($name, self::$impairs))
+        if(in_array($name, self::IMPAIRS))
         {
             $content = $arguments && count($arguments) >= 1 ? array_shift($arguments) : "";
             $attributes = $arguments && count($arguments) >= 1 ? self::attributes($arguments) : "";

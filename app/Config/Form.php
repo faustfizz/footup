@@ -10,8 +10,7 @@ class Form
 {
     public static $config = [
         'open' => true,
-        'close' => true,
-        'from_db' => true
+        'close' => true
     ];
 
     public static function submitBtn()
@@ -26,7 +25,7 @@ class Form
                 return "<div class='form-group mb-3'>
                             <div class='form-floating'>
                                 <select class='form-select $validityClass' name='{$field->name}' $field->inline_attributes>
-                                    " . implode('\n', $field->htmlOptions) . "
+                                    " . implode('', $field->htmlOptions) . "
                                 </select>
                                 <label for='{$field->id}'>" . ($field->label ?? ucfirst($field->name)) . "</label>
                             </div>

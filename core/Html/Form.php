@@ -25,11 +25,10 @@ class Form
 
     protected $config = [
         'open' => true,
-        'close' => true,
-        'from_db' => true
+        'close' => true
     ];
 
-    public ConfigForm $ConfigForm;
+    public ConfigForm $configForm;
 
     /**
      * Contruct
@@ -42,7 +41,7 @@ class Form
     {
         $this->config = array_merge($this->config, ConfigForm::$config);
         $this->action = $action;
-        $this->ConfigForm = new ConfigForm;
+        $this->configForm = new ConfigForm;
         $this->prepareFields($fields, $data);
     }
 
@@ -65,7 +64,7 @@ class Form
         if (!empty($field->options)) {
             $field->htmlOptions = $this->buildOptions($field, $data);
         }
-        $html = $this->ConfigForm::getHtmlInput($field);
+        $html = $this->configForm::getHtmlInput($field);
 
         $this->fields[$field->name] = $html;
 
@@ -83,7 +82,7 @@ class Form
             $this->output .= $fieldHtml;
         }
 
-        $this->output .= $this->ConfigForm::submitBtn();
+        $this->output .= $this->configForm::submitBtn();
 
         if ($this->config['close'] === true) {
             $this->output .= "</div> " . $this->close();
@@ -198,7 +197,7 @@ class Form
 
         foreach (array_filter($attrs) as $attr => $value) {
             # code...
-            $attrsString .= " $attr='$value'";
+            $attrsString .= " $attr=\"$value\"";
         }
         return $attrsString;
     }
@@ -206,28 +205,33 @@ class Form
     public function buildOptions(object $field, $data)
     {
         $opt = [];
+
         foreach ($field->options as $key => $value) {
             # code...
-            if (is_numeric($key)) {
+            if (is_string($value)) {
                 $attr = array("value" => strtolower($value));
 
                 if ($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name])) {
                     $attr['selected'] = true;
                 }
             } else {
-                $attr = array("value" => strtolower($key));
+                $attr = array("value" => $value['value']);
 
-                if ($field->default && strtolower($field->default) == strtolower($value['value']) || (isset($data[$field->name]) && $value['value'] == $data[$field->name])) {
+                if ($field->default && $field->default == $value['value'] || (isset($data[$field->name]) && $value['value'] == $data[$field->name])) {
                     $attr['selected'] = true;
                 }
             }
             $attr = array_filter($attr);
 
-            $opt[] = Html::option(ucfirst($value), $attr);
+            $opt[] = Html::option(ucfirst($value['label'] ?? $value['value'] ?? $value), $attr);
         }
         return $opt;
     }
 
+    /**
+     * @param boolean $display
+     * @return void|string
+     */
     public function print($display = false)
     {
         if ($display) {

@@ -33,7 +33,6 @@ use PDO;
  * @method ModelQueryBuilder rightJoin($table, $fields, $operator = " = ")
  * @method ModelQueryBuilder fullJoin($table, $fields, $operator = " = ")
  * @method ModelQueryBuilder where($key, $operatorOrValue = null, $val = null, $link = ' AND ', $escape = true)
- * @method ModelQueryBuilder when($expression, \Closure $callback)
  * @method ModelQueryBuilder orWhere(array|string $key, $operatorOrValue = null, $val = null, $escape = true)
  * @method ModelQueryBuilder whereIn($key, array $val, $escape = true)
  * @method ModelQueryBuilder whereNotIn($key, array $val, $escape = true)
@@ -614,6 +613,8 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
                 $field->options = explode(",", $opt);
             }
 
+            $this->getOptionsFromRelations($field, $_type);
+
             $field->maxLength = (int) $length;
             $field->label = ucwords(strtr($field->Field, ["_" => " "]));
             $field->placeholder = ucwords(strtr($field->Field, ["_" => " "]));
@@ -631,6 +632,57 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
         }
 
         return array_intersect_key($fields, $this->getFillableKeys());
+    }
+
+    /**
+     * Get input  options from db
+     *
+     * @param object $field
+     * @param string $type
+     * @return void
+     */
+    public function getOptionsFromRelations(&$field, &$type)
+    {
+        if ($field->Key === 'MUL') {
+            $targetTable = preg_replace('/_id/i', '', $field->Field);
+            $query = $this->getDb()->prepare("SHOW TABLE STATUS FROM `".request()->db_name."` WHERE Name = ?");
+            $stmt = $query->execute([$targetTable]);
+            
+            $options = [];
+
+            if ($stmt && $query->fetchObject()) { // yes a table exists
+                $queryTitle = $this->getDb()->query("SHOW COLUMNS FROM `" . $targetTable . "` WHERE Type LIKE '%varchar%' AND `Null` = 'NO'");
+                $queryPrimary = $this->getDb()->query("SHOW COLUMNS FROM `".$targetTable."` WHERE Type LIKE '%INT%' OR `Key` = 'PRI'");
+
+                if ($queryPrimary && $queryTitle) {
+                    $primary = $queryPrimary->fetch(PDO::FETCH_OBJ);
+                    $title = $queryTitle->fetch(PDO::FETCH_OBJ);
+                    
+
+                    $queryOptions = $this->getDb()->query("SELECT * FROM `" . $targetTable . "`");
+                    if ($queryOptions) {
+                        $data = $queryOptions->fetchAll(PDO::FETCH_OBJ);
+                        if ($data) {
+                            foreach ($data as $key => $valueObject) {
+                                # code...
+                                array_push($options, [
+                                    'label' =>  $valueObject->{$title->Field},
+                                    'value' =>  $valueObject->{$primary->Field},
+                                ]);
+                            }
+                        }
+                    }
+                }
+
+                if (!empty($options)) {
+                    $type = 'select';
+                    $field->options = $options;
+                }
+
+            }
+        }
+
+        return $field;
     }
 
     /**
@@ -685,7 +737,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
                 break;
             case 'datetime':
             case 'timestamp':
-                $type = 'datetime';
+                $type = 'datetime-local';
                 break;
             case 'tinyint':
             case 'smallint':
@@ -696,6 +748,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
                 break;
             case 'enum':
             case 'set':
+            case 'select':
                 $type = "select";
                 break;
             case 'double':

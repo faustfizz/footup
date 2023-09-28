@@ -283,21 +283,6 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param mixed $expression
-     * @param \Closure $callback
-     * 
-     * @return QueryBuilder
-     */
-    public function when($expression, \Closure $callback)
-    {
-        if (!empty($expression) && $expression) {
-            $callback($this);
-        } 
-
-        return $this;
-    }
-
-    /**
      * @param array|string $key
      * @param array|string|null $operatorOrValue
      * @param array|string|null $val
