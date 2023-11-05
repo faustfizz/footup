@@ -43,16 +43,16 @@ class Multiple extends Command
         if ($this->namespace && !is_string($this->namespace)) {
             $this->set("namespace", $io->prompt("Please give the namespace "));
         }
-        if ($this->type && !is_string($this->type) || empty($this->type)) {
+        if ($this->type && !is_string($this->type)) {
             $this->set("type", $io->choice("Choose the type of file [controller, model, middle, migration, seeder, view]; default: controller ", ["controller", "model", "middle", "migration", "seeder", "view"], "controller"));
         }
         if ($this->returnType && !is_string($this->returnType)) {
             $this->set("returnType", $io->choice("You can't add empty returnType, Please choose one : ", ["self", "object", "array"], "self"));
         }
-        if (($this->table && !is_string($this->table) || empty($this->table)) && $this->type === "model") {
+        if (($this->table && !is_string($this->table)) && $this->type === "model") {
             $this->set("table", $io->prompt("Please give the table name as you selected the model type "));
         }
-        if (($this->primaryKey && !is_string($this->primaryKey) || empty($this->primaryKey)) && $this->type === "model") {
+        if (($this->primaryKey && !is_string($this->primaryKey)) && $this->type === "model") {
             $this->set("primaryKey", $io->prompt("Please give the primaryKey as you selected the model type "));
         }
         // ...
