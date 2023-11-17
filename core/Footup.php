@@ -11,6 +11,7 @@
 namespace Footup;
 
 use Exception;
+use Footup\Http\RedirectResponse;
 use Footup\Http\Request;
 use Footup\Http\Response;
 use Footup\Routing\MiddleHandler;
@@ -70,6 +71,9 @@ class Footup
         if ($handler instanceof \Closure) {
             $this->endTime($request);
             $responseOrContent = $handler(...array_values($route->getArgs()));
+
+            $this->redirectIfNeeded($responseOrContent);
+
             if ($responseOrContent)
                 return $response->body($responseOrContent ?? '')->send();
         }
@@ -80,12 +84,31 @@ class Footup
         list($controller, $middleResult) = $this->runMiddles(new $handler(), $method, $request, $response);
         // Recalculate endTime as we can run many Middles before
         $this->endTime($request);
+
+        $this->redirectIfNeeded($middleResult);
+
         if ($middleResult instanceof Response) {
             $responseOrContent = $controller->__boot($request, $response->body($middleResult))->{$method}(...array_values($route->getArgs()));
+
+            $this->redirectIfNeeded($responseOrContent);
+
             if ($responseOrContent)
                 return $response->body($responseOrContent ?? '')->send();
         }
         
+    }
+
+    /**
+     * Redirect if we have a RedirectResponse on the way
+     *
+     * @param mixed $testableResponse
+     * @return void
+     */
+    public function redirectIfNeeded($testableResponse) {
+        if ($testableResponse instanceof RedirectResponse) {
+            $testableResponse->send();
+            exit(0);
+        }
     }
 
     /**

@@ -99,6 +99,35 @@ class Request
     {
         return $this->validator;
     }
+    /**
+     * @param string $key
+     *
+     * @return mixed
+     */
+    public function oldInput(string $key)
+    {
+        $session = Shared::loadSession();
+        
+        $getFlash = $session->get('flash_$_GET');
+        $postFlash = $session->get('flash_$_POST');
+        // If no data was previously saved, why we should go down ?
+        if (empty($getFlash) && empty($postFlash)) {
+            return null;
+        }
+        
+        // Check for the value in the POST array first.
+        if (isset($getFlash[$key]) || isset($postFlash[$key])) {
+            return $getFlash[$key] ?? $postFlash[$key];
+        }
+        
+        // Check for an array value in POST.
+        if ((isset($postFlash) && $postValue = ArrDots::get($postFlash, $key)) || (isset($getFlash) && $getValue = ArrDots::get($getFlash, $key))) {
+            return $postValue ?? $getValue;
+        }
+        
+        // puff, we should return something
+        return null;
+    }
 
     /**
      * Choose the GET data to validate

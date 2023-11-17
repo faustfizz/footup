@@ -343,6 +343,19 @@ if (!function_exists("validate")) {
 	}
 }
 
+if (!function_exists("old")) {
+	/**
+	 * Get data sent by old request via GET or POST if saved
+	 *
+	 * @param string $key - string in the format 'name' or 'contact.name'
+	 * @return mixed
+	 */
+	function old($key)
+	{
+		return request()->oldInput($key);
+	}
+}
+
 // --------------------------------------------------------------------
 if (!function_exists('function_usable')) {
 	/**
@@ -740,7 +753,7 @@ if (!function_exists('redirect')) {
 	 * Redirection
 	 *
 	 * @param string $route Route ou url
-	 * @return void
+	 * @return \Footup\Http\RedirectResponse
 	 */
 	function redirect(string $route = '/')
 	{
@@ -753,7 +766,7 @@ if (!function_exists('goback')) {
 	 * Redirection en arrière
 	 *
 	 * @param string $route Route ou url
-	 * @return void
+	 * @return \Footup\Http\RedirectResponse
 	 */
 	function goback()
 	{
@@ -766,7 +779,7 @@ if (!function_exists('to')) {
 	 * Redirection
 	 *
 	 * @param string $route Route ou url
-	 * @return void
+	 * @return \Footup\Http\RedirectResponse
 	 */
 	function to(string $route = '/')
 	{

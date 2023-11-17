@@ -13,7 +13,6 @@
 namespace Footup\Http;
 
 use Footup\Config\Config;
-use ArrayObject;
 use DateTime;
 use Exception;
 use Footup\Utils\Arrays\Arrayable;
@@ -22,6 +21,13 @@ use JsonSerializable;
 
 class Response implements JsonSerializable
 {
+    /**
+     * If we are redirecting
+     *
+     * @var boolean
+     */
+    public bool $redirecting = false;
+
     /**
      * header Content-Length.
      */
@@ -344,40 +350,44 @@ class Response implements JsonSerializable
     }
 
     /**
-     * @param  string $data
+     * @param  string $uri
+     * @param  string $method
      * @param  int    $status
-     * @param  array  $header
-     * @return void
+     * @return RedirectResponse
      */
-    public function redirect(string $location = '/', int $status = 302, array $header = [])
+    public function redirect(string $uri = '/', $method = 'auto', $status = 302)
     {
-        if(!empty($header))
-        {
-            foreach($header as $key => $value)
-            {
-                header('$key: $value', true);
+        // IIS environment likely? Use 'refresh' for better compatibility
+        if ($method === 'auto' && isset($_SERVER['SERVER_SOFTWARE']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== false) {
+            $method = 'refresh';
+        }
+
+        $protocolVersion = (float)str_replace('HTTP/','', $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1');
+
+        // override status code for HTTP/1.1 & higher
+        // reference: http://en.wikipedia.org/wiki/Post/Redirect/Get
+        if (isset($_SERVER['SERVER_PROTOCOL'], $_SERVER['REQUEST_METHOD']) && $protocolVersion >= 1.1) {
+            if ($method !== 'refresh') {
+                $status = ($_SERVER['REQUEST_METHOD'] !== 'GET') ? 303 : ($status === 302 ? 307 : $status);
             }
         }
-        header("Location: $location", true, $status);
-        exit;
-    }
 
-    /**
-     * @return void
-     */
-    public function back()
-    {
-        return $this->redirect($_SERVER['HTTP_REFERER'] ?? '/');
-    }
+        $self = $this;
 
-    /**
-     * @param  string $name
-     * @param  array  $parameter
-     * @return void
-     */
-    public function to(string $url)
-    {
-        return $this->redirect($url);
+        if (!$this->redirecting) {
+            $self = new RedirectResponse($status);
+        }
+
+        switch ($method) {
+            case 'refresh':
+                $self->header('Refresh', '0;url=' . $uri);
+                break;
+            default:
+                $self->header('Location', $uri);
+                break;
+        }
+
+        return $self;
     }
 
     /**
