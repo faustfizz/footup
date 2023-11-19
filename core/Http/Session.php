@@ -99,10 +99,10 @@ class Session
     {
         if(is_array($key) && !empty($val)){
             foreach($key as $k => $v){
-                $this->data["flash_".$k] = $v;
+                $this->data["flash_".$k] = ['value' => $v, 'seniority' => time()];
             }
         }else{
-            $this->data["flash_".$key] = $val;
+            $this->data["flash_".$key] = ['value' => $val, 'seniority' => time()];
         }
         return $this;
     }
@@ -112,7 +112,7 @@ class Session
      *
      * @param mixed $key
      * @param mixed $default
-     * @param boolean $clear_after
+     * @param boolean $clear_after clear after displaying
      * @return mixed
      */
     public function flash($key, $default = null, $clear_after = true)
@@ -120,11 +120,10 @@ class Session
         # code...
         if ($key && $this->has("flash_".$key)) {
             $flashdata = $this->data["flash_".$key];
-            if($clear_after)
-            {
+            if($clear_after || time() - $flashdata['seniority'] >= 60) {
                 unset($_SESSION["flash_".$key]);
             }
-            return $flashdata;
+            return $flashdata['value'] ?? $default;
         }else{
             return $default;
         }

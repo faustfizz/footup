@@ -108,8 +108,8 @@ class Request
     {
         $session = Shared::loadSession();
         
-        $getFlash = $session->get('flash_$_GET');
-        $postFlash = $session->get('flash_$_POST');
+        $getFlash = $session->flash('$_GET', null, false);
+        $postFlash = $session->flash('$_POST', null, false);
         // If no data was previously saved, why we should go down ?
         if (empty($getFlash) && empty($postFlash)) {
             return null;
