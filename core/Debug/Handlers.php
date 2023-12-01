@@ -1,9 +1,9 @@
 <?php
 
 /**
- * FOOTUP -  2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup\Debug
  * @version 0.1
@@ -50,13 +50,20 @@ class Handlers implements HandlersInterface
      */
     public function errorHandler(int $type, string $message, string $file, int $line): void
     {
-        $this->whichError($message, $type, $file, $line);
+        $this->whichError($this->translateErrorMessage($message), $type, $file, $line);
+    }
+
+    public function translateErrorMessage(string $message) {
+        if (function_exists('text')) {
+            return text('Http.error500', [frameworkName(), $message]);
+        }
+        return $message;
     }
 
     /**
      * exception handler.
      *
-     * @param object $e exception object
+     * @param \Exception $e exception object
      *
      * @return void throw exception based on the error type
      */
@@ -64,12 +71,14 @@ class Handlers implements HandlersInterface
     {
         $this->setError(
             (int) $e->getCode(),
-            (string) $e->getMessage(),
+            (string) $this->translateErrorMessage($e->getMessage()),
             (string) $e->getFile(),
             (int) $e->getLine(),
             (string) get_class($e),
             $e->getTrace()
         );
+
+        error_log(var_export(debug_backtrace(), true), 3, dirname(__FILE__) . "/resources/logs/footup.log");
 
         die(
             View::render('500.php', (object) $this->errors, $this->env)
@@ -87,11 +96,13 @@ class Handlers implements HandlersInterface
         if (is_array($errors)) {
             $this->setError(
                 (int) $errors['type'],
-                (string) $errors['message'],
+                (string) $this->translateErrorMessage($errors['message']),
                 (string) $errors['file'],
                 (int) $errors['line'],
                 'FatalErrorException'
             );
+
+            error_log(var_export(debug_backtrace(), true), 3, dirname(__FILE__) . "/resources/logs/footup.log");
 
             die(
                 View::render('500.php', (object) $this->errors, $this->env)

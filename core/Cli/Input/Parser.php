@@ -18,6 +18,9 @@ use Footup\Cli\IO\Interactor;
 
 /**
  * Argv parser for the cli.
+ * 
+ * @method string alias()
+ * @method string name()
  *
  * @author  Jitendra Adhikari <jiten.adhikary@gmail.com>
  * @license MIT
@@ -55,14 +58,14 @@ abstract class Parser
         $this->_normalizer = new Normalizer;
 
         \array_shift($argv);
-        
-        $argv    = $this->_normalizer->normalizeArgs($argv);
-        $count   = \count($argv);
+
+        $argv = $this->_normalizer->normalizeArgs($argv);
+        $count = \count($argv);
         $literal = false;
 
         for ($i = 0; $i < $count; $i++) {
             list($arg, $nextArg) = [$argv[$i], $argv[$i + 1] ?? null];
-            
+
             if ($arg === '--') {
                 $literal = true;
             } elseif ($arg[0] === '-' || $literal) {
@@ -115,7 +118,7 @@ abstract class Parser
     {
         $value = \substr($nextArg ?? '', 0, 1) === '-' ? null : $nextArg;
 
-        if (null === $option  = $this->optionFor($arg)) {
+        if (null === $option = $this->optionFor($arg)) {
             return $this->handleUnknown($arg, $value);
         }
 
@@ -174,7 +177,7 @@ abstract class Parser
      */
     protected function setValue(Parameter $parameter, string $value = null): bool
     {
-        $name  = $parameter->attributeName();
+        $name = $parameter->attributeName();
         $value = $this->_normalizer->normalizeValue($parameter, $value);
 
         return $this->set($name, $value, $parameter->variadic());
@@ -227,12 +230,10 @@ abstract class Parser
 
             $choice = $io->choice(\sprintf('%s "%s" is required, you want to add it ?', $label, $name), ["y", "n"], "y");
 
-            if($choice === "y")
-            {
+            if ($choice === "y") {
                 $value = $io->prompt(\sprintf('%s "%s" is required, please add it ', $label, $name));
 
-                if(!empty($value))
-                {
+                if (!empty($value)) {
                     $this->set($name, $value, $item->variadic());
                     continue;
                 }
@@ -241,11 +242,11 @@ abstract class Parser
             $io->eol()
                 ->error(\sprintf('%s "%s" is required, can\'t continue ! ', $label, $name), true, ["mod" => 1])
                 ->info("Type ")
-                    ->boldPurple(\sprintf("php footup %s -h", $this->name()))
-                    ->blue(" or ")
-                    ->boldPurple(\sprintf("php footup %s -h", $this->alias()))
+                ->boldPurple(\sprintf("php footup %s -h", $this->name()))
+                ->blue(" or ")
+                ->boldPurple(\sprintf("php footup %s -h", $this->alias()))
                 ->blue(" to view help !", true);
-            
+
             exit(0);
             // throw new RuntimeException(
             //     \sprintf('%s "%s" is required, can\'t continue !', $label, $name)
@@ -348,6 +349,19 @@ abstract class Parser
     }
 
     /**
+     * Magic setter for specific value by its key.
+     *
+     * @param string $key
+     * @param mixed $value
+     *
+     * @return void
+     */
+    public function __set(string $key, $value)
+    {
+        $this->_values[$key] = $value;
+    }
+
+    /**
      * Get the command arguments i.e which is not an option.
      *
      * @return array
@@ -366,7 +380,7 @@ abstract class Parser
      */
     public function values(bool $withDefaults = true): array
     {
-        $values            = $this->_values;
+        $values = $this->_values;
         $values['version'] = $this->_version ?? null;
 
         if (!$withDefaults) {

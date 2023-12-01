@@ -1,9 +1,9 @@
 <?php
 
 /**
- * FOOTUP -  2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @uses Html::h1("Content !", ["attr" => "value", "..." => "..."]) | where h1 is in $pairs or $impairs arrays
  * 
@@ -24,13 +24,12 @@ class Form
     protected $fields = [];
 
     protected $config = [
-        'open'      => true,
-        'close'     => true,
-        'from_db'   => true
+        'open' => true,
+        'close' => true
     ];
 
-    public ConfigForm $ConfigForm;
-    
+    public ConfigForm $configForm;
+
     /**
      * Contruct
      *
@@ -38,10 +37,11 @@ class Form
      * @param array $fields
      * @param array|null $data
      */
-    public function __construct(string $action = "#", array $fields = null, array $data = []) {
+    public function __construct(string $action = "#", array $fields = null, array $data = [])
+    {
         $this->config = array_merge($this->config, ConfigForm::$config);
         $this->action = $action;
-        $this->ConfigForm = new ConfigForm;
+        $this->configForm = new ConfigForm;
         $this->prepareFields($fields, $data);
     }
 
@@ -52,9 +52,8 @@ class Form
      */
     public function addHtmlInput($field, array $data)
     {
-        $field = is_array($field) ? (object)$field : $field; 
-        if(!empty($field->isPrimaryKey) && !empty($data[$field->name]))
-        {
+        $field = is_array($field) ? (object) $field : $field;
+        if (!empty($field->isPrimaryKey) && !empty($data[$field->name])) {
             $field->crudType = $field->type = "hidden";
         }
 
@@ -62,11 +61,11 @@ class Form
 
         $field->inline_attributes = $this->inlineAttributes($field);
 
-        if(!empty($field->options)){
+        if (!empty($field->options)) {
             $field->htmlOptions = $this->buildOptions($field, $data);
         }
-        $html = $this->ConfigForm::getHtmlInput($field);
-            
+        $html = $this->configForm::getHtmlInput($field);
+
         $this->fields[$field->name] = $html;
 
         return $this;
@@ -74,9 +73,8 @@ class Form
 
     public function build()
     {
-        if($this->config['open'] === true)
-        {
-            $this->output .= $this->open($this->action)."<div class='row'>";
+        if ($this->config['open'] === true) {
+            $this->output .= $this->open($this->action) . "<div class='row'>";
         }
 
         foreach ($this->fields as $fieldName => $fieldHtml) {
@@ -84,11 +82,10 @@ class Form
             $this->output .= $fieldHtml;
         }
 
-        $this->output .= $this->ConfigForm::submitBtn();
+        $this->output .= $this->configForm::submitBtn();
 
-        if($this->config['close'] === true)
-        {
-            $this->output .= "</div> ".$this->close();
+        if ($this->config['close'] === true) {
+            $this->output .= "</div> " . $this->close();
         }
         return $this;
     }
@@ -106,8 +103,7 @@ class Form
     private function switchType(object $field)
     {
         $type = $field->crudType;
-        switch($field->name)
-        {
+        switch ($field->name) {
             case 'image':
             case 'picture':
             case 'photo':
@@ -151,22 +147,22 @@ class Form
      */
     public function prepareFields(array $fields = array(), $data = array())
     {
-        if(empty($fields))
+        if (empty($fields))
             return $this;
 
 
-        foreach($fields as $name => $field)
-        {
+        foreach ($fields as $name => $field) {
             $field = (object) $field;
             $field->type = $field->crudType;
             $field = $this->switchType($field);
 
-            if(!empty($field->isPrimaryKey) && (empty($data) || empty($data[$field->name])) ) continue;
-            
+            if (!empty($field->isPrimaryKey) && (empty($data) || empty($data[$field->name])))
+                continue;
+
             $this->addHtmlInput(
-                    $field,
-                    $data
-                );
+                $field,
+                $data
+            );
         }
 
         return $this;
@@ -191,18 +187,17 @@ class Form
     {
         $attrsString = "";
         $acceptedAttrs = $this->inputAttributes();
-        $field->checked =  ($field->value && !$field->null || $field->value == $field->default) && in_array($field->type, ['radio', 'checkbox']);
-        if($field->type == "file" && in_array($field->name, ['picture', 'cover', 'image', 'photo']))
-        {
+        $field->checked = ($field->value && !$field->null || $field->value == $field->default) && in_array($field->type, ['radio', 'checkbox']);
+        if ($field->type == "file" && in_array($field->name, ['picture', 'cover', 'image', 'photo'])) {
             $field->accept = ".jpeg,.png,.jpg";
         }
-        $attrs = array_intersect_key((array)$field, array_flip($acceptedAttrs));
+        $attrs = array_intersect_key((array) $field, array_flip($acceptedAttrs));
         // filter values
         $attrs = array_filter($attrs);
 
         foreach (array_filter($attrs) as $attr => $value) {
             # code...
-            $attrsString .= " $attr='$value'";
+            $attrsString .= " $attr=\"$value\"";
         }
         return $attrsString;
     }
@@ -210,37 +205,38 @@ class Form
     public function buildOptions(object $field, $data)
     {
         $opt = [];
+
         foreach ($field->options as $key => $value) {
             # code...
-            if(is_numeric($key))
-            {
+            if (is_string($value)) {
                 $attr = array("value" => strtolower($value));
-                
-                if($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name]))
-                {
+
+                if ($field->default && strtolower($field->default) == strtolower($value) || (isset($data[$field->name]) && $value == $data[$field->name])) {
                     $attr['selected'] = true;
                 }
-            }else{
-                $attr = array("value" => strtolower($key));
+            } else {
+                $attr = array("value" => $value['value']);
 
-                if($field->default && strtolower($field->default) == strtolower($value['value']) || (isset($data[$field->name]) && $value['value'] == $data[$field->name]))
-                {
+                if ($field->default && $field->default == $value['value'] || (isset($data[$field->name]) && $value['value'] == $data[$field->name])) {
                     $attr['selected'] = true;
                 }
             }
             $attr = array_filter($attr);
 
-            $opt[] = Html::option(ucfirst($value), $attr);
+            $opt[] = Html::option(ucfirst($value['label'] ?? $value['value'] ?? $value), $attr);
         }
         return $opt;
     }
 
+    /**
+     * @param boolean $display
+     * @return void|string
+     */
     public function print($display = false)
     {
-        if($display)
-        {
+        if ($display) {
             echo $this->output;
-        }else{
+        } else {
             return $this->output;
         }
     }
@@ -251,10 +247,10 @@ class Form
 
         throw new \Exception(text("Core.classNoMethod", [$name, get_class()]));
     }
-    
+
     public function __toString()
     {
         return $this->build()->print();
     }
-    
+
 }

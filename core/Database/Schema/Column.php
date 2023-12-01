@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Database
+ * @package Footup\Database
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -216,7 +216,7 @@ class Column
 	 */
 	public function default($defaultValue)
 	{
-		$this->defaultValue = $defaultValue;
+		$this->defaultValue = $defaultValue === false ? 0 : $defaultValue;
 		return $this;
 	}
 
@@ -231,22 +231,31 @@ class Column
 		return $this;
 	}
 
+	public function foreignKeyOf(string $targetTable, string $targetColumn = null) {
+		$targetColumn = is_null($targetColumn) ? 'id_'.strtolower($targetTable) : $targetColumn;
+		return $this->caller->foreign($this->getName(), $targetTable)->references($targetColumn);
+	}
+
     public function toSQL()
     {
         $sql = Schema::quoteIdentifier($this->getName()) . ' ';
 		// If it's enum, we use the parameters
 		$sql .= in_array(strtolower($this->type), ["enum", "set"]) ? 
-					"ENUM(".join(",", array_map("Schema::quoteDescription", $this->parameters)).")" :
+					"ENUM(".join(",", array_map([new Schema, "quoteDescription"], $this->parameters)).")" :
 				$this->type. ($this->getLength() ? "(". $this->getLength() .")" : "" );
 
 		// If it's null so it's NULL what do you exepect ?
         $sql .= $this->nullable ? " NULL " : " NOT NULL ";
-		
-		// quote the dafault value and if it nullable so default value is NULL right ?
-        $default = $this->defaultValue ? (is_string($this->defaultValue) ? Schema::quoteDescription( $this->defaultValue ) : $this->defaultValue) ." " : ($this->nullable ? "NULL " : "");
 
-        if(!empty($default)) {
-            $sql .= " DEFAULT ". $default;
+		if (mb_stripos($this->defaultValue, 'CURRENT_TIMESTAMP') !== false) {
+			$default = $this->defaultValue;
+		} else {
+			// quote the dafault value and if it nullable so default value is NULL right ?
+			$default = $this->defaultValue ? (is_string($this->defaultValue) ? Schema::quoteDescription( $this->defaultValue ) : $this->defaultValue) ." " : ($this->nullable ? "NULL " : $this->defaultValue);
+		}
+		
+        if(isset($default)) {
+            $sql .= " DEFAULT $default";
         }
         if ($this->autoIncrement) {
             $sql .= ' AUTO_INCREMENT ';

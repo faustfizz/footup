@@ -15,76 +15,80 @@ class DotEnv extends \ArrayObject
 
     public function __construct($path = ROOT_PATH, bool $setEnvironmentVariables = true, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED)
     {
-        if(file_exists(rtrim($path, DS).DS.".env"))
-        {
+        if (file_exists(rtrim($path, DS) . DS . ".env")) {
             $this->setPath($path);
             $data = self::parseFile($this->_file, $processSections, $scannerMode);
             $this->setData($data);
-            if ($setEnvironmentVariables){
+            if ($setEnvironmentVariables) {
                 self::setEnvironmentVariables($this->_data);
             }
         }
     }
 
-    public function setPath($path){
-        if (is_dir($path)){
+    public function setPath($path)
+    {
+        if (is_dir($path)) {
             $path = rtrim($path, DS) . DS;
             $this->_path = $path;
             $this->setDir($this->_path);
-        } else if (file_exists($path)){
+        } else if (file_exists($path)) {
             $this->_path = $path;
             $this->setFile($this->_path);
         }
     }
 
-    public function setDir(string $dir){
+    public function setDir(string $dir)
+    {
         $this->_dir = $dir;
-        if (!is_dir($this->_dir)){
+        if (!is_dir($this->_dir)) {
             throw new InvalidPathException(text("File.dirNotExist", [$this->_file]));
         }
         $this->_file = $dir . ".env";
-        if (!file_exists($this->_file)){
+        if (!file_exists($this->_file)) {
             throw new InvalidPathException(text("File.fileNotExist", [$this->_file]));
         }
     }
 
-    public function setFile(string $file){
+    public function setFile(string $file)
+    {
         $this->_dir = dirname($file);
         $this->_file = $file;
-        if (!file_exists($this->_file)){
+        if (!file_exists($this->_file)) {
             throw new InvalidPathException(text("File.fileNotExist", [$this->_file]));
         }
     }
 
-    public function loadArray(array $array, bool $setEnvironmentVariables, int $scannerMode = INI_SCANNER_TYPED){
-        if ($scannerMode == INI_SCANNER_TYPED){
+    public function loadArray(array $array, bool $setEnvironmentVariables, int $scannerMode = INI_SCANNER_TYPED)
+    {
+        if ($scannerMode == INI_SCANNER_TYPED) {
             $array = self::scanArrayTypes($array);
         }
         $this->_data = $array;
-        if ($setEnvironmentVariables){
+        if ($setEnvironmentVariables) {
             self::setEnvironmentVariables($this->_data);
         }
     }
 
-    public static function scanArrayTypes(array $array){
-        foreach ($array as $property => $value){
-            if (is_array($value)){
+    public static function scanArrayTypes(array $array)
+    {
+        foreach ($array as $property => $value) {
+            if (is_array($value)) {
                 $value = self::scanArrayTypes($array);
             } else {
-                if (is_string($value)){
+                if (is_string($value)) {
                     switch ($value) {
                         case 'true':
                         case 'yes':
                         case 'on':
                         case '1':
                             $value = true;
-                        break;
+                            break;
                         case 'false':
                         case 'no':
                         case 'off':
                         case '0':
                             $value = false;
-                        break;
+                            break;
                     }
                 }
             }
@@ -93,43 +97,46 @@ class DotEnv extends \ArrayObject
         return $array;
     }
 
-    public function loadString(string $string, bool $setEnvironmentVariables = true, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED){
+    public function loadString(string $string, bool $setEnvironmentVariables = true, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED)
+    {
         $data = self::parseString($string, $processSections, $scannerMode);
         $this->setData($data);
-        if ($setEnvironmentVariables){
+        if ($setEnvironmentVariables) {
             self::setEnvironmentVariables($this->_data);
         }
     }
 
-    public static function parseFile(string $file, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED):array{
-        $newFile = fopen(substr($file, 0, strrpos($file, DS)).'/footup.ini', "w");
+    public static function parseFile(string $file, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED): array
+    {
+        $newFile = fopen(substr($file, 0, strrpos($file, DS)) . '/footup.ini', "w");
         foreach (file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
             # code...
             $line = trim($line);
-            if(strpos($line, "#") === 0) continue;
+            if (strpos($line, "#") === 0)
+                continue;
 
             $pos = strpos($line, "#") ? strpos($line, "#") : strlen($line);
             $line = substr($line, 0, $pos);
-            fwrite($newFile, $line."\n");
+            fwrite($newFile, $line . "\n");
         }
         fclose($newFile);
-        $data = parse_ini_file(substr($file, 0, strrpos($file, DS)).'/footup.ini', $processSections, $scannerMode);
-        @unlink(substr($file, 0, strrpos($file, DS)).'/footup.ini');
+        $data = parse_ini_file(substr($file, 0, strrpos($file, DS)) . '/footup.ini', $processSections, $scannerMode);
+        @unlink(substr($file, 0, strrpos($file, DS)) . '/footup.ini');
         return $data;
     }
 
-    public static function parseString(string $string, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED):array{
+    public static function parseString(string $string, bool $processSections = true, int $scannerMode = INI_SCANNER_TYPED): array
+    {
         return parse_ini_string($string, $processSections, $scannerMode);
     }
 
-    public static function setEnvironmentVariables($iterable, string $accessName=""){
-        foreach ($iterable as $variable => $value){
-            if(is_object($value))
-            {
+    public static function setEnvironmentVariables($iterable, string $accessName = "")
+    {
+        foreach ($iterable as $variable => $value) {
+            if (is_object($value)) {
                 $value = (array) $value;
             }
-            if(isset($value["base_url"]) && isset($_SERVER["BASE_URL"]))
-            {
+            if (isset($value["base_url"]) && isset($_SERVER["BASE_URL"])) {
                 $value["base_url"] = $_SERVER["BASE_URL"];
             }
             $_ENV[$variable] = $value;
@@ -140,8 +147,9 @@ class DotEnv extends \ArrayObject
         }
     }
 
-    public static function setEnv($variable, $value){
-        if (is_array($value) || is_object($value)){
+    public static function setEnv($variable, $value)
+    {
+        if (is_array($value) || is_object($value)) {
             self::setEnvironmentVariables($value, $variable);
         } else {
             putenv("$variable=$value");
@@ -150,36 +158,40 @@ class DotEnv extends \ArrayObject
         }
     }
 
-    public static function arrayToObject($array){
+    public static function arrayToObject($array)
+    {
         $object = (object) $array;
-        foreach ($object as $variable => $value){
-            if (is_array($value)){
+        foreach ($object as $variable => $value) {
+            if (is_array($value)) {
                 $object->$variable = (object) self::arrayToObject($value);
             }
         }
-        return((object) $object);
+        return ((object) $object);
     }
 
-    public static function objectToArray($object){
+    public static function objectToArray($object)
+    {
         $array = [];
-        foreach ($object as $variable => $value){
-            if (is_object($value)){
+        foreach ($object as $variable => $value) {
+            if (is_object($value)) {
                 $array[$variable] = (array) self::objectToArray($value);
             }
         }
-        return((array) $array);
+        return ((array) $array);
     }
 
-    public function setData($data){
+    public function setData($data)
+    {
         //parent::__construct($data, \ArrayObject::ARRAY_AS_PROPS);
         parent::__construct($data);
         $this->_data = self::arrayToObject($data);
     }
 
-    public function data(){
+    public function data()
+    {
         return $this->_data;
     }
-    
+
     public function serialize(): string
     {
         return serialize($this->_data);
@@ -195,9 +207,9 @@ class DotEnv extends \ArrayObject
         if ($name[0] == "_") {
             return $this->$name;
         }
-        if (is_array($this->_data)){
-            if (array_key_exists($name, $this->_data)){
-                if (is_array($this->_data[$name]) || is_object($this->_data[$name])){
+        if (is_array($this->_data)) {
+            if (array_key_exists($name, $this->_data)) {
+                if (is_array($this->_data[$name]) || is_object($this->_data[$name])) {
                     return self::arrayToObject($this->_data[$name]);
                 } else {
                     return $this->_data[$name];
@@ -206,8 +218,8 @@ class DotEnv extends \ArrayObject
                 return "";
             }
         } else {
-            if (isset($this->_data->$name)){
-                if (is_array($this->_data->$name) || is_object($this->_data->$name)){
+            if (isset($this->_data->$name)) {
+                if (is_array($this->_data->$name) || is_object($this->_data->$name)) {
                     return self::arrayToObject($this->_data->$name);
                 } else {
                     return $this->_data->$name;
@@ -223,7 +235,7 @@ class DotEnv extends \ArrayObject
         if ($name[0] == "_") {
             $this->$name = $value;
         } else {
-            if (is_object($this->_data)){
+            if (is_object($this->_data)) {
                 $this->_data->$name = $value;
             } else {
                 $this->_data[$name] = $value;
@@ -241,6 +253,11 @@ class DotEnv extends \ArrayObject
         parent::offsetSet($index, $newval);
     }
 
+    /**
+     * @param mixed $index
+     * @return mixed
+     * 
+     */#[\ReturnTypeWillChange]
     public function offsetGet($index)
     {
         return parent::offsetGet($index);

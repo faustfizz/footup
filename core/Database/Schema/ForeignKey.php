@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Database
+ * @package Footup\Database
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -28,10 +28,10 @@ class ForeignKey
 	private $columns = [];
 
 	/** @var string|null */
-	private $targetTable;
+	private $targetTable = null;
 
 	/** @var string[] */
-	private $targetColumns;
+	private $targetColumns = [];
 
 	/** @var string */
 	private $onUpdateAction = self::ACTION_CASCADE;
@@ -39,38 +39,45 @@ class ForeignKey
 	/** @var string */
 	private $onDeleteAction = self::ACTION_CASCADE;
 
-	/** @var Table */
-	private $caller;
+	/** @var Table|null */
+	private $caller = null;
 
 
 	/**
 	 * @param  string $name
-	 * @param  string[]|string $columns
+	 * @param  string[]|string|null $columns
 	 * @param  string|null $targetTable
-	 * @param  string[]|string $targetColumns
+	 * @param  string[]|string|null $targetColumns
 	 * @param  Table|null $caller
 	 */
-	public function __construct($name, $columns, $targetTable, $targetColumns, Table $caller = null)
+	public function __construct($name, $columns, $targetTable, $targetColumns, $caller = null)
 	{
 		$this->name = $name;
 		$this->caller = $caller;
-		$this->setTargetTable($targetTable);
 
-		if (!is_array($columns)) {
-			$columns = [$columns];
+		$columns = is_string($columns) ? [$columns] : $columns;
+		$targetColumns = is_string($targetColumns) ? [$targetColumns] : $targetColumns;
+		
+		if ($targetTable) {
+			$this->setTargetTable($targetTable);
 		}
 
-		foreach ($columns as $column) {
-			$this->addColumn($column);
+		if (!empty($columns)) {
+			foreach ($columns as $column) {
+				$this->addColumn($column);
+			}
 		}
 
-		if (!is_array($targetColumns)) {
-			$targetColumns = [$targetColumns];
+		if (!empty($targetColumns)) {
+			foreach ($targetColumns as $targetColumn) {
+				$this->addTargetColumn($targetColumn);
+			}
 		}
 
-		foreach ($targetColumns as $targetColumn) {
-			$this->addTargetColumn($targetColumn);
+		if ($caller) {
+			$this->caller = $caller;
 		}
+
 	}
 
 	/**
@@ -93,6 +100,26 @@ class ForeignKey
 		return $this->name;
 	}
 
+	/**
+	 * Referenced column on the target table
+	 *
+	 * @param string $targetColumn
+	 * @return self
+	 */
+	public function references(string $targetColumn) {
+		$this->targetColumns = []; // reset this array as you are setting a column as target
+		return $this->addTargetColumn($targetColumn);
+	}
+
+	/**
+	 * set target table
+	 *
+	 * @param string $targetTable
+	 * @return self
+	 */
+	public function on(string $targetTable) {
+		return $this->setTargetTable($targetTable);
+	}
 
 	/**
 	 * @param  string $column
@@ -141,6 +168,8 @@ class ForeignKey
 	public function addTargetColumn($targetColumn)
 	{
 		$this->targetColumns[] = $targetColumn;
+		$this->targetColumns = array_unique($this->targetColumns);
+
 		return $this;
 	}
 
@@ -158,7 +187,7 @@ class ForeignKey
 	 * @param  string $onUpdateAction
 	 * @return self
 	 */
-	public function setOnUpdateAction($onUpdateAction)
+	public function onUpdate($onUpdateAction)
 	{
 		if (!$this->validateAction($onUpdateAction)) {
 			throw new ErrorException("Action '$onUpdateAction' is invalid.");
@@ -172,7 +201,7 @@ class ForeignKey
 	/**
 	 * @return string
 	 */
-	public function getOnUpdateAction()
+	public function getOnUpdate()
 	{
 		return $this->onUpdateAction;
 	}
@@ -182,7 +211,7 @@ class ForeignKey
 	 * @param  string $onDeleteAction
 	 * @return self
 	 */
-	public function setOnDeleteAction($onDeleteAction)
+	public function onDelete($onDeleteAction)
 	{
 		if (!$this->validateAction($onDeleteAction)) {
 			throw new ErrorException("Action '$onDeleteAction' is invalid.");
@@ -196,7 +225,7 @@ class ForeignKey
 	/**
 	 * @return string
 	 */
-	public function getOnDeleteAction()
+	public function getOnDelete()
 	{
 		return $this->onDeleteAction;
 	}
@@ -213,11 +242,17 @@ class ForeignKey
 
     public function toSQL()
     {
+		$anEmptyThing = empty($this->columns) ? 'columns' : empty($this->targetTable) ? 'targetTable' : empty($this->targetColumns) ? 'targetColumns' : null;
+
+		if ($anEmptyThing) {
+			throw new ErrorException("'$anEmptyThing' not specified for foreign key : {$this->getName()}.");
+		}
+
         $sql = "CONSTRAINT fk_" . join("_", [$this->getName(), $this->getTargetTable()]) . " FOREIGN KEY (" . 
 					join(',', array_map('\Footup\Database\Schema\Schema::quoteIdentifier', $this->getColumns())) . 
 				") REFERENCES " . Schema::quoteIdentifier($this->getTargetTable()) ." (" . 
 					join(',', array_map('\Footup\Database\Schema\Schema::quoteIdentifier', $this->getTargetColumns())) . 
-				") ON UPDATE " . $this->getOnUpdateAction() . " ON DELETE " . $this->getOnDeleteAction();
+				") ON UPDATE " . $this->getOnUpdate() . " ON DELETE " . $this->getOnDelete();
 		
         return trim(preg_replace("/\s\s/", " ", $sql));
     }

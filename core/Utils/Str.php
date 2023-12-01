@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * FOOTUP FRAMEWORK
+ * *************************
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
+ * 
+ * @package Footup\Utils
+ * @version 0.1
+ * @author Faustfizz Yous <youssoufmbae2@gmail.com>
+ */
 namespace Footup\Utils;
 
 class Str
@@ -52,13 +61,32 @@ class Str
      */
     public static function overlapLeftMerge($overlap, $attribute, $field)
     {
-        $overlap   = explode('.', $overlap);
+        $overlap = explode('.', $overlap);
         $attribute = explode('.', $attribute);
-        $field     = explode('.', $field);
+        $field = explode('.', $field);
 
-        for ($i=0; $i<count($overlap); $i++) {
+        for ($i = 0; $i < count($overlap); $i++) {
             $field[$i] = $attribute[$i];
         }
         return implode('.', $field);
+    }
+
+    /**
+     * Get random string
+     *
+     * @param integer $length
+     * @param string $with
+     * @return string
+     */
+    public static function random($length = 16, $with = 'alphanum')
+    {
+        $characters = $with === 'alphanum' ? '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_' : (in_array($with, ['num', 'number']) ? '0123456789' : 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_');
+
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        while (strlen($randomString) < $length) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
 }

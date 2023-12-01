@@ -16,5 +16,6 @@
 	"future"     	 : "dans {0}",
 	"yesterday"      : "Hier",
 	"tomorrow"       : "Demain",
-	"now"            : "À l\"instant"
+	"now"            : "À l\"instant",
+	"invalidFormat"	 : "Le format {0} est invalide !"
 }

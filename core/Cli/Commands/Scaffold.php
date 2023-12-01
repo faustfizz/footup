@@ -13,7 +13,7 @@ class Scaffold extends Command
     public function __construct(App $cli)
     {
         $this
-			->argument('<classname>', 'The name of classes to generate')
+            ->argument('<classname>', 'The name of classes to generate')
             ->option('-n --namespace', 'The namespace of these classes')
             ->option('-t --table', 'The table name if you generate Model class')
             ->option('-p --primaryKey', 'The primary key name if you generate Model class')
@@ -27,7 +27,7 @@ class Scaffold extends Command
                 '<bold>  $0</end> <comment> <classname> -n namespace </end> ## Generate the class with namespace<eol/>' .
                 '<comment> ## All options not matching the selected type are ignored<eol/>'
             );
-            
+
         $this->inGroup("Helper");
 
         $this->alias("scaffold");
@@ -36,19 +36,19 @@ class Scaffold extends Command
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance
-    public function interact(Interactor $io) :void
+    public function interact(Interactor $io): void
     {
         // Collect missing opts/args
         if ($this->namespace && !is_string($this->namespace)) {
             $this->set("namespace", $io->prompt("Please give the namespace "));
         }
-        if ($this->table && !is_string($this->table) && $this->type === "model") {
+        if (($this->table && !is_string($this->table) || empty($this->type)) && $this->type === "model") {
             $this->set("table", $io->prompt("Please give the table name as you selected the model type "));
         }
         if ($this->returnType && !is_string($this->returnType)) {
             $this->set("returnType", $io->choice("You can't add empty returnType, Please choose one : ", ["self", "object", "array"], "self"));
         }
-        if ($this->primaryKey && !is_string($this->primaryKey) && $this->type === "model") {
+        if (($this->primaryKey && !is_string($this->primaryKey) || empty($this->type)) && $this->type === "model") {
             $this->set("primaryKey", $io->prompt("Please give the primaryKey as you selected the model type "));
         }
         // ...
@@ -59,9 +59,8 @@ class Scaffold extends Command
     public function execute()
     {
         $io = $this->app()->io();
-        
-        if(!$this->returnType)
-        {
+
+        if (!$this->returnType) {
             $this->returnType = "self";
         }
 
@@ -115,7 +114,7 @@ class Scaffold extends Command
         $seederCommand->scaffold = true;
         $this->force && $seederCommand->set("force", true);
         $generated = array_merge($generated, $seederCommand->execute());
-        
+
         # view...
         $viewCommand = new View($this->app());
         $viewCommand->scaffold = true;
@@ -126,8 +125,7 @@ class Scaffold extends Command
         // If you return integer from here, that will be taken as exit error code
 
         !empty($generated) && $io->info("All generated files :", true);
-        foreach($generated as $file)
-        {
+        foreach ($generated as $file) {
             $io->success($file, true);
         }
         $io->eol();

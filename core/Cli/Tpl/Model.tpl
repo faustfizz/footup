@@ -6,6 +6,7 @@
 
 namespace {name_space};
 
+use Footup\I18n\Time;
 use Footup\Model;
 
 class {class_name} extends Model
@@ -30,6 +31,17 @@ class {class_name} extends Model
      * @var string
      */
     protected $returnType = '{return_type}';
+
+    /**
+     * Array with keys as columns and values as types to cast when reading the column
+     * For now, we use casting just for accessing
+     *
+     * @var array
+     */
+    protected $casts    = [
+        'updated_at'    =>  Time::class,
+        'created_at'    =>  Time::class,
+    ];
 
     /**
      * Add all fillable fields here, if empty, all fields are fillable except  fields added on the **exclude** array

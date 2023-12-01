@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/App/Controller
+ * @package Footup\App\Controller
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -33,7 +33,7 @@ class BaseController extends Controller
      * ];
      */
     protected $globalMiddles = [];
-    
+
     /**
      * Si vous voulez ajouter des middles (middleware) spécifiques pour un controlleur, c'est par ici
      * 

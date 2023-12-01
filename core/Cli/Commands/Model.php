@@ -12,18 +12,18 @@ class Model extends Command
     protected $name_space = "App\\Model";
 
     protected $replacements = array(
-            "{name_space}"  =>  null,
-            "{class_name}"  =>  null,
-            "{return_type}" =>  "self",
-            "{table}"       =>  null,
-            "{primary_key}" =>  null
-        );
+        "{name_space}" => null,
+        "{class_name}" => null,
+        "{return_type}" => "self",
+        "{table}" => null,
+        "{primary_key}" => null
+    );
     protected $generated = [];
 
     public function __construct(App $cli)
     {
         $this
-			->argument('<classname>', 'The name of the class to generate')
+            ->argument('<classname>', 'The name of the class to generate')
             ->option('-n --namespace', 'The namespace of the model class')
             ->option('-t --table', 'The table name of the model')
             ->option('-r --returnType', 'The return type of the fetched data of the model')
@@ -33,9 +33,9 @@ class Model extends Command
             ->usage(
                 // $0 will be interpolated to actual command name
                 '<bold>  $0</end> <comment> <classname> </end> ## Generate the class without specifying anything than the name<eol/>' .
-                '<bold>  $0</end> <comment> <classname> -t tableName -p idTable -r object</end> ## Generate the class with namespace<eol/>' 
+                '<bold>  $0</end> <comment> <classname> -t tableName -p idTable -r object</end> ## Generate the class with namespace<eol/>'
             );
-            
+
         $this->inGroup("Generator");
 
         $this->alias("model");
@@ -44,7 +44,7 @@ class Model extends Command
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance
-    public function interact(Interactor $io) :void
+    public function interact(Interactor $io): void
     {
         // Collect missing opts/args
         if ($this->namespace && !is_string($this->namespace)) {
@@ -70,14 +70,13 @@ class Model extends Command
 
         // more codes ...
         $this->generate();
-        
-        if($this->scaffold)
+
+        if ($this->scaffold)
             return $this->generated;
 
-        
+
         !empty($this->generated) && $io->info("All generated files :", true);
-        foreach($this->generated as $file)
-        {
+        foreach ($this->generated as $file) {
             $io->success($file, true);
         }
         $io->eol();
@@ -91,38 +90,36 @@ class Model extends Command
         $this->name_space = is_string($namespace) ? trim($namespace, " /") : $this->name_space;
 
         $this->replacements = array(
-            "{name_space}"  =>  ucfirst($this->name_space),
-            "{class_name}"  =>  ucfirst($this->classname),
-            "{return_type}" =>  $this->returnType,
-            "{table}"       =>  strtolower($this->table ?? $this->classname),
-            "{primary_key}" =>  $this->primaryKey ? $this->primaryKey : 'id_'.strtolower($this->table ?? $this->classname)
+            "{name_space}" => ucfirst($this->name_space),
+            "{class_name}" => ucfirst($this->classname),
+            "{return_type}" => $this->returnType,
+            "{table}" => strtolower($this->table ?? $this->classname),
+            "{primary_key}" => $this->primaryKey ? $this->primaryKey : 'id_' . strtolower($this->table ?? $this->classname)
         );
     }
 
     protected function replace($key, $value = null)
     {
-        if(is_array($key))
-        {
+        if (is_array($key)) {
             foreach ($key as $k => $v) {
                 # code...
                 $this->replacements[$k] = $v;
             }
-        }else{
+        } else {
             $this->replacements[$key] = $value;
         }
         return $this;
     }
 
     protected function parse_file_content($file)
-    {   
+    {
         $tpl = file_exists($file) ? file_get_contents($file) : "";
         return strtr($tpl, $this->replacements);
     }
 
     public function generate($scaffold = false)
     {
-        if(!$this->returnType)
-        {
+        if (!$this->returnType) {
             $this->returnType = "self";
         }
 
@@ -131,54 +128,51 @@ class Model extends Command
         $hasSlash = strpos($this->classname, "/");
         $expl = explode("/", trim(APP_PATH, DIRECTORY_SEPARATOR));
 
-        if($hasSlash !== false)
-        {
+        if ($hasSlash !== false) {
             $expo = explode("/", $this->classname);
             $file = array_pop($expo);
-            $dir = implode("/", array_map(function($v){ return ucfirst($v); }, $expo));
-            
-            if(!is_dir(APP_PATH."Model/".ucfirst($dir)))
-            {
-                @mkdir(APP_PATH."Model/".ucfirst($dir), 0777, true);
+            $dir = implode("/", array_map(function ($v) {
+                return ucfirst($v); }, $expo));
+
+            if (!is_dir(APP_PATH . "Model/" . ucfirst($dir))) {
+                @mkdir(APP_PATH . "Model/" . ucfirst($dir), 0777, true);
             }
 
-            if(!$this->force && file_exists(APP_PATH."Model/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php'))
-            {
-                $this->app()->io()->eol()->warn('"'.end($expl)."/Model/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php" exists, use --force to override !', true)->eol();
+            if (!$this->force && file_exists(APP_PATH . "Model/" . ucfirst($dir) . DIRECTORY_SEPARATOR . ucfirst($file) . '.php')) {
+                $this->app()->io()->eol()->warn('"' . end($expl) . "/Model/" . ucfirst($dir) . DIRECTORY_SEPARATOR . ucfirst($file) . '.php" exists, use --force to override !', true)->eol();
                 exit(0);
             }
 
             @file_put_contents(
-                APP_PATH."Model/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php',
+                APP_PATH . "Model/" . ucfirst($dir) . DIRECTORY_SEPARATOR . ucfirst($file) . '.php',
                 $this->replace([
-                    "{name_space}"  => $this->name_space . '\\' . strtr($dir, "/" , "\\"),
-                    "{class_name}"  => ucfirst($file),
+                    "{name_space}" => $this->name_space . '\\' . strtr($dir, "/", "\\"),
+                    "{class_name}" => ucfirst($file),
                     "{return_type}" => $this->returnType,
-                    "{table}"       => strtolower($this->table ?? $file),
-                    "{primary_key}" => $this->primaryKey ? $this->primaryKey : 'id_'.strtolower($this->table ?? $this->classname),
-                ])->parse_file_content(__DIR__."/../Tpl/Model.tpl")
+                    "{table}" => strtolower($this->table ?? $file),
+                    "{primary_key}" => $this->primaryKey ? $this->primaryKey : 'id_' . strtolower($this->table ?? $this->classname),
+                ])->parse_file_content(__DIR__ . "/../Tpl/Model.tpl")
             );
-            
-            $this->generated[] =  end($expl)."/Model/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php';
 
-        }else{
-            if(!$this->force && file_exists(APP_PATH."Model/".ucfirst($this->classname).'.php'))
-            {
-                $this->app()->io()->eol()->warn('"'.end($expl)."/Model/".ucfirst($this->classname).'.php" exists, use --force to override !', true)->eol();
+            $this->generated[] = end($expl) . "/Model/" . ucfirst($dir) . DIRECTORY_SEPARATOR . ucfirst($file) . '.php';
+
+        } else {
+            if (!$this->force && file_exists(APP_PATH . "Model/" . ucfirst($this->classname) . '.php')) {
+                $this->app()->io()->eol()->warn('"' . end($expl) . "/Model/" . ucfirst($this->classname) . '.php" exists, use --force to override !', true)->eol();
                 exit(0);
             }
-            
+
             @file_put_contents(
-                APP_PATH."Model/".ucfirst($this->classname).'.php',
+                APP_PATH . "Model/" . ucfirst($this->classname) . '.php',
                 $this->replace([
-                    "{name_space}"  => $this->name_space,
+                    "{name_space}" => $this->name_space,
                     "{return_type}" => $this->returnType,
-                    "{table}"       => strtolower($this->table ?? $this->classname),
-                    "{primary_key}" => $this->primaryKey ? $this->primaryKey : 'id_'.strtolower($this->table ?? $this->classname),
-                ])->parse_file_content(__DIR__."/../Tpl/Model.tpl")
+                    "{table}" => strtolower($this->table ?? $this->classname),
+                    "{primary_key}" => $this->primaryKey ? $this->primaryKey : 'id_' . strtolower($this->table ?? $this->classname),
+                ])->parse_file_content(__DIR__ . "/../Tpl/Model.tpl")
             );
-            
-            $this->generated[] =  end($expl)."/Model/".ucfirst($this->classname).'.php';
+
+            $this->generated[] = end($expl) . "/Model/" . ucfirst($this->classname) . '.php';
         }
 
         return $this->generated;

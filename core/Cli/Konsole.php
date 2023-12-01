@@ -55,9 +55,9 @@ class Konsole
 
     public function __construct(string $name, string $version = '0.0.1', callable $onExit = null)
     {
-        $this->name    = $name;
+        $this->name = $name;
         $this->version = $version;
-        $this->logo(file_get_contents(__DIR__.'/logo'));
+        $this->logo(file_get_contents(__DIR__ . '/logo'));
 
         // @codeCoverageIgnoreStart
         $this->onExit = $onExit ?? function ($exitCode = 0) {
@@ -80,21 +80,17 @@ class Konsole
     {
         $namespaces = is_array($namespaces) ? $namespaces : [$namespaces];
 
-        foreach($namespaces as $namespace)
-        {
+        foreach ($namespaces as $namespace) {
             /**
              * All Commands classes in the Commands directory
              */
             $cmds = ClassLocator::findRecursive(trim($namespace, " \n\r\t\v\x00\\"));
-            
-            if (!empty($cmds))
-            {
-                foreach ($cmds as $command)
-                {
+
+            if (!empty($cmds)) {
+                foreach ($cmds as $command) {
                     # code...
                     $class = new \ReflectionClass($command);
-                    if($class->isSubclassOf(Command::class))
-                    {
+                    if ($class->isSubclassOf(Command::class)) {
                         $cmd = new $command($this);
                         $this->add($cmd, $cmd->alias(), false);
                     }
@@ -259,7 +255,7 @@ class Konsole
         $argv += [null, null, null];
 
         return
-             // cmd
+            // cmd
             $this->commands[$argv[1]]
             // cmd alias
             ?? $this->commands[$this->aliases[$argv[1]] ?? null]
@@ -339,8 +335,8 @@ class Konsole
         $exitCode = 255;
 
         try {
-            $command  = $this->parse($argv);
-            $result   = $this->doAction($command);
+            $command = $this->parse($argv);
+            $result = $this->doAction($command);
             $exitCode = \is_int($result) ? $result : 0;
         } catch (\Throwable $e) {
             $this->outputHelper()->printTrace($e);

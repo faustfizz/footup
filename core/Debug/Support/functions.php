@@ -1,9 +1,9 @@
 <?php
 
 /**
- * FOOTUP -  2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup\Debug
  * @version 0.1
@@ -19,6 +19,9 @@
  *
  * @link        https://github.com/lotfio/ouch
  */
+
+namespace Footup\Debug\Support;
+
 if (!function_exists('ouch_root')) {
 
     /**
@@ -67,7 +70,7 @@ if (!function_exists('str_last')) {
      * @param string $str string
      * @param string $del delimiter
      *
-     * @return void
+     * @return string
      */
     function str_last($str, $del = '\\')
     {
@@ -125,8 +128,10 @@ if (!function_exists('readErrorFile')) {
 
         $start = $errorLine >= 6 ? $errorLine - 6 : 1;
         $end = ($errorLine + 6) <= $numberOfLines ? $errorLine + 6 : $numberOfLines;
-
+        
         for ($i = $start; $i <= $end; $i++) {
+            if (!isset($file[$i])) continue;
+
             if(($i == $start || $i == $end) && empty(trim($file[$i])))
             {
                 $file[$i] = "ㅤ".$file[$i]."";

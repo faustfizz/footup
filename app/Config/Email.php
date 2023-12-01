@@ -173,7 +173,7 @@ class Email
 	 */
 	public function __construct($config = [])
 	{
-		array_walk($config, function($value, $key, $class){
+		array_walk($config, function ($value, $key, $class) {
 			$class->{$key} = $value;
 		}, $this);
 	}

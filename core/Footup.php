@@ -1,16 +1,17 @@
 <?php
 /**
- * FOOTUP 
- * *************************
- * Hard Coded by Faustfizz Yous
+ * FOOTUP FRAMEWORK  2021 - 2023
+ * *****************************
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1.7-alpha.1
+ * @version 0.1.7-alpha.6
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
 
 use Exception;
+use Footup\Http\RedirectResponse;
 use Footup\Http\Request;
 use Footup\Http\Response;
 use Footup\Routing\MiddleHandler;
@@ -21,7 +22,7 @@ class Footup
     protected $router;
     public const NAME = "FootUP Framework";
 
-    public const VERSION = "0.1.7-alpha.1";
+    public const VERSION = "0.1.7-alpha.6";
 
     public function __construct(Router &$router)
     {
@@ -39,7 +40,7 @@ class Footup
      * @return void
      */
     public function terminate()
-    { 
+    {
         return $this->go();
     }
 
@@ -53,7 +54,7 @@ class Footup
     {
         // Find a route
         $route = $this->router->match();
-        
+
         /**
          * Controller
          */
@@ -64,40 +65,52 @@ class Footup
          */
         $method = $route->getMethod();
 
-        $request = $this->router->request;
+        $request = $this->router->getRequest();
         $response = new Response();
 
+        if ($handler instanceof \Closure) {
+            $this->endTime($request);
+            $responseOrContent = $handler(...array_values($route->getArgs()));
+
+            $this->redirectIfNeeded($responseOrContent);
+
+            if ($responseOrContent)
+                return $response->body($responseOrContent ?? '')->send();
+        }
+        
+        /**
+         * @var \Footup\Controller $controller
+         */
+        list($controller, $middleResult) = $this->runMiddles(new $handler(), $method, $request, $response);
+        // Recalculate endTime as we can run many Middles before
         $this->endTime($request);
 
-        try {
-            if($handler instanceof \Closure)
-            {
-                $return = $handler(...array_values($route->getArgs()));
+        $this->redirectIfNeeded($middleResult);
 
-                if($return instanceof Response){
-                    return $return->send(true);
-                }
-                return $response->body($return ?? '')->send(true);
-            }
-            /**
-             * @var \Footup\Controller $controller
-             */
-            $controller = $this->runMiddles(new $handler(), $method, $request, $response);
-            // Recalculate endTime as we can run many Middles before
-            $this->endTime($request);
-            $return = $controller->__boot($request, $response)->{$method}(...array_values($route->getArgs()));
+        if ($middleResult instanceof Response) {
+            $responseOrContent = $controller->__boot($request, $response->body($middleResult))->{$method}(...array_values($route->getArgs()));
 
-            if($return instanceof Response){
-                return $return->send(true);
-            }
-            return $response->body($return ?? '')->send(true);
+            $this->redirectIfNeeded($responseOrContent);
 
-        } catch (\ErrorException $exception) {
-            // Erreur 500.
-            throw new \ErrorException(text("Http.error500", [self::NAME, $exception->getMessage()]), $exception->getCode(), $exception->getSeverity(), $exception->getFile(), $exception->getLine(), $exception);
+            if ($responseOrContent)
+                return $response->body($responseOrContent ?? '')->send();
+        }
+        
+    }
+
+    /**
+     * Redirect if we have a RedirectResponse on the way
+     *
+     * @param mixed $testableResponse
+     * @return void
+     */
+    public function redirectIfNeeded($testableResponse) {
+        if ($testableResponse instanceof RedirectResponse) {
+            $testableResponse->send();
+            exit(0);
         }
     }
-    
+
     /**
      * Execute les middleWare
      *
@@ -105,7 +118,7 @@ class Footup
      * @param string $method
      * @param Request $request
      * @param Response $response
-     * @return \Footup\Controller|mixed
+     * @return array<\Footup\Controller, mixed>
      */
     protected function runMiddles($controller, $method, Request $request, Response &$response)
     {
@@ -113,58 +126,52 @@ class Footup
         /**
          * For globaux Middles
          */
-        foreach($controller->getGlobalMiddles($method) as $key => $value)
-        {
-            if($value instanceof \Closure || class_exists($value) || $method === $key)
-            {
+        foreach ($controller->getGlobalMiddles($method) as $key => $value) {
+            if ($value instanceof \Closure || class_exists($value) || $method === $key) {
                 $middlesStack[] = $value;
             }
         }
 
+        $class = trim(get_class($controller), '\\');
         /**
          * For spécifiques middles
          * @var string|string[]
          */
-        $middles = $controller->getMiddles(trim(get_class($controller), '\\')) ?? $controller->getMiddles(rtrim(get_class($controller), '\\'));
+        $middles = $controller->getMiddles($class) ?? $controller->getMiddles(rtrim($class, '\\'));
 
-        if($middles)
-        {
-            if($value instanceof \Closure || !is_array($middles) && class_exists($middles))
-            {
+        if ($middles) {
+            if ($middles instanceof \Closure || !is_array($middles) && class_exists($middles)) {
                 $middlesStack[] = $middles;
-            }
-            elseif(is_array($middles))
-            {
-                foreach($middles as $key => $middle)
-                {
-                    if($value instanceof \Closure || class_exists($middle) && $method === $key)
-                    {
+            } elseif (is_array($middles)) {
+                foreach ($middles as $key => $middle) {
+                    if ($middle instanceof \Closure || class_exists($middle) && $method === $key) {
                         $middlesStack[] = $middle;
                     }
                 }
             }
         }
 
-        if(!empty($middlesStack))
-        {
-            (new MiddleHandler($middlesStack))->dispatch($request, $response);
+        $middleResult = $response;
+
+        if (!empty($middlesStack)) {
+            $middleResult = (new MiddleHandler($middlesStack))->dispatch($request, $response);
         }
-        
-        return $controller;
+
+        return [$controller, $middleResult];
     }
-    
+
     protected function endTime(Request $request)
     {
-        $request->setEnv("end_time",  microtime(true));
+        $request->setEnv("end_time", microtime(true));
 
-        list($start_time, $end_time) = [(float)$request->env("start_time"), (float)$request->env("end_time")];
+        list($start_time, $end_time) = [(float) $request->env("start_time"), (float) $request->env("end_time")];
 
-        $request->setEnv("delayed_time",  (float) number_format($end_time - $start_time, 4));
+        $request->setEnv("delayed_time", (float) number_format($end_time - $start_time, 4));
     }
 
     /**
      * Get the value of VERSION
-     */ 
+     */
     public function version()
     {
         return self::VERSION;
@@ -172,7 +179,7 @@ class Footup
 
     /**
      * Get the value of NAME
-     */ 
+     */
     public function name()
     {
         return self::NAME;

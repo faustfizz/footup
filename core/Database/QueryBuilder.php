@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Database
+ * @package Footup\Database
  * @version 0.4
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -20,6 +20,11 @@ use PDOStatement;
 
 class QueryBuilder implements \IteratorAggregate
 {
+    /**
+     * Supported operators
+     */
+    const OPERATORS = ['=', '!=', '<>', '>', '>=', '<', '<=', 'IS', 'IS NOT', 'IN', 'NOT IN', 'LIKE', 'NOT LIKE', 'BETWEEN', 'NOT BETWEEN'];
+
     /**
      * @var string $table
      */
@@ -119,7 +124,7 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * @var array|string $tableInfo informations de la table
      */
-    protected $tableInfo  = [];
+    protected $tableInfo = [];
 
     /**
      * QueryBuilder constructor
@@ -131,7 +136,7 @@ class QueryBuilder implements \IteratorAggregate
     {
         $this->from($table);
         self::$db = $DbConnection instanceof PDO ? $DbConnection : DbConnection::setDb(null, true);
-        $this->getPrimaryKey();
+        $pk = $this->getPrimaryKey();
     }
 
     /*** Core Methods ***/
@@ -164,16 +169,16 @@ class QueryBuilder implements \IteratorAggregate
      */
     public function reset()
     {
-        $this->where        =
-        $this->selectFields =
-        $this->joins        =
-        $this->order        =
-        $this->groups       =
-        $this->having       =
-        $this->distinct     =
-        $this->limit        =
-        $this->offset       =
-        $this->sql          = '';
+        $this->where =
+            $this->selectFields =
+            $this->joins =
+            $this->order =
+            $this->groups =
+            $this->having =
+            $this->distinct =
+            $this->limit =
+            $this->offset =
+            $this->sql = '';
 
         return $this;
     }
@@ -202,19 +207,21 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $table Table to join to
      * @param array|string $fields Fields to join on
      * @param string $type Type of join
+     * @param string $operator default = 
+     * 
      * @return QueryBuilder Self reference
      * @throws Exception For invalid join type
      */
     public function join($table, $fields, $type = ' INNER ', $operator = " = ")
     {
         static $joins = array(
-            'INNER',
-            'LEFT OUTER',
-            'RIGHT OUTER',
-            'FULL OUTER',
-            'LEFT',
-            'RIGHT',
-            'FULL'
+        'INNER',
+        'LEFT OUTER',
+        'RIGHT OUTER',
+        'FULL OUTER',
+        'LEFT',
+        'RIGHT',
+        'FULL'
         );
 
         if (!in_array($type, $joins)) {
@@ -238,6 +245,8 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param string $table Table to join to
      * @param array|string $fields Fields to join on
+     * @param string $operator default =
+     * 
      * @return QueryBuilder Self reference
      */
     public function leftJoin($table, $fields, $operator = " = ")
@@ -250,6 +259,8 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param string $table Table to join to
      * @param array|string $fields Fields to join on
+     * @param string $operator default =
+     * 
      * @return QueryBuilder Self reference
      */
     public function rightJoin($table, $fields, $operator = " = ")
@@ -262,6 +273,8 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param string $table Table to join to
      * @param array $fields Fields to join on
+     * @param string $operator default =
+     * 
      * @return QueryBuilder Self reference
      */
     public function fullJoin($table, $fields, $operator = " = ")
@@ -271,62 +284,36 @@ class QueryBuilder implements \IteratorAggregate
 
     /**
      * @param array|string $key
-     * @param string|array $val
-     * @param string $operator
-     * @param string $link
+     * @param array|string|null $operatorOrValue
+     * @param array|string|null $val
+     * @param string $link default AND 
+     * @param bool $escape default TRUE
+     * 
      * @return QueryBuilder
      */
-    public function where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
+    public function where($key, $operatorOrValue = null, $val = null, $link = ' AND ', $escape = true)
     {
-        $this->where .= (empty($this->where)) ? ' WHERE ' : '';
-
-        if (is_array($key)) {
-            $key = array_filter($key);
-            $counter = count($key);
-            foreach ($key as $k => $v) {
-                $glue = !empty($this->where) && trim(strtolower($this->where)) != 'where' ? $link : '';
-                $this->where .= $counter > 1 ? ' (' : '';
-                $counter--;
-                $this->where .= $glue . $k . ' ' . trim($operator ?? " = ") . ' ' . ($escape && !is_numeric($v) ? $this->quote($v) : $v);
-                $this->where .= $counter == 0 && count($key) > 1 ? ') ' : '';
-            }
-        } else if (is_string($key) && is_null($val)) {
-            $link = !empty($this->where) && trim(strtolower($this->where)) != 'where'  ? $link : '';
-            $this->where .= $link . $key;
-        } else {
-            $link = !empty($this->where) && trim(strtolower($this->where)) != 'where'  ? $link : '';
-            if (trim(strtolower($operator)) != 'is') {
-                if (is_null($val)) {
-                    $operator = "IS NOT NULL";
-                }
-                if (is_string($val) && !empty($val)) {
-                    $val = ($escape && !is_numeric($val) ? $this->quote($val) : $val);
-                }
-                if (is_array($val) && !empty($val)) {
-                    $val = '(' . implode(',', array_map(array($this, 'quote'), $val)) . ')';
-                    $operator = ' IN ';
-                }
-            }
-            $this->where .= trim($link . $key . ' ' . trim($operator ?? " = ") . ' ' . $val);
-        }
-
-        return $this;
+        return $this->buildWhere($key, $operatorOrValue, $val, $link, $escape);
     }
 
     /**
      * @param string|array $key
-     * @param array|string $val
-     * @param string $operator
+     * @param array|string|null $operatorOrValue
+     * @param array|string|null $val
+     * @param bool $escape default TRUE
+     * 
      * @return QueryBuilder
      */
-    public function orWhere($key, $val = null, $operator = null, $escape = true)
+    public function orWhere($key, $val = null, $operatorOrValue = null, $escape = true)
     {
-        return $this->where($key, $val, $operator, ' OR ', $escape);
+        return $this->where($key, $operatorOrValue, $val, ' OR ', $escape);
     }
 
     /**
      * @param string $key
-     * @param array|string $val
+     * @param array $val
+     * @param bool $escape default TRUE
+     * 
      * @return QueryBuilder
      */
     public function whereIn($key, array $val, $escape = true)
@@ -335,8 +322,10 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @param array $val
+     * @param bool $escape default TRUE
+     * 
      * @return QueryBuilder
      */
     public function whereNotIn($key, array $val, $escape = true)
@@ -345,9 +334,8 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param $str
-     * @param array|null $build_data
-     * @param string $link
+     * @param mixed $str
+     * 
      * @return QueryBuilder
      */
     public function whereRaw($str)
@@ -356,49 +344,53 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param $key
+     * @param string $key
+     * 
      * @return QueryBuilder
      */
     public function whereNotNull($key)
     {
-        return $this->where($key, 'NOT NULL', ' IS ');
+        return $this->where($key, ' IS NOT ', 'NULL');
     }
 
     /**
-     * @param $key
+     * @param string $key
+     * 
      * @return QueryBuilder
      */
     public function whereNull($key)
     {
-        return $this->where($key, 'NULL', ' IS ');
+        return $this->where($key, ' IS ', 'NULL');
     }
 
     // where OR
 
     /**
-     * @param array|string $key
-     * @param array|string $val
-     * @return QueryBuilder
-     */
-    public function orWhereIn(array|string $key, array $val, $escape = true)
-    {
-        return $this->orWhere($key, $val, ' IN ', $escape);
-    }
-
-    /**
-     * @param array|string $key
+     * @param string $key
      * @param array $val
+     * 
      * @return QueryBuilder
      */
-    public function orWhereNotIn(array|string $key, array $val, $escape = true)
+    public function orWhereIn(string $key, array $val, $escape = true)
     {
-        return $this->orWhere($key, $val, ' NOT IN ', $escape);
+        return $this->orWhere($key, ' IN ', $val, $escape);
     }
 
     /**
-     * @param $str
-     * @param array|null $build_data
-     * @param string $link
+     * @param string $key
+     * @param array $val
+     * @param bool $escape default TRUE
+     * 
+     * @return QueryBuilder
+     */
+    public function orWhereNotIn(string $key, array $val, $escape = true)
+    {
+        return $this->orWhere($key, ' NOT IN ', $val, $escape);
+    }
+
+    /**
+     * @param mixed $str
+     * 
      * @return QueryBuilder
      */
     public function orWhereRaw($str)
@@ -407,27 +399,29 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param $key
+     * @param string $key
+     * 
      * @return QueryBuilder
      */
     public function orWhereNotNull($key)
     {
-        return $this->orWhere($key, ' NOT NULL ', ' IS ');
+        return $this->orWhere($key, ' IS NOT ', 'NULL');
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return QueryBuilder
      */
     public function orWhereNull($key)
     {
-        return $this->orWhere($key, 'NULL', ' IS ');
+        return $this->orWhere($key, ' IS ', 'NULL');
     }
 
     /**
      * Adds an ascending sort for a field.
      *
      * @param string|array $field Field name
+     * 
      * @return QueryBuilder Self reference
      */
     public function asc($field = null)
@@ -439,6 +433,7 @@ class QueryBuilder implements \IteratorAggregate
      * Adds an descending sort for a field.
      *
      * @param string|array $field Field name
+     * 
      * @return QueryBuilder Self reference
      */
     public function desc($field = null)
@@ -451,18 +446,19 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param string|array $field Field name
      * @param string $direction Sort direction
+     * 
      * @return QueryBuilder Self reference
      */
-    public function orderBy(mixed $field, $direction = 'ASC')
+    public function orderBy($field, $direction = 'ASC')
     {
-        $this->order = (empty($this->order)) ? 'ORDER BY ' : $this->order.',';
+        $this->order = (empty($this->order)) ? 'ORDER BY ' : $this->order . ',';
 
         if (is_array($field)) {
             foreach ($field as $key => $value) {
                 $field[$key] = $value . ' ' . $direction;
             }
         } else {
-            $field = ($field ?? $this->getPrimaryKey()) .' ' . $direction;
+            $field = ($field ?? $this->getPrimaryKey()) . ' ' . $direction;
         }
 
         $fields = (is_array($field)) ? implode(', ', $field) : $field;
@@ -476,6 +472,7 @@ class QueryBuilder implements \IteratorAggregate
      * Adds fields to group by.
      *
      * @param string|array $field Field name or array of field names
+     * 
      * @return QueryBuilder Self reference
      */
     public function groupBy($field)
@@ -493,20 +490,21 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param string|array $field A field name or an array of fields and values.
      * @param string $value A field value to compare to
+     * 
      * @return QueryBuilder Self reference
      */
     public function having($field, $value = null)
     {
         $join = (empty($this->having)) ? 'HAVING ' : '';
-        if(is_array($field))
-        {   $thisModel = $this;
-            $fields = array_map(function($key, $value) use ($thisModel){
-                $chain = is_numeric($key) ? $thisModel->primaryKey." = ".$thisModel->quote($value) : "$key = ".$thisModel->quote($value);
+        if (is_array($field)) {
+            $thisModel = $this;
+            $fields = array_map(function ($key, $value) use ($thisModel) {
+                $chain = is_numeric($key) ? $thisModel->primaryKey . " = " . $thisModel->quote($value) : "$key = " . $thisModel->quote($value);
                 return $chain;
             }, array_keys($field), array_values($field));
             $join .= implode(',', $fields);
-        }else{
-            $join .= !empty($value) ? $field." = ".$this->quote($value) : $field;
+        } else {
+            $join .= !empty($value) ? $field . " = " . $this->quote($value) : $field;
         }
         $this->having .= $join;
 
@@ -518,6 +516,7 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param int $limit Number of rows to limit
      * @param int $offset Number of rows to offset
+     * 
      * @return QueryBuilder Self reference
      */
     public function limit($limit = null, $offset = null)
@@ -537,6 +536,7 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param int $offset Number of rows to offset
      * @param int $limit Number of rows to limit
+     * 
      * @return QueryBuilder Self reference
      */
     public function offset($offset, $limit = null)
@@ -552,9 +552,30 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
+     * @param int $offset
+     * @return QueryBuilder
+     */
+    public function skip($offset)
+    {
+        $this->offset($offset);
+        return $this;
+    }
+
+    /**
+     * @param int $limit
+     * @return QueryBuilder
+     */
+    public function take($limit)
+    {
+        $this->limit($limit);
+        return $this;
+    }
+
+    /**
      * Sets the distinct keyword for a query.
      * 
      * @param bool $value
+     * 
      * @return QueryBuilder
      */
     public function distinct($value = true)
@@ -570,6 +591,7 @@ class QueryBuilder implements \IteratorAggregate
      * @param string $field Database field
      * @param string $value1 First value
      * @param string $value2 Second value
+     * 
      * @return QueryBuilder
      */
     public function between($field, $value1, $value2)
@@ -584,23 +606,86 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
+     * Sets a not between where clause.
+     *
+     * @param string $field Database field
+     * @param string $value1 First value
+     * @param string $value2 Second value
+     * 
+     * @return QueryBuilder
+     */
+    public function notBetween($field, $value1, $value2)
+    {
+        $this->where(sprintf(
+            '%s NOT BETWEEN %s AND %s',
+            $field,
+            $this->quote($value1),
+            $this->quote($value2)
+        ));
+        return $this;
+    }
+
+    /**
+     * Sets a or between where clause.
+     *
+     * @param string $field Database field
+     * @param string $value1 First value
+     * @param string $value2 Second value
+     * 
+     * @return QueryBuilder
+     */
+    public function orBetween($field, $value1, $value2)
+    {
+        $this->orWhere(sprintf(
+            '%s BETWEEN %s AND %s',
+            $field,
+            $this->quote($value1),
+            $this->quote($value2)
+        ));
+        return $this;
+    }
+
+    /**
+     * Sets a or not between where clause.
+     *
+     * @param string $field Database field
+     * @param string $value1 First value
+     * @param string $value2 Second value
+     * 
+     * @return QueryBuilder
+     */
+    public function orNotBetween($field, $value1, $value2)
+    {
+        $this->orWhere(sprintf(
+            '%s NOT BETWEEN %s AND %s',
+            $field,
+            $this->quote($value1),
+            $this->quote($value2)
+        ));
+        return $this;
+    }
+
+    /**
      * Builds a select query.
      *
      * @param array|string $fields Array of field names to select
      * @param int $limit Limit condition
      * @param int $offset Offset condition
+     * 
      * @return QueryBuilder Self reference
      */
     public function select($fields = '*', $limit = null, $offset = null)
     {
         $this->checkTable();
 
-        $fields = (is_array($fields)) ? implode(',', $fields) : $fields;
+        $fields = is_array($fields) && !empty($fields) ? implode(',', $fields) : (is_string($fields) ? $fields : '*');
+
         $this->limit($limit, $offset);
 
-        if($fields === "*" && !empty($this->selectFields)) return $this;
+        if ($fields === "*" && !empty($this->selectFields))
+            return $this;
 
-        $this->selectFields .= !empty($this->selectFields) ?  ", ".$fields : $fields;
+        $this->selectFields .= !empty($this->selectFields) ? ", " . $fields : $fields;
 
         return $this;
     }
@@ -610,19 +695,20 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param array $data Array of key and values or array of keys to insert
      * @param array $values Array of values to use prepared statement
+     * 
      * @return bool|int
      */
     public function insert(array $data = [], $values = [])
     {
         $this->checkTable();
 
-        if (empty($data)) return false;
+        if (empty($data))
+            return false;
 
-        if(!empty($values))
-        {
+        if (!empty($values)) {
             $keys = implode(',', array_values($data));
             $vals = str_repeat("? , ", count($values));
-        }else{
+        } else {
             $keys = implode(',', array_keys($data));
             $vals = implode(',', array_values(
                 array_map(
@@ -631,7 +717,7 @@ class QueryBuilder implements \IteratorAggregate
                 )
             ));
         }
-        
+
         $this->sql(array(
             'INSERT INTO',
             ($this->getTable()),
@@ -648,6 +734,7 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @param array|\stdClass $data Array of keys and values or object of type \stdClass
      * @param int|null $id 
+     * 
      * @return bool 
      */
     public function update($data, $id = null)
@@ -656,25 +743,24 @@ class QueryBuilder implements \IteratorAggregate
         $data = is_object($data) ? get_object_vars($data) : $data;
 
         $values = array();
-        
+
         $id && $this->where($this->getPrimaryKey() . " = " . $id);
-        
+
         if (empty($this->where)) {
-            if(!empty($data[$this->getPrimaryKey()])) {
+            if (!empty($data[$this->getPrimaryKey()])) {
                 $this->where($this->getPrimaryKey() . " = " . $this->quote($data[$this->getPrimaryKey()]));
-            }else{
+            } else {
                 throw new Exception(text("Db.dontUse", ["UPDATE"]));
             }
         }
-        
+
         foreach ($data as $key => $value) {
-            if(is_numeric($key))
-            {
-                throw new Exception("Data array should be in format [field => value] !");
+            if (is_numeric($key)) {
+                throw new Exception(text("Db.invalidDataArray"));
             }
             $values[] = $key . " = " . $this->quote($value);
         }
-        
+
         $this->sql(array(
             'UPDATE',
             $this->getTable(),
@@ -690,13 +776,14 @@ class QueryBuilder implements \IteratorAggregate
      * Builds a delete query.
      *
      * @param string|array|int $where Where conditions
+     * 
      * @return bool
      */
     public function delete($where = null)
     {
         $this->checkTable();
 
-        $where && $this->where(is_int($where) ? $this->getPrimaryKey()." = ".$where : $where);
+        $where && $this->where(is_int($where) ? $this->getPrimaryKey() . " = " . $where : $where);
 
         if (empty($this->where)) {
             throw new Exception(text("Db.dontUse", ["DELETE"]));
@@ -715,6 +802,7 @@ class QueryBuilder implements \IteratorAggregate
      * Gets or sets the SQL statement.
      *
      * @param string|array SQL statement
+     * 
      * @return QueryBuilder|string SQL statement
      */
     public function sql($sql = null)
@@ -738,8 +826,9 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Executes a sql statement.
      *
-     * @throws Exception When database is not defined
      * @param array $params
+     * 
+     * @throws Exception When database is not defined
      * @return object Query results object
      */
     public function execute(array $params = [])
@@ -755,8 +844,7 @@ class QueryBuilder implements \IteratorAggregate
             ->setInsertId(-1)
             ->setLastQuery($this->sql);
 
-        if (!empty($this->sql))
-        {
+        if (!empty($this->sql)) {
             $error = null;
 
             try {
@@ -781,32 +869,36 @@ class QueryBuilder implements \IteratorAggregate
                 if ($this->show_sql) {
                     $error .= "\nSQL: " . $this->sql;
                 }
-                throw new Exception('Database error: ' . $error);
+                throw new Exception(text("Db.databaseError", [$error]));
             }
         }
 
         $this->reset();
-        
-        return (object)['ok' => ($bool && $this->getInsertID() ? $this->getInsertID() : $bool), 'result' => $result];
+
+        return (object) ['ok' => ($bool && $this->getInsertID() ? $this->getInsertID() : $bool), 'result' => $result];
     }
 
     /**
-     * Undocumented function
+     * get records from the db
      *
-     * @param string $select
-     * @param array|string $where
-     * @param int $limit
-     * @param int $offset
-     * @return \stdClass[]
+     * @param array|string $select
+     * @param array|string|null $where
+     * @param int|null $limit
+     * @param int|null $offset
+     * 
+     * @return array
      */
     public function get($select = "*", $where = null, $limit = null, $offset = null)
     {
         if (!empty($where)) {
             $this->where($where);
         }
+
         if (empty($this->sql)) {
-            $this->select($select, $limit, $offset);
+            $this->select($select);
         }
+        
+        $this->limit($limit)->offset($offset);
 
         $this->sql(array(
             'SELECT',
@@ -837,71 +929,78 @@ class QueryBuilder implements \IteratorAggregate
      * Fetch a single row from a select query.
      * 
      * @param string $fields
-     * @param string|array $where
      *
-     * @return \stdClass|\Footup\Orm\BaseModel|null Row
+     * @return object|null Row
      */
     public function one($fields = null, $where = null)
     {
-        if (empty($this->sql)) {
-            $this->limit(1)->select();
-        }
-        $data = $this->get($fields ?? "*");
+        $data = $this->get($fields, $where, 1);
 
-        return (!empty($data)) ? $data[0] : null;
+        return !empty($data) ? $data[0] : null;
     }
 
     /**
      * Fetch a single row from a select query.
      *
      * @param string $field
-     * @param string|array $where
+     * @param string|array $value
      *
-     * @return \stdClass|\Footup\Orm\BaseModel|null Row
+     * @return object|null Row
      */
-    public function first($field = null, $where = null)
+    public function first($field = null, $value = null)
     {
-        if (empty($this->sql)) {
+        if (empty($this->order)) {
             $this->asc($field);
         }
-        return $this->one(null, $where);
+
+        if ($field && $value) {
+            is_array($value) ? $this->whereIn($field, $value) : $this->where($field, $value);
+        }
+
+        return $this->one();
     }
 
     /**
      * Fetch a single row from a select query.
      *
      * @param string $field
-     * @param string|array $where
+     * @param string|array $value
      *
-     * @return \stdClass|\Footup\Orm\BaseModel|null Row
+     * @return object|null Row
      */
-    public function last($field = null, $where = null)
+    public function last($field = null, $value = null)
     {
-        if (empty($this->sql)) {
-            $this->desc($field ?? $this->getPrimaryKey());
+        if (empty($this->order)) {
+            $this->desc($field);
         }
 
-        return $this->one(null, $where);
+        if ($field && $value) {
+            is_array($value) ? $this->whereIn($field, $value) : $this->where($field, $value);
+        }
+
+        return $this->one();
     }
 
     /**
      * Fetch a value from a field.
      *
      * @param string $name Database field name
+     * 
      * @return mixed Row value
      */
     public function value($name)
     {
         $row = $this->one();
 
-        return (!empty($row)) ? $row->$name : null;
+        return !empty($row) ? (is_array($row) ? $row[$name] : $row->$name) : null;
     }
 
     /**
      * Gets the min value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Row value
+     * 
+     * @return number Row value
      */
     public function min($field, $key = null)
     {
@@ -916,7 +1015,8 @@ class QueryBuilder implements \IteratorAggregate
      * Gets the max value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Row value
+     * 
+     * @return number Row value
      */
     public function max($field, $key = null)
     {
@@ -931,7 +1031,8 @@ class QueryBuilder implements \IteratorAggregate
      * Gets the sum value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Row value
+     * 
+     * @return number Row value
      */
     public function sum($field, $key = null)
     {
@@ -946,7 +1047,8 @@ class QueryBuilder implements \IteratorAggregate
      * Gets the average value for a specified field.
      *
      * @param string $field Field name
-     * @return mixed Row value
+     * 
+     * @return number Row value
      */
     public function avg($field, $key = null)
     {
@@ -962,6 +1064,7 @@ class QueryBuilder implements \IteratorAggregate
      * Gets a count of records for a table.
      *
      * @param string $field Field name
+     * 
      * @return int Row value
      */
     public function count($field = '*')
@@ -977,11 +1080,13 @@ class QueryBuilder implements \IteratorAggregate
      * Wraps quotes around a string and escapes the content for a string parameter.
      *
      * @param mixed $value mixed value
-     * @return mixed Quoted value
+     * 
+     * @return string|int Quoted value
      */
     public function quote($value)
     {
-        if ($value === null) return 'NULL';
+        if ($value === null)
+            return 'NULL';
 
         if (is_string($value)) {
             if (self::$db !== null) {
@@ -1004,7 +1109,8 @@ class QueryBuilder implements \IteratorAggregate
      * Finds and populates an object.
      *
      * @param int|string|array Search value
-     * @param string $field Search value
+     * @param string $field Search field
+     * 
      * @return object|array|null Populated object
      */
     public function find($value = [], $field = null)
@@ -1012,32 +1118,26 @@ class QueryBuilder implements \IteratorAggregate
         $field = is_null($field) ? $this->getPrimaryKey() : $field;
 
         if (!empty($value)) {
-            if ((is_int($value) || is_string($value)) && ($this->getPrimaryKey() == $field || property_exists($this, $field))) {
+            if (!is_array($value) && ($this->getPrimaryKey() == $field || $this->isColumnExists($field))) {
                 $this->where($field, $value);
             } else if (is_array($value)) {
                 $this->whereIn($field, $value);
             }
         }
 
-        if (empty($this->sql)) {
-            $this->select();
-        }
 
-
-        return $field == $this->getPrimaryKey() && is_array($value) ? $this->get() : $this->one($field);
+        return $field == $this->getPrimaryKey() && is_array($value) ? $this->get($field) : $this->one($field);
     }
 
     /**
      * Get the table name for this ER class.
      * 
-     * @access public
      * @return string
      */
     public function getTable()
     {
         return $this->table;
     }
-
 
     /**
      * Get the value of primaryKey
@@ -1046,21 +1146,40 @@ class QueryBuilder implements \IteratorAggregate
      */
     public function getPrimaryKey()
     {
-        if(empty($this->primaryKey))
-        {
+        if (empty($this->primaryKey)) {
             $columns = $this->getTableInfo();
-            
+
             foreach ($columns as $key => $column) {
                 # code...
-                if($column["Key"] === "PRI")
-                {
+                if ($column["Key"] === "PRI") {
                     $this->primaryKey = $column["Field"];
                     break;
                 }
             }
         }
-        
+
         return $this->primaryKey;
+    }
+
+    /**
+     * Check if field is part of the selected table
+     * 
+     * @return bool
+     */
+    public function isColumnExists($field)
+    {
+        $fieldFound = false;
+        $columns = $this->getTableInfo();
+
+        foreach ($columns as $key => $column) {
+            # code...
+            if ($field === $column["Field"]) {
+                $fieldFound = true;
+                break;
+            }
+        }
+
+        return $fieldFound;
     }
 
     /**
@@ -1074,7 +1193,8 @@ class QueryBuilder implements \IteratorAggregate
     }
 
     /**
-     * @param int $fetchType
+     * @param int $fetchType - PDO FETCH constants
+     * 
      * @return array $tableInfo
      */
     public function getTableInfo($fetchType = PDO::FETCH_ASSOC)
@@ -1086,17 +1206,17 @@ class QueryBuilder implements \IteratorAggregate
             $stmt->execute();
             $this->tableInfo = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
-        
-        return $fetchType === PDO::FETCH_OBJ ? array_map(function($field){
-            return (object)$field;
+
+        return $fetchType === PDO::FETCH_OBJ ? array_map(function ($field) {
+            return (object) $field;
         }, $this->tableInfo) : $this->tableInfo;
     }
 
     /**
      * Get $last_query dernière requête sql
      *
-     * @return  string
-     */ 
+     * @return string
+     */
     public function getLastQuery()
     {
         return $this->last_query;
@@ -1105,10 +1225,10 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set $last_query dernière requête sql
      *
-     * @param  string  $last_query  $last_query dernière requête sql
+     * @param string $last_query  $last_query dernière requête sql
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setLastQuery(string $last_query)
     {
         $this->last_query = $last_query;
@@ -1119,8 +1239,8 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get $num_rows
      *
-     * @return  int
-     */ 
+     * @return int
+     */
     public function getNumRows()
     {
         return $this->num_rows;
@@ -1129,8 +1249,8 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get $insert_id id dernièrement ajouté
      *
-     * @return  int|string
-     */ 
+     * @return int|string
+     */
     public function getInsertID()
     {
         return $this->insert_id;
@@ -1139,8 +1259,8 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get $affcted_rows
      *
-     * @return  int
-     */ 
+     * @return int
+     */
     public function getAffectedRows()
     {
         return $this->affected_rows;
@@ -1162,10 +1282,10 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set the value of returnType
      *
-     * @param  string  $returnType
+     * @param string $returnType
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setReturnType(string $returnType)
     {
         $this->returnType = $returnType;
@@ -1176,10 +1296,10 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set the value of primaryKey
      *
-     * @param  string  $primaryKey
+     * @param string $primaryKey
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setPrimaryKey(string $primaryKey)
     {
         $this->primaryKey = $primaryKey;
@@ -1190,10 +1310,10 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set $insert_id id dernièrement ajouté
      *
-     * @param  int|string  $insert_id  $insert_id id dernièrement ajouté
+     * @param int|string $insert_id  $insert_id id dernièrement ajouté
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setInsertId($insert_id)
     {
         $this->insert_id = $insert_id;
@@ -1204,10 +1324,10 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set $num_rows
      *
-     * @param  int  $num_rows  $num_rows
+     * @param int $num_rows  $num_rows
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setNumRows(int $num_rows)
     {
         $this->num_rows = $num_rows;
@@ -1218,10 +1338,10 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Set $affcted_rows
      *
-     * @param  int  $affected_rows  $affcted_rows
+     * @param int $affected_rows  $affcted_rows
      *
-     * @return  self
-     */ 
+     * @return self
+     */
     public function setAffectedRows(int $affected_rows)
     {
         $this->affected_rows = $affected_rows;
@@ -1232,10 +1352,122 @@ class QueryBuilder implements \IteratorAggregate
     /**
      * Get $db connection
      *
-     * @return  \PDO
-     */ 
+     * @return \PDO
+     */
     public function getDb()
     {
         return self::$db;
     }
+
+    /**
+     * Build the where clause
+     * 
+     * @param array|string $key
+     * @param null|string|null $operator
+     * @param array|string|null $val
+     * @param string $link default AND 
+     * @param bool $escape default TRUE
+     * 
+     * @throws Exception
+     * @return QueryBuilder
+     */
+    protected function buildWhere($key, $operatorOrValue = null, $val = null, $link = ' AND ', $escape = true)
+    {
+        if (empty($key)) {
+            throw new Exception(text("Db.emptyWhere"));
+        }
+
+        $this->where .= empty($this->where) ? ' WHERE ' : '';
+        $glue = !empty($this->where) && trim(strtolower($this->where)) != 'where' ? $link : '';
+        
+        if (is_array($key) ) {
+            $key = array_filter($key);
+            $counter = count($key);
+            
+            if ($counter !== count($key, COUNT_RECURSIVE)) {
+                // Handle multidimensional array
+                $this->where .= '(';
+
+                foreach ($key as $k => $condition) {
+                    if (is_array($condition)) {
+                        $this->handleSingleArrayCondition($condition, $escape, $link);
+                    }
+                }
+                $this->where .= ') ';
+
+            } else {
+                // Handle single condition
+                $this->handleSingleArrayCondition($key, $escape, $link);
+            }
+        } else {
+            if (is_array($operatorOrValue) && !empty($operatorOrValue)) {
+                list($operatorOrValue, $val) = ['IN', '(' . implode(',', array_map(array($this, 'quote'), $operatorOrValue)) . ')'];
+            }
+
+            if ((!is_array($operatorOrValue) && !is_null($operatorOrValue)) && is_null($val)) {
+                list($operatorOrValue, $val) = ['=', $operatorOrValue];
+            }
+
+            $operator = strtoupper(trim($operatorOrValue));
+
+            if (in_array($operator, self::OPERATORS)) {
+                if ($val === 'NULL') {
+                    $val = null;
+                    $operatorOrValue = $operator.' NULL';
+                } else {
+                    if (is_array($val)) {
+                        if (stripos($operator, 'in') !== false) {
+                            $val = '(' . implode(',', array_map(array($this, 'quote'), $val)) . ')';
+                        }
+                        if (stripos($operator, 'between') !== false) {
+                            $val = implode(',', array_map(array($this, 'quote'), $val));
+                        }
+                    }
+                }
+            }
+            $this->where .= trim($glue . $key . ' ' . $operatorOrValue . ' ' . $val);
+        }
+        
+        return $this;
+    }
+
+    protected function addWhereArrayCondition(array $condition, $escape = true, &$link = ' AND ') {
+        $this->where .= empty($this->where) ? ' WHERE ' : '';
+        $glue = !empty($this->where) && trim(strtolower($this->where), ' (') != 'where' ? $link : '';
+
+
+        $firstArrayKey = key($condition);
+        
+        if (count($condition) === 3 && is_numeric($firstArrayKey)) {
+            list($field, $operator, $value) = $condition;
+            $operator = strtoupper(trim($operator));
+
+            if (!in_array($operator, self::OPERATORS)) {
+                throw new Exception(text("Db.unknownOperator", [$operator]));
+            }
+
+            $value = $escape && !is_numeric($value) ? $this->quote($value) : $value;
+            $this->where .= $glue . ' ' . $field . ' ' . $operator . ' ' . $value;
+        } elseif (count($condition) === 1) {
+            $field = key($condition);
+            $value = $condition[$field];
+            $value = $escape && !is_numeric($value) ? $this->quote($value) : $value;
+            $this->where .= $glue . ' ' . $field . ' = ' . $value;
+        } else {
+            throw new Exception(text("Db.malFormedWhereArray", [print_r($condition, true)]));
+        }
+    }
+
+    protected function handleSingleArrayCondition(array $condition, $escape = true, &$link = ' AND ') {
+        $firstArrayKey = key($condition);
+        if (is_numeric($firstArrayKey)) {
+            $this->addWhereArrayCondition($condition, $escape, $link);
+        } else {
+            foreach ($condition as $k => $value) {
+                # code...
+                $this->addWhereArrayCondition([$k => $value], $escape, $link);
+            }
+        }
+    }
+    
 }

@@ -34,5 +34,5 @@
     "uuid"              : ":attribute doit être un UUID valide",
     "card-number"       : ":attribute doit être un numéro de carte valide",
 
-    "cannotMatch"       :   "Impossible de faire correpondre {0} au champ {1} !"
+    "cannotMatch"       : "Impossible de faire correpondre {0} au champ {1} !"
 }

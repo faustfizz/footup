@@ -1,8 +1,8 @@
 <?php
 /**
- * FOOTUP -  2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup\Debug
  * @version 0.1
@@ -50,6 +50,16 @@ class Reporter
      */
     public function enableErrorHandler(string $env = 'prod'): self
     {
+        if ($env === "prod") {
+            error_reporting(0);
+            ini_set("display_errors", "Off");
+            ini_set("display_startup_errors", "Off");
+        } else {
+            error_reporting(E_ALL);
+            ini_set("display_errors", "On");
+            ini_set("display_startup_errors", "On");
+        }
+
         $this->handler->setEnvirenment($env);
         $this->handler->setErrorHandler();
         $this->handler->setExceptionHandler();

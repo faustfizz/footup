@@ -1,8 +1,8 @@
 <?php
 /**
- * FOOTUP -  2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup\Debug
  * @version 0.1
@@ -21,6 +21,8 @@
 
 namespace Footup\Debug;
 
+use function Footup\Debug\Support\{readErrorFileConsole, ouch_views};
+
 class View
 {
     /**
@@ -31,7 +33,7 @@ class View
      * @param int    $bg
      * @param int    $bold
      *
-     * @return void
+     * @return bool|int
      */
     public static function writeLn($line, $color = 37, $bg = 48, $bold = 0)
     {

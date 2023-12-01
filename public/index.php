@@ -1,7 +1,7 @@
 <?php
 /**
- * FOOTUP 
- * *************************
+ * FOOTUP FRAMEWORK  2021 - 2023
+ * *****************************
  * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package FOOTUP
@@ -11,8 +11,7 @@
 
 // Valid PHP Version?
 $minPHPVersion = '7.4';
-if (version_compare(PHP_VERSION, $minPHPVersion, '<'))
-{
+if (version_compare(PHP_VERSION, $minPHPVersion, '<')) {
 	die("Your PHP version must be {$minPHPVersion} or higher to run FootUp. Current version: " . PHP_VERSION);
 }
 unset($minPHPVersion);
@@ -22,7 +21,7 @@ defined("DS") or define("DS", DIRECTORY_SEPARATOR);
 /**
  * Le dossier public
  */
-defined('BASE_PATH') or define('BASE_PATH', __DIR__ .DS);
+defined('BASE_PATH') or define('BASE_PATH', __DIR__ . DS);
 
 /**
  * On se positionne dans le dossier public
@@ -34,4 +33,4 @@ chdir(__DIR__);
 require realpath(BASE_PATH . '../app/Config/Fuel.php');
 
 // Load our friend FootUP.
-(require (rtrim(App\Config\Fuel::sysDir, '\\/ ') . DS . 'Boot.php'))->terminate();
+(require(rtrim(App\Config\Fuel::sysDir, '\\/ ') . DS . 'Boot.php'))->terminate();

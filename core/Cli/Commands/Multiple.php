@@ -13,7 +13,7 @@ class Multiple extends Command
     public function __construct(App $cli)
     {
         $this
-			->argument('<classname> [...]', 'The name of classes to generate')
+            ->argument('<classname> [...]', 'The name of classes to generate')
             ->option('-n --namespace', 'The namespace of these classes')
             ->option('-T --type', 'The type can be controller, model, middle, migration, seeder or view class')
             ->option('-t --table', 'The table name if you generate Model class')
@@ -28,7 +28,7 @@ class Multiple extends Command
                 '<bold>  $0</end> <comment> <classname> -n namespace </end> ## Generate the class with namespace<eol/>' .
                 '<comment> ## All options not matching the selected type are ignored<eol/>'
             );
-            
+
         $this->inGroup("Helper");
 
         $this->alias("multiple");
@@ -37,7 +37,7 @@ class Multiple extends Command
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance
-    public function interact(Interactor $io) :void
+    public function interact(Interactor $io): void
     {
         // Collect missing opts/args
         if ($this->namespace && !is_string($this->namespace)) {
@@ -49,10 +49,10 @@ class Multiple extends Command
         if ($this->returnType && !is_string($this->returnType)) {
             $this->set("returnType", $io->choice("You can't add empty returnType, Please choose one : ", ["self", "object", "array"], "self"));
         }
-        if ($this->table && !is_string($this->table) && $this->type === "model") {
+        if (($this->table && !is_string($this->table)) && $this->type === "model") {
             $this->set("table", $io->prompt("Please give the table name as you selected the model type "));
         }
-        if ($this->primaryKey && !is_string($this->primaryKey) && $this->type === "model") {
+        if (($this->primaryKey && !is_string($this->primaryKey)) && $this->type === "model") {
             $this->set("primaryKey", $io->prompt("Please give the primaryKey as you selected the model type "));
         }
         // ...
@@ -63,17 +63,15 @@ class Multiple extends Command
     public function execute()
     {
         $io = $this->app()->io();
-        
-        if(!$this->returnType)
-        {
+
+        if (!$this->returnType) {
             $this->returnType = "self";
         }
-
-        $classnames = array_unique($this->values(0)["classname"]);
+        
+        $classnames = array_unique($this->values(false)["classname"]);
         // more codes ...
         foreach ($classnames as $value) {
-            switch($this->type)
-            {
+            switch ($this->type) {
                 case "controller":
                 case "middle":
                     # code...
@@ -115,7 +113,7 @@ class Multiple extends Command
                     $value && $seederCommand->set("classname", $value);
                     $this->force && $seederCommand->set("force", true);
                     $seederCommand->execute();
-                break;
+                    break;
             }
         }
 

@@ -7,5 +7,12 @@
 	"modelClassUndefined"  : "Model: class non défini !",
 	"undefinedTable"  	: "Table indéfinie !",
 	"undefinedMethod"   : "La méthode {0} n'éxiste pas dans la classe {1} !",
-	"dontUse"   		: "Attention: N\"utilisez jamais une requête de type {0} sans une clause WHERE !"
+	"dontUse"   		: "Attention: N\"utilisez jamais une requête de type {0} sans une clause WHERE !",
+	"emptyWhere"   		: "Attention: Le premier argument des méthods 'where' ne peut pas être vide !",
+	"unknownOperator"	: "Opérateur inconnu {0}",
+	"malFormedWhereArray"	: "Le tableau passé dans la méthode 'where' est mal formé {0}",
+	"invalidDataArray"  : "Le tableau de données doit être au format [champ => valeur] !",
+	"databaseError"  : "Erreur de la base de données: {0}",
+	"emptyData"  : "{0} : Aucune donnée.",
+	"noWhereRef"  : "Aucune valeur de clé primaire ou condition n'est spécifiée"
 }

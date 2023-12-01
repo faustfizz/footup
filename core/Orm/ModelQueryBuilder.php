@@ -3,9 +3,9 @@
 /**
  * FOOTUP - FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Orm
+ * @package Footup\Orm
  * @version 0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -43,11 +43,9 @@ class ModelQueryBuilder extends QueryBuilder
     public function __construct(BaseModel $model, $DbConnection = null)
     {
         $this->model = $model;
-        self::$db = $DbConnection instanceof PDO ? $DbConnection : DbConnection::getDb();
+        self::$db = $DbConnection instanceof PDO ? $DbConnection : DbConnection::getDb(true);
 
         $this->getTable();
-        $this->getPrimaryKey();
-        $this->getReturnType();
 
         parent::__construct($this->getTable(), self::$db);
     }
@@ -57,18 +55,17 @@ class ModelQueryBuilder extends QueryBuilder
     /**
      * Builds a delete query.
      *
-     * @param string|array|int $where Where conditions
+     * @param scalar $where Where conditions
      * @return bool
      */
     public function delete($where = null)
     {
-        if($this->model->id() && empty($where))
-        {
-            return parent::delete($this->getPrimaryKey()." = ".$this->model->id());
+        if ($this->model->id() && empty($where)) {
+            return parent::delete($this->getPrimaryKey() . " = " . $this->model->id());
         }
         return parent::delete($where);
     }
-    
+
     /**
      * Fetch a value from a field.
      *
@@ -79,34 +76,32 @@ class ModelQueryBuilder extends QueryBuilder
     {
         $returnType = $this->getReturnType();
 
-        if($this->getReturnType() !== 'object') {
+        if ($this->getReturnType() !== 'object') {
             $this->setReturnType('object');
         }
-        
+
         $row = $this->one();
 
         $this->setReturnType($returnType);
 
-        return (!empty($row)) ? $row->$name : null;
+        return !empty($row) ? $row->$name : null;
     }
 
     /**
-     * Undocumented function
-     *
-     * @param string $select
-     * @param array|string $where
-     * @param int $limit
-     * @param int $offset
-     * @return BaseModel[]
+     * @inheritDoc
+     * @return Collection<int, BaseModel|array|object>
      */
     public function get($select = "*", $where = null, $limit = null, $offset = null)
     {
         if (!empty($where)) {
             $this->where($where);
         }
+
         if (empty($this->sql)) {
-            $this->select($select, $limit, $offset);
+            $this->select($select);
         }
+
+        $this->limit($limit)->offset($offset);
 
         $this->sql(array(
             'SELECT',
@@ -129,73 +124,28 @@ class ModelQueryBuilder extends QueryBuilder
          * @var \PDOStatement
          */
         $result = $execute->result;
+        $items = [];
 
         switch ($this->returnType) {
             case 'object':
-                return $result->fetchAll(PDO::FETCH_OBJ);
-            
+                $items = $result->fetchAll(PDO::FETCH_OBJ);
+                break;
+
             case 'array':
-                return $result->fetchAll(PDO::FETCH_ASSOC);
-                
+                $items = $result->fetchAll(PDO::FETCH_ASSOC);
+                break;
+
             case 'self':
-                default:{
+            default: {
                     $items = $result->fetchAll(PDO::FETCH_ASSOC);
                     $model = get_class($this->model);
-                    return array_map(function ($item) use ($model) {
-                        $Model = new $model;
-                        $Model->fill($item);
-                        return $Model->setOriginalData($Model->getData());
+                    $items = array_map(function ($item) use ($model) {
+                        return new $model($item);
                     }, $items);
                 }
         }
+        return new Collection($items);
 
-    }
-
-    /**
-     * Saves an object to the database.
-     *
-     * @param \Footup\Orm\BaseModel $object Class instance
-     * @param array $fields Select database fields to save
-     * @return bool
-     */
-    public function save(BaseModel $object = null, array $fields = null)
-    {
-        $object = is_null($object) ? $this->model : $object;
-
-        $this->from($object->getTable());
-
-        $pk = $object->getPrimaryKey();
-        $id = $object->{$pk} ?? null;
-        
-        $data = $object->getData();
-
-        if (is_null($id)) {
-            if ($bool = $this->insert(
-                    array_filter($data, 
-                        function($v, $k) {
-                            return  trim($v) !== "";
-                        }, ARRAY_FILTER_USE_BOTH
-                    )
-                )
-            ) {
-                $object->{$pk} = $this->getInsertID();
-            }
-            return $bool;
-        } else {
-            if ($fields !== null) {
-                $keys = array_flip($fields);
-                $data = array_intersect_key($data, $keys);
-            }
-            
-            return $this->update(
-                    array_filter($data, 
-                        function($v, $k) {
-                            return trim($v) !== "";
-                        }, ARRAY_FILTER_USE_BOTH
-                    ),
-                    $id
-                );
-        }
     }
 
     /**
@@ -206,7 +156,8 @@ class ModelQueryBuilder extends QueryBuilder
      */
     public function getTable()
     {
-        if(empty($this->table)) $this->table = $this->model->getTable();
+        if (empty($this->table))
+            $this->table = $this->model->getTable();
 
         return $this->table;
     }
@@ -218,10 +169,9 @@ class ModelQueryBuilder extends QueryBuilder
      */
     public function getPrimaryKey()
     {
-        if(empty($this->primaryKey)) $this->primaryKey = $this->model->getPrimaryKey();
+        if (empty($this->primaryKey))
+            $this->primaryKey = $this->model->getPrimaryKey();
 
-        parent::setPrimaryKey($this->primaryKey);
-        
         return $this->primaryKey;
     }
 
@@ -232,8 +182,9 @@ class ModelQueryBuilder extends QueryBuilder
      */
     public function getReturnType()
     {
-        if(empty($this->returnType)) $this->returnType = $this->model->getReturnType();
-        
+        if (empty($this->returnType))
+            $this->returnType = $this->model->getReturnType();
+
         return $this->returnType;
     }
 
@@ -241,19 +192,9 @@ class ModelQueryBuilder extends QueryBuilder
      * Get $model classe courrante
      *
      * @return  string|object
-     */ 
+     */
     public function getModel()
     {
         return $this->model;
-    }
-
-    /**
-     * Get $db connection
-     *
-     * @return  \PDO
-     */ 
-    public function getDb()
-    {
-        return self::$db;
     }
 }

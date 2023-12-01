@@ -12,24 +12,24 @@ class Middle extends Command
     protected $name_space = "App\\Middle";
 
     protected $replacements = array(
-            "{name_space}"  =>  null,
-            "{class_name}"  =>  null
-        );
+        "{name_space}" => null,
+        "{class_name}" => null
+    );
     protected $generated = [];
 
     public function __construct(App $cli)
     {
         $this
-			->argument('<classname>', 'The name of the class to generate')
+            ->argument('<classname>', 'The name of the class to generate')
             ->option('-n --namespace', 'The namespace of the middleware class')
             ->option('-f --force', 'Force override file', null, false)
             // Usage examples:
             ->usage(
                 // $0 will be interpolated to actual command name
                 '<bold>  $0</end> <comment> <classname> </end> ## Generate the class without specifying anything than the name<eol/>' .
-                '<bold>  $0</end> <comment> <classname> -n namespace </end> ## Generate the class with namespace<eol/>' 
+                '<bold>  $0</end> <comment> <classname> -n namespace </end> ## Generate the class with namespace<eol/>'
             );
-            
+
         $this->inGroup("Generator");
 
         $this->alias("middle");
@@ -38,7 +38,7 @@ class Middle extends Command
     }
 
     // This method is auto called before `self::execute()` and receives `Interactor $io` instance
-    public function interact(Interactor $io) :void
+    public function interact(Interactor $io): void
     {
         // Collect missing opts/args
         if ($this->namespace && !is_string($this->namespace)) {
@@ -56,13 +56,12 @@ class Middle extends Command
         // more codes ...
         $this->generate();
 
-        if($this->scaffold)
+        if ($this->scaffold)
             return $this->generated;
 
-        
+
         !empty($this->generated) && $io->info("All generated files :", true);
-        foreach($this->generated as $file)
-        {
+        foreach ($this->generated as $file) {
             $io->success($file, true);
         }
         $io->eol();
@@ -76,27 +75,26 @@ class Middle extends Command
         $this->name_space = is_string($namespace) ? trim($namespace, " /") : $this->name_space;
 
         $this->replacements = array(
-            "{name_space}"  =>  ucfirst($this->name_space),
-            "{class_name}"  =>  ucfirst($this->classname)
+            "{name_space}" => ucfirst($this->name_space),
+            "{class_name}" => ucfirst($this->classname)
         );
     }
 
     protected function replace($key, $value = null)
     {
-        if(is_array($key))
-        {
+        if (is_array($key)) {
             foreach ($key as $k => $v) {
                 # code...
                 $this->replacements[$k] = $v;
             }
-        }else{
+        } else {
             $this->replacements[$key] = $value;
         }
         return $this;
     }
 
     protected function parse_file_content($file)
-    {   
+    {
         $tpl = file_exists($file) ? file_get_contents($file) : "";
         return strtr($tpl, $this->replacements);
     }
@@ -108,48 +106,45 @@ class Middle extends Command
         $hasSlash = strpos($this->classname, "/");
         $expl = explode("/", trim(APP_PATH, DIRECTORY_SEPARATOR));
 
-        if($hasSlash !== false)
-        {
+        if ($hasSlash !== false) {
             $expo = explode("/", $this->classname);
             $file = array_pop($expo);
-            $dir = implode("/", array_map(function($v){ return ucfirst($v); }, $expo));
-            
-            if(!is_dir(APP_PATH."Middle/".ucfirst($dir)))
-            {
-                @mkdir(APP_PATH."Middle/".ucfirst($dir), 0777, true);
+            $dir = implode("/", array_map(function ($v) {
+                return ucfirst($v); }, $expo));
+
+            if (!is_dir(APP_PATH . "Middle/" . ucfirst($dir))) {
+                @mkdir(APP_PATH . "Middle/" . ucfirst($dir), 0777, true);
             }
 
-            if(!$this->force && file_exists(APP_PATH."Middle/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php'))
-            {
-                $this->app()->io()->eol()->warn('"'.end($expl)."/Middle/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php" exists, use --force to override !', true)->eol();
+            if (!$this->force && file_exists(APP_PATH . "Middle/" . ucfirst($dir) . DIRECTORY_SEPARATOR . ucfirst($file) . '.php')) {
+                $this->app()->io()->eol()->warn('"' . end($expl) . "/Middle/" . ucfirst($dir) . DIRECTORY_SEPARATOR . ucfirst($file) . '.php" exists, use --force to override !', true)->eol();
                 exit(0);
             }
-            
-            
+
+
             @file_put_contents(
-                APP_PATH."Middle/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php',
+                APP_PATH . "Middle/" . ucfirst($dir) . DIRECTORY_SEPARATOR . ucfirst($file) . '.php',
                 $this->replace([
-                    "{name_space}" => $this->name_space. '\\'.strtr($dir, "/" , "\\"),
+                    "{name_space}" => $this->name_space . '\\' . strtr($dir, "/", "\\"),
                     "{class_name}" => ucfirst($file)
-                ])->parse_file_content(__DIR__."/../Tpl/Middle.tpl")
+                ])->parse_file_content(__DIR__ . "/../Tpl/Middle.tpl")
             );
-            
-            $this->generated[] =  end($expl)."/Middle/".ucfirst($dir).DIRECTORY_SEPARATOR.ucfirst($file).'.php';
-        }else{
-            if(!$this->force && file_exists(APP_PATH."Middle/".ucfirst($this->classname).'.php'))
-            {
-                $this->app()->io()->eol()->warn('"'.end($expl)."/Middle/".ucfirst($this->classname).'.php" exists, use --force to override !', true)->eol();
+
+            $this->generated[] = end($expl) . "/Middle/" . ucfirst($dir) . DIRECTORY_SEPARATOR . ucfirst($file) . '.php';
+        } else {
+            if (!$this->force && file_exists(APP_PATH . "Middle/" . ucfirst($this->classname) . '.php')) {
+                $this->app()->io()->eol()->warn('"' . end($expl) . "/Middle/" . ucfirst($this->classname) . '.php" exists, use --force to override !', true)->eol();
                 exit(0);
             }
-            
+
             @file_put_contents(
-                APP_PATH."Middle/".ucfirst($this->classname).'.php',$this->replace([
+                APP_PATH . "Middle/" . ucfirst($this->classname) . '.php', $this->replace([
                     "{name_space}" => $this->name_space,
                     "{class_name}" => ucfirst($this->classname)
-                ])->parse_file_content(__DIR__."/../Tpl/Middle.tpl")
+                ])->parse_file_content(__DIR__ . "/../Tpl/Middle.tpl")
             );
 
-            $this->generated[] =  end($expl)."/Middle/".ucfirst($this->classname).'.php';
+            $this->generated[] = end($expl) . "/Middle/" . ucfirst($this->classname) . '.php';
         }
 
         return $this->generated;

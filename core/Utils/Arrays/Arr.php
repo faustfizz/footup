@@ -1,14 +1,19 @@
 <?php
 
+/**
+ * FOOTUP FRAMEWORK
+ * *************************
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
+ * 
+ * @package Footup\Utils\Arrays
+ * @version 0.1
+ * @author Faustfizz Yous <youssoufmbae2@gmail.com>
+ */
+
 namespace Footup\Utils\Arrays;
 
 use ArrayAccess;
 
-/**
- * Class Arr
- *
- * @package Footup\Utils\Arrays
- */
 class Arr
 {
     /**
@@ -68,7 +73,7 @@ class Arr
         return array_reduce($array, function ($result, $item) use ($depth) {
             if (!is_array($item)) {
                 return array_merge($result, [$item]);
-            } else if($depth === 1) {
+            } else if ($depth === 1) {
                 return array_merge($result, array_values($item));
             } else {
                 return array_merge($result, static::flatten($item, $depth - 1));
@@ -166,9 +171,9 @@ class Arr
      */
     public static function column(array $array = null, $columns, $indexKey = null)
     {
-        $array   = (array) $array;
+        $array = (array) $array;
         $columns = (array) $columns;
-        $last    = array_pop($columns);
+        $last = array_pop($columns);
         foreach ($columns as $column) {
             $array = array_column($array, $column);
         }
@@ -187,7 +192,7 @@ class Arr
      */
     public static function pluck(array $array = null, $columns)
     {
-        $array   = (array) $array;
+        $array = (array) $array;
         $columns = (array) $columns;
         foreach ($columns as $column) {
             if ($column !== null) {
@@ -234,8 +239,7 @@ class Arr
                 }
             }
             return false;
-        }
-        else {
+        } else {
             return array_search($needle, $haystack, $strict);
         }
     }
@@ -260,8 +264,7 @@ class Arr
                 }
             }
             return null;
-        }
-        else {
+        } else {
             $key = array_search($needle, $haystack, $strict);
             return $key !== false ? $haystack[$key] : null;
         }
@@ -280,8 +283,8 @@ class Arr
      */
     public static function locate($array, $property, $value, $strict = false)
     {
-        $array    = $array ?? [];
-        $columns  = (array) $property;
+        $array = $array ?? [];
+        $columns = (array) $property;
         $property = array_pop($columns);
         if (!empty($columns)) {
             $array = static::column($array, $columns);

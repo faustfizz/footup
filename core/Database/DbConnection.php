@@ -1,11 +1,11 @@
-<?php 
+<?php
 
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Database
+ * @package Footup\Database
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -40,12 +40,10 @@ class DbConnection
      */
     public static function setDb($config = null, $init = false)
     {
-        if($config instanceof PDO)
-        {
+        if ($config instanceof PDO) {
             return self::$db = $config;
         }
-        if($config instanceof DbConnection)
-        {
+        if ($config instanceof DbConnection) {
             return self::$db = $config::getDb();
         }
 
@@ -61,8 +59,7 @@ class DbConnection
                  */
                 $Config = Shared::loadConfig()->config;
 
-                if(!in_array($Config['db_type'], self::$db_types))
-                {
+                if (!in_array($Config['db_type'], self::$db_types)) {
                     throw new Exception(text("Db.unsupportedType", [$Config['db_type'], self::$db_types]));
                 }
 
@@ -109,10 +106,14 @@ class DbConnection
     /**
      * Gets the database connection.
      *
+     * @param boolean $init init the connection if needed
      * @return PDO Database connection
      */
-    public static function getDb()
+    public static function getDb($init = false)
     {
+        if (is_null(self::$db)) {
+            return self::setDb(null, $init);
+        }
         return self::$db;
     }
 

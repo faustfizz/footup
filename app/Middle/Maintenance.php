@@ -21,6 +21,6 @@ class Maintenance
      */
     public function execute(Request $request, Response $response, $next)
     {
-        return $response->die(503, 'Site Web en Maintenance' ,'Ce site est en maintenance !');
+        return $response->die(503, 'Site Web en Maintenance', 'Ce site est en maintenance !');
     }
 }

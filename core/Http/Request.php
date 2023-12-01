@@ -3,16 +3,15 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Http
+ * @package Footup\Http
  * @version 0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
 namespace Footup\Http;
 
-use Footup\Config\Config;
 use Footup\Files\File;
 use Footup\Utils\Arrays\ArrDots;
 use Footup\Utils\Shared;
@@ -26,6 +25,13 @@ class Request
      * @var string
      */
     public $lang;
+
+    /**
+     * Current logged in user
+     *
+     * @var \Footup\Model|\stdClass|null
+     */
+    public $loggedInUser;
 
     /**
      * Current Controller
@@ -92,6 +98,35 @@ class Request
     public function getValidator()
     {
         return $this->validator;
+    }
+    /**
+     * @param string $key
+     *
+     * @return mixed
+     */
+    public function oldInput(string $key)
+    {
+        $session = Shared::loadSession();
+        
+        $getFlash = $session->flash('$_GET', null, false);
+        $postFlash = $session->flash('$_POST', null, false);
+        // If no data was previously saved, why we should go down ?
+        if (empty($getFlash) && empty($postFlash)) {
+            return null;
+        }
+        
+        // Check for the value in the POST array first.
+        if (isset($getFlash[$key]) || isset($postFlash[$key])) {
+            return $getFlash[$key] ?? $postFlash[$key];
+        }
+        
+        // Check for an array value in POST.
+        if ((isset($postFlash) && $postValue = ArrDots::get($postFlash, $key)) || (isset($getFlash) && $getValue = ArrDots::get($getFlash, $key))) {
+            return $postValue ?? $getValue;
+        }
+        
+        // puff, we should return something
+        return null;
     }
 
     /**
@@ -186,14 +221,14 @@ class Request
      */
     public function server($key, $default = null)
     {
-        $kname = is_null($key) ? null : str_replace('-', '_', mb_strtoupper($key));
+        $key = is_null($key) ? null : str_replace('-', '_', mb_strtoupper($key));
 
-        if (is_null($kname)) {
+        if (is_null($key)) {
             return $default;
         }
 
-        if (isset($this->server[$kname]) || isset($this->server[$key])) {
-            return $this->server[$kname] ?? $this->server[$key];
+        if (isset($this->server[$key])) {
+            return $this->server[$key];
         }
 
         return $this->header($key, $default);
@@ -214,7 +249,7 @@ class Request
         if ($key === null) {
             return $arr;
         }
-        return isset($arr[$key]) ? $arr[$key] : $default;
+        return $arr[$key] ?? $default;
     }
 
     /**
@@ -334,8 +369,8 @@ class Request
         if (!is_null($field) && isset($this->files[$field]['name'])) {
             return new File($this->files[$field]);
         } else {
-            $k = array_keys($this->files);
-            return isset($k[0]) ? new File($this->files[$k[0]]) : false;
+            $firstFile = reset($this->files);
+            return $firstFile ? new File($firstFile) : false;
         }
     }
 
@@ -345,7 +380,7 @@ class Request
      */
     public function method($upper = false)
     {
-        $m = $this->server('REQUEST_METHOD');
+        $m = $this->server('REQUEST_METHOD') ?? 'GET';
         return $upper === false ? strtolower($m) : strtoupper($m);
     }
 
@@ -376,14 +411,14 @@ class Request
 
         $value = $this->json($key);
 
-        if(isset($value) && !is_array($value) && !is_object($value))
+        if(!empty($value))
         {
             return $value;
         }
-
+        
         $value = $this->env($key);
 
-        if(isset($value) && !is_array($value))
+        if(!empty($value))
         {
             return $value;
         }
@@ -392,18 +427,23 @@ class Request
     }
 
     /**
+     * Get if subdomain
+     *
+     * @return string|false
+     */
+    public function subdomain() {
+        preg_match('/(\w+[^\.])\.\w+\.\w+/', $this->domain(), $matches);
+        return isset($matches[1]) ? $matches[1] : false;
+    }
+
+    /**
      * @return string
      */
     public function uri(): string
     {
-        $url = parse_url($this->url(false, true));
-
-        $uri = $this->server('REQUEST_URI');
-
-        if(isset($url['path']))
-        {
-            $uri = strtr($this->server('REQUEST_URI'), [rtrim($url['path'], '/') => ""]);
-        }
+        $rootDoc = array_filter(explode(DS, BASE_PATH));
+        $rootDoc = join('/', array_slice($rootDoc, -2));
+        $uri = preg_replace('/.*'.preg_quote($rootDoc, '/').'/', '/', strtolower($this->server('REQUEST_URI')));
 
         return rtrim(preg_replace('/\/+/', '/', $uri), '/') ?: '/';
     }
@@ -415,15 +455,25 @@ class Request
      */
     public function url($withQuery = true, $base = false): string
     {
-        $base_url = $this->env("base_url") ?? Shared::loadConfig()->base_url;
-        $base_url = trim((string) $base_url, " \n\r\t\v\x00\/");
-
-        if($base === true)
-        {
-            return $base_url;
+        if (preg_match('/(localhost|127\.)/', $this->domain())) {
+            $rootDoc = array_filter(explode(DS, BASE_PATH));
+            $rootDoc = join('/', array_slice($rootDoc, -2));
+            $fullTestUrl = trim( $this->scheme(true).$this->domain().'/'. strtolower($this->server('REQUEST_URI')), " \n\r\t\v\x00\/");
+            $baseUrl = preg_match('/'.preg_quote(trim($rootDoc, '/'), '/').'/', $fullTestUrl) ? $this->scheme(true).$this->domain().'/'. $rootDoc : $this->scheme(true).$this->domain();
+        } else {
+            $baseUrl = trim($this->scheme(true).$this->domain(), " \n\r\t\v\x00\/");
         }
 
-		return $withQuery && !empty($this->query()) ? $base_url. $this->path() ."?".http_build_query($this->query(), "_key", "&") : $base_url. $this->path();
+        if($base === true)
+            return $baseUrl;
+
+        $url = $baseUrl . $this->path();
+
+        if ($withQuery && !empty($this->query())) {
+            $url .= "?" . http_build_query($this->query(), "_key", "&");
+        }
+
+        return $url;
     }
 
     /**
@@ -449,7 +499,7 @@ class Request
      */
     public function domain(): string
     {
-        return $this->server('SERVER_NAME');
+        return $this->server('SERVER_NAME'). ($this->port() !== 80 ? ':'.$this->port() : null);
     }
 
     /**
@@ -457,7 +507,7 @@ class Request
      */
     public function scheme(bool $suffix = false): string
     {
-        return $suffix ? $this->server('REQUEST_SCHEME') . '://' : $this->server('REQUEST_SCHEME');
+        return $suffix ? $this->server('REQUEST_SCHEME', 'http') . '://' : $this->server('REQUEST_SCHEME', 'http');
     }
 
     /**
@@ -498,17 +548,15 @@ class Request
      * @param  string|null $name
      * @return mixed
      */
-    public function header(string $keyname, $default = null)
+    public function header(string $kname, $default = null)
     {
-        $kname = is_null($keyname) ? null : 'HTTP_' . mb_strtoupper($keyname);
-
-        if (empty($kname)) {
-            return $default;
+        $kname = is_null($kname) ? null : 'HTTP_' . str_replace('-', '_', mb_strtoupper($kname));
+    
+        if (!empty($kname) && isset($this->server[$kname])) {
+            return $this->server[$kname];
         }
 
-        $kname = str_replace('-', '_', $kname);
-        
-        return $this->server[$kname] ?? $default;
+        return $default;
     }
 
     /**
@@ -539,9 +587,10 @@ class Request
     public function is($patterns)
     {
         $path = rawurldecode($this->path());
-        $pattern = strtr( (is_array($patterns) ? implode("/", $patterns) : $patterns), [$this->url(false, true) => ""]);
+        $pattern = is_array($patterns) ? implode("/", $patterns) : $patterns;
+        $pattern = str_replace($this->url(false, true), "", $patterns);
 
-        return trim($pattern, " \n\r\t\v\x00/") === trim($path, " \n\r\t\v\x00/");
+        return trim($pattern) === trim($path);
     }
     
     /**
@@ -609,6 +658,30 @@ class Request
     public function setLang($lang)
     {
         $this->lang = $lang;
+
+        return $this;
+    }
+
+    /**
+     * Get current logged in user
+     *
+     * @return  \Footup\Model|\stdClass|null
+     */ 
+    public function user()
+    {
+        return $this->loggedInUser;
+    }
+
+    /**
+     * Set current logged in user
+     *
+     * @param  \Footup\Model|\stdClass|null  $loggedInUser  Current logged in user
+     *
+     * @return  self
+     */ 
+    public function setUser($loggedInUser)
+    {
+        $this->loggedInUser = $loggedInUser;
 
         return $this;
     }

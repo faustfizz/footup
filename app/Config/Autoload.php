@@ -2,9 +2,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/App/Config
+ * @package Footup\App\Config
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -23,7 +23,7 @@ class Autoload
      * ]
      *
      * @var array
-     */ 
+     */
     public static $classmap = [];
 
     /**
@@ -35,7 +35,7 @@ class Autoload
      * ]
      *
      * @var array
-     */ 
-    public static $psr4 = [ ];
+     */
+    public static $psr4 = [];
 
 }

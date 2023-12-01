@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Database
+ * @package Footup\Database
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -13,6 +13,7 @@
 namespace Footup\Database\Schema;
 
 use ErrorException;
+use Footup\Database\DbConnection;
 use PDO;
 
 
@@ -37,7 +38,6 @@ class Schema
 	private $tables = [];
 
     /**
-     * Конструктор.
      * @param PDO|null
      */
     public function __construct(PDO $db = null)
@@ -45,6 +45,14 @@ class Schema
         $this->db = &$db;
     }
 
+    /**
+     * @param PDO|null
+     * @return self
+     */
+    public static function new(PDO $db = null)
+    {
+        return new self($db);
+    }
 
 	/**
 	 * @param  string|Table $name
@@ -69,6 +77,33 @@ class Schema
 		return $this->tables[$name] = $table;
 	}
 
+	/**
+	 * @param  string|Table $name
+	 * @param  \Closure $callback
+	 * @return bool|string
+	 */
+	public static function createTable($name, \Closure $callback)
+	{
+		$table = NULL;
+        $schema = self::new(DbConnection::getDb(true));
+
+		if ($name instanceof Table) {
+			$table = $name;
+			$name = $table->getName();
+		} else {
+			$table = new Table($name, $schema->db);
+		}
+
+		if (isset($schema->tables[$name])) {
+			throw new ErrorException("Table '$name' already exists.");
+		}
+
+        $callback($table);
+
+        $schema->tables[$name] = $table;
+
+		return $schema->doAction($name);
+	}
 
 	/**
 	 * @param  string $name
@@ -82,7 +117,6 @@ class Schema
 
 		return NULL;
 	}
-
 
 	/**
 	 * @return Table[]
@@ -129,7 +163,7 @@ class Schema
 
     /**
      * execute the execute method magically to Create, Drop or Truncate tables schema
-     * @return PDOStatement|bool|string
+     * @return \PDOStatement|bool|string
      */
     public function __call(string $action, $arguments)
     {
@@ -137,15 +171,27 @@ class Schema
     }
 
     /**
+     * execute the execute method magically to Create, Drop or Truncate tables schema
+     * @return \PDOStatement|bool|string
+     */
+    public static function __callStatic(string $action, $arguments)
+    {
+        $schema = self::new(DbConnection::getDb(true));
+
+        return $schema->doAction($arguments[0] ?? null, strtolower($action), $arguments[1] ?? true);
+    }
+
+    /**
      * execute sql to Create, Drop or Truncate tables schema
      *
-     * @param string|null $tableName if null that you selected all tables. What ? Yeah
+     * @param string|Table|null $tableName if null that you selected all tables. What ? Yeah
      * @param string $action Choose one action to execute
      * @param bool $exists add "IF EXISTS" to the sql ()
      * @return bool|string
      */
-    protected function doAction(string $tableName = null, $action = "create", $exists = true)
+    protected function doAction($tableName = null, $action = "create", $exists = true)
     {
+        $tableName = $tableName instanceof Table ? $tableName->getName() : $tableName;
         $executed = $this->action($tableName, $action, $exists);
 
         if(!is_string($executed)){
@@ -184,7 +230,7 @@ class Schema
             case 'build':
             case 'execute':
             case 'create':
-                $action = "execute";
+                $action = "create";
                 break;
             default:
                 throw new ErrorException("Action '{$action}' not exists !");
@@ -195,11 +241,11 @@ class Schema
             {
                 return $table->{$action}($exists);
             }
-            if($action === "execute")
+            if($action === "create")
             {
                 throw new ErrorException("Table Object for `{$tableName}` not exists !");
             }else{
-                $exec = (bool)$this->db->query(($exists ? "CREATE TABLE IF NOT EXISTS {$tableName};" : "") . strtoupper($action)." TABLE "  .$tableName) ?:  $this->db->errorInfo()[2];
+                $exec = (bool)$this->db->query(strtoupper($action) ." TABLE "  . ($exists ? ($action === 'create' ? "IF NOT EXISTS" : "IF EXISTS") : "" )  . " `{$tableName}`;") ?:  $this->db->errorInfo()[2];
                 if(is_string($exec)) return $exec;
                 return true;
             }

@@ -171,7 +171,7 @@ class Paginator extends AbstractPaginator
 
     /**
      * @param string $url
-     * @param $query string|array
+     * @param string|array $query
      *
      * @return string
      */

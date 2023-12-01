@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Database
+ * @package Footup\Database
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -36,28 +36,29 @@ abstract class Migration
     }
 
     /**
-     * 
-     * @param Schema $schema
-     * @param boolean $empty
-     * @return bool|Schema
-     */
-    abstract protected function up(Schema $schema);
-
-    /**
-     * 
-     * @param Schema $schema
-     * @param boolean $empty
      * @return bool|string|Schema
      */
-    abstract protected function down(Schema $schema);
+    abstract protected function up();
 
     /**
-     * 
-     * @param Schema $schema
-     * @param boolean $empty
      * @return bool|string|Schema
      */
-    abstract protected function empty(Schema $schema);
+    abstract protected function down();
+
+    /**
+     * @return bool|string|Schema
+     */
+    abstract protected function empty();
+
+    public function enableForeignKeyChecks() 
+    {
+        $this->schema->getDb()->query("SET FOREIGN_KEY_CHECKS = 1");
+    }
+
+    public function disableForeignKeyChecks() 
+    {
+        $this->schema->getDb()->query("SET FOREIGN_KEY_CHECKS = 0");
+    }
 
     /**
      * 
@@ -67,13 +68,15 @@ abstract class Migration
     public function execute($action = null)
     {
         $result = false;
+        $this->disableForeignKeyChecks();
 
-        switch($action)
-        {
-            case self::DOWN: $result = $this->down($this->schema); break;
-            case self::EMPTY: $result = $this->empty($this->schema); break;
-            case self::UP: $result = $this->up($this->schema); break;
+        switch ($action) {
+            case self::DOWN: $result = $this->down(); break;
+            case self::EMPTY: $result = $this->empty(); break;
+            case self::UP: $result = $this->up(); break;
         }
+
+        $this->enableForeignKeyChecks();
 
         return $result;
     }

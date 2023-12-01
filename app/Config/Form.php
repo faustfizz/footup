@@ -9,9 +9,8 @@ namespace App\Config;
 class Form
 {
     public static $config = [
-        'open'      => true,
-        'close'     => true,
-        'from_db'   => true
+        'open' => true,
+        'close' => true
     ];
 
     public static function submitBtn()
@@ -26,16 +25,16 @@ class Form
                 return "<div class='form-group mb-3'>
                             <div class='form-floating'>
                                 <select class='form-select $validityClass' name='{$field->name}' $field->inline_attributes>
-                                    ".implode('\n', $field->htmlOptions)."
+                                    " . implode('', $field->htmlOptions) . "
                                 </select>
-                                <label for='{$field->id}'>".($field->label ?? ucfirst($field->name))."</label>
+                                <label for='{$field->id}'>" . ($field->label ?? ucfirst($field->name)) . "</label>
                             </div>
                         </div>";
             case 'checkbox':
             case 'radio':
                 return "<div class='mb-3'>
                             <input type='radio' class='btn-check $validityClass' name='{$field->name}' autocomplete='off' $field->inline_attributes>
-                            <label class='btn btn-outline-success' for='{$field->id}'>".($field->label ?? ucfirst($field->name))."</label>
+                            <label class='btn btn-outline-success' for='{$field->id}'>" . ($field->label ?? ucfirst($field->name)) . "</label>
                         </div>";
             case 'file':
                 return "<div class='mb-3'>
@@ -48,7 +47,7 @@ class Form
                 return "<div class='form-group mb-3'>
                             <div class='form-floating'>
                                 <textarea class='form-control $validityClass' name='{$field->name}' style='height: 100px' $field->inline_attributes>$field->value</textarea>
-                                <label for='{$field->id}'>".($field->label ?? ucfirst($field->name))."</label>
+                                <label for='{$field->id}'>" . ($field->label ?? ucfirst($field->name)) . "</label>
                             </div>
                         </div>";
             case 'text':
@@ -62,16 +61,15 @@ class Form
             case 'datetime-local':
             case 'number':
             case 'month':
-                default:
-                    return "<div class='form-group mb-3'>
+            default:
+                return "<div class='form-group mb-3'>
                                 <div class='form-floating'>
                                     <input type='{$field->type}' class='form-control $validityClass' name='{$field->name}' $field->inline_attributes>
-                                    <label for='{$field->id}'>".($field->label ?? ucfirst($field->name))."</label>
+                                    <label for='{$field->id}'>" . ($field->label ?? ucfirst($field->name)) . "</label>
                                 </div>
                             </div>";
         }
     }
-    
+
 
 }
-

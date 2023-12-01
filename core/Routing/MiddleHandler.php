@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Routing
+ * @package Footup\Routing
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -75,9 +75,9 @@ class MiddleHandler
      * 
      * @param Request $request 
      * @param Response $response
-     * @return Response
+     * @return Response|mixed
      */
-    public function dispatch(Request $request, Response $response): Response
+    public function dispatch(Request $request, Response $response)
     {
         reset($this->middlewares);
         $this->response = $response;
@@ -89,37 +89,30 @@ class MiddleHandler
      * next middleware.
      * 
      * @param Request $request 
-     * @return Response|void
+     * @return Response|mixed|void
      */
     public function handle(Request $request, Response $response)
     {
         if (!isset($this->middlewares[$this->index])) {
             return $this->response;
         }
-
+        /**
+         * @var Middle|\Closure
+         */
         $middleware = $this->middlewares[$this->index];
-        if(is_object($middleware) && method_exists($middleware, "execute"))
-        {
+        if(is_object($middleware) && method_exists($middleware, "execute")) {
             $result = $middleware->execute($request, $response, $this->next());
-        }else{
+        } else {
             $result = $middleware($request, $response, $this->next());
         }
-
+        
         // If the result is not an instance of Response so you don't need to continue
-        if(is_string($result) || is_callable($result))
-        {
-            $response->body((string) $result)->send(true);
-            exit;
-        }
-
-        if($result instanceof Response)
-        {
+        if ($result instanceof Response) {
             return $result;
-        }else{
-            // We are facing a middle that return void that mean it delegate itself the request so we don't continue
-            // Yes we stop because you don't return a response, nor string or callable but nothing that we need
-            exit;
+        } elseif (is_scalar($result) || is_array($result) || is_object($result) ) {
+            return $response->body($result)->send();
         }
+        return;
     }
 
     /**

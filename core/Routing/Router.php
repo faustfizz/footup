@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Routing
+ * @package Footup\Routing
  * @version 0.2
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -42,6 +42,7 @@ use Footup\Utils\Shared;
  * @method self patch(string $uri, Closure|string $handler, string|array $options = null)
  * @method self delete(string $uri, Closure|string $handler, string|array $options = null)
  * @method self head(string $uri, Closure|string $handler, string|array $options = null)
+ * @method self any(string $uri, Closure|string $handler, string|array $options = null)
  */
 class Router
 {
@@ -354,8 +355,6 @@ class Router
                 $placeholders,
                 PREG_SET_ORDER
             );
-
-            print_r($placeholders);
 
             // Create a copy of the URI (we'll need it later on)
             $expression = $uri;

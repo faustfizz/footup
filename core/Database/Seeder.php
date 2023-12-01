@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Database
+ * @package Footup\Database
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -40,7 +40,7 @@ abstract class Seeder
      */
     public function __construct(PDO $db = null)
     {
-        $this->db = $db ?? DbConnection::getDb();
+        $this->db = $db ?? DbConnection::getDb(true);
     }
 
     /**
@@ -68,9 +68,9 @@ abstract class Seeder
         }
 
         if (strpos($class, '\\') === false) {
-            $path = APP_PATH."Seed/". str_replace('.php', '', $class) . '.php';
+            $path = APP_PATH . "Seed/" . str_replace('.php', '', $class) . '.php';
 
-            if (! is_file($path)) {
+            if (!is_file($path)) {
                 throw new InvalidArgumentException('The specified seeder is not a valid file: ' . $path);
             }
 
@@ -78,7 +78,7 @@ abstract class Seeder
             // @codeCoverageIgnoreStart
             $class = "\\App\\Seed\\" . $class;
 
-            if (! class_exists($class, false)) {
+            if (!class_exists($class, false)) {
                 require_once $path;
             }
             // @codeCoverageIgnoreEnd
@@ -113,26 +113,26 @@ abstract class Seeder
      */
     protected function insert($columns)
     {
-        if(empty($columns))
+        if (empty($columns))
             throw new InvalidArgumentException("Columns Data should be an array of key => value");
 
-        if(empty($this->table))
+        if (empty($this->table))
             throw new InvalidArgumentException('Table should be defined before, please call $this->table($tableName) !');
 
 
-        $columnString = implode(', ',array_keys($columns));
+        $columnString = implode(', ', array_keys($columns));
         $placeholderValues = [];
-        foreach($columns as $columnName => $value) {
-            $placeholderValues[':'.$columnName]=$value;
+        foreach ($columns as $columnName => $value) {
+            $placeholderValues[':' . $columnName] = $value;
         }
 
-        $placeholderString = implode(', ',array_keys($placeholderValues));
+        $placeholderString = implode(', ', array_keys($placeholderValues));
 
-        $sql = 'INSERT INTO `'.$this->table.'` ('.$columnString.') VALUES ('.$placeholderString.')';
-        
+        $sql = 'INSERT INTO `' . $this->table . '` (' . $columnString . ') VALUES (' . $placeholderString . ')';
+
         $stmt = $this->db->prepare($sql);
 
-        if(!$stmt instanceof \PDOStatement) {
+        if (!$stmt instanceof \PDOStatement) {
             throw new InvalidArgumentException(print_r($this->db->errorInfo()));
         }
         return $stmt->execute($placeholderValues);
@@ -146,21 +146,21 @@ abstract class Seeder
      */
     protected function insertBatch($columns)
     {
-        if(empty($columns) || !is_array($columns[0]))
+        if (empty($columns) || !is_array($columns[0]))
             throw new InvalidArgumentException("Columns Data should be on the form [[key => value]]");
-            
-        if(empty($this->table))
+
+        if (empty($this->table))
             throw new InvalidArgumentException('Table should be defined before, please call $this->table($tableName) !');
 
 
-        $columnString = implode(', ',array_keys($columns[0]));
+        $columnString = implode(', ', array_keys($columns[0]));
         $countPlaceholders = count($columns[0]);
 
-        $sql = 'INSERT INTO `'.$this->table.'` ('.$columnString.') VALUES ('.trim(str_repeat("?,", $countPlaceholders), ',').')';
-        
+        $sql = 'INSERT INTO `' . $this->table . '` (' . $columnString . ') VALUES (' . trim(str_repeat("?,", $countPlaceholders), ',') . ')';
+
         $stmt = $this->db->prepare($sql);
-        
-        if(!$stmt instanceof \PDOStatement) {
+
+        if (!$stmt instanceof \PDOStatement) {
             throw new InvalidArgumentException(print_r($this->db->errorInfo()));
         }
         $this->db->beginTransaction();
@@ -176,7 +176,7 @@ abstract class Seeder
      * Get the value of table
      *
      * @return  string
-     */ 
+     */
     protected function getTable()
     {
         return $this->table;
@@ -188,7 +188,7 @@ abstract class Seeder
      * @param  string  $table
      *
      * @return  self
-     */ 
+     */
     protected function setTable(string $table)
     {
         $this->table = $table;

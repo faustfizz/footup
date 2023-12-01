@@ -2,7 +2,7 @@
 
 <div align="center">
   <img src="core/footup-ascii-art.png" alt="Footup Logo" width="400px" />
-  <h2 class="name_title">FOOTUP MVC FRAMEWORK - 0.1.7-alpha.1</h2>
+  <h2 class="name_title">FOOTUP MVC FRAMEWORK - 0.1.7-alpha.6</h2>
 </div>
 
 <p align="center">
@@ -361,7 +361,7 @@ request()->withGetInput()->validate(["page" => "is:int"]);
 
 ```php
 // using get function to validate the page=3 present in the url
-$this->response->json(["page" => 2], true); // second parameter to echo directly
+$this->response->json(["page" => 2]); // second parameter to echo directly
 
 # Yes you can access the response using the global function response()
 ```

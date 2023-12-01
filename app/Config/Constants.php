@@ -2,13 +2,13 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * ================================
  * Définissez toutes vos constantes ici dans ce fichier
  * 
  * 
- * @package Footup/App/Config
+ * @package Footup\App\Config
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */

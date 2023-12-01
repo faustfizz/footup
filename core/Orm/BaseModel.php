@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Orm
+ * @package Footup\Orm
  * @version 0.3
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -15,7 +15,12 @@ namespace Footup\Orm;
 use Exception;
 use Footup\Database\DbConnection;
 use Footup\Html\Form;
+use Footup\Orm\Traits\CastValue;
+use Footup\Orm\Traits\Events;
+use Footup\Orm\Traits\Fillable;
+use Footup\Orm\Traits\Relations;
 use Footup\Paginator\Paginator;
+use Footup\Utils\Arrays\Arrayable;
 use PDO;
 
 /**
@@ -27,8 +32,8 @@ use PDO;
  * @method ModelQueryBuilder leftJoin($table, $fields, $operator = " = ")
  * @method ModelQueryBuilder rightJoin($table, $fields, $operator = " = ")
  * @method ModelQueryBuilder fullJoin($table, $fields, $operator = " = ")
- * @method ModelQueryBuilder where($key, $val = null, $operator = null, $link = ' AND ', $escape = true)
- * @method ModelQueryBuilder orWhere(array|string $key, $val = null, $operator = null, $escape = true)
+ * @method ModelQueryBuilder where($key, $operatorOrValue = null, $val = null, $link = ' AND ', $escape = true)
+ * @method ModelQueryBuilder orWhere(array|string $key, $operatorOrValue = null, $val = null, $escape = true)
  * @method ModelQueryBuilder whereIn($key, array $val, $escape = true)
  * @method ModelQueryBuilder whereNotIn($key, array $val, $escape = true)
  * @method ModelQueryBuilder whereRaw($str)
@@ -46,8 +51,13 @@ use PDO;
  * @method ModelQueryBuilder having(string|array $field, $value = null)
  * @method ModelQueryBuilder limit($limit = null, $offset = null)
  * @method ModelQueryBuilder offset($offset, $limit = null)
+ * @method ModelQueryBuilder skip($offset)
+ * @method ModelQueryBuilder take($limit)
  * @method ModelQueryBuilder distinct($value = true)
  * @method ModelQueryBuilder between(string $field, $value1, $value2)
+ * @method ModelQueryBuilder notBetween(string $field, $value1, $value2)
+ * @method ModelQueryBuilder orBetween(string $field, $value1, $value2)
+ * @method ModelQueryBuilder orNotBetween(string $field, $value1, $value2)
  * @method ModelQueryBuilder select($fields = '*', $limit = null, $offset = null)
  * @method bool|int insert(array $data = [])
  * @method bool delete($where = null)
@@ -55,7 +65,7 @@ use PDO;
  * @method ModelQueryBuilder setDb($config = null, $init = true)
  * @method \PDO getDb()
  * @method object execute(array $params = [])
- * @method BaseModel[]|null get($select = "*", $where = null, $limit = null, $offset = null)
+ * @method Collection get($select = "*", $where = null, $limit = null, $offset = null)
  * @method BaseModel|null one($fields = null, $where = null)
  * @method BaseModel|null first(string $field = null, $where = null)
  * @method BaseModel|null last(string $field = null, $where = null)
@@ -64,10 +74,8 @@ use PDO;
  * @method mixed max(string $field, $key = null)
  * @method mixed sum(string $field, $key = null)
  * @method mixed avg(string $field, $key = null)
- * @method int|null count(string $field = '*')
  * @method mixed quote($value)
- * @method BaseModel|BaseModel[]|null find($value = null, string $field = null)
- * @method bool save(BaseModel $object = null, array $fields = null)
+ * @method Collection|BaseModel find($value = null, string $field = null)
  * @method array getTableInfo()
  * @method string getLastQuery()
  * @method ModelQueryBuilder setLastQuery(string $last_query)
@@ -75,8 +83,10 @@ use PDO;
  * @method int|string getInsertID()
  * @method int getAffectedRows()
  */
-class BaseModel implements \Countable, \IteratorAggregate
+class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
 {
+    use Fillable, Events, Relations, CastValue;
+
     /**
      * @var string $table
      */
@@ -96,223 +106,32 @@ class BaseModel implements \Countable, \IteratorAggregate
      * @var int
      */
     protected $page_count = null;
-    
+
     /**
      * @var int
      */
     protected $current_page = 0;
-    
+
     /**
      * @var int
      */
     protected $per_page = 10;
-	
-    /**
-     * @var bool $allow_callbacks activer les évenements 
-     */
-	protected $allow_callbacks      = true;
-	
-    /**
-     * @var bool $tmp_callbacks activer les évenements temporairement
-     */
-	protected $tmp_callbacks;
-
-    
-    /**
-     * @var array
-     */
-    protected $originalData         = [];
 
     /**
      * @var array
      */
-    protected $data         = [];
+    protected $originalData = [];
 
     /**
-     * Add all fillable fields here, if empty, all fields are fillable except  fields added on the **exclude** array
-     * 
-     * @var string[]
-     */
-    protected $fillable         = [];
-
-    /**
-     * Add all non fillable fields here, if empty, all fields are fillable
-     * 
-     * Consider using this in case you have too many fields and cannot add them all on **fillable** array
-     * 
-     * @var string[]
-     */
-    protected $exclude         = [];
-
-    /**
-     * Permet de passer un array de la forme `$data = [ 'data' => [] ]` avant insertion
-     * les callbacks doivent obligatoirement retourner $data
-     * 
      * @var array
      */
-    protected $beforeInsert         = [];
-
-    /**
-     * Permet de passer un array de la forme `$data = [ 'data' => [], 'where'    => ,'limit' =>, 'offset'    =>  ]`
-     * avant recuperation les callbacks doivent obligatoirement retourner $data
-     * 
-     * @var array
-     */
-	protected $beforeFind           = [];
-
-    /**
-     * Permet de passer un array de la forme `$data = [ 'id' => $primaryKeyValue ]` avant suppression
-     * les callbacks doivent obligatoirement retourner $data
-     * 
-     * @var array
-     */
-	protected $beforeDelete         = [];
-    
-    /**
-     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [] ]` avant modification
-     * 
-     * @var array
-     */
-	protected $beforeUpdate         = [];
-    
-    /**
-     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [] ]` après insertion
-     * 
-     * @var array
-     */
-	protected $afterInsert          = [];
-
-    /**
-     * Permet de passer un array de la forme `$data = [ 'data' => [ ModelObjectFetched ] ]` après recupération
-     * les callbacks doivent obligatoirement retourner $data
-     * 
-     * @var array
-     */
-	protected $afterFind            = [];
-
-    /**
-     * Permet de passer un array de la forme `$data = [ 'id' => $primaryKeyValue, 'result'   => bool ]`
-     * après suppression
-     * 
-     * @var array
-     */
-	protected $afterDelete          = [];
-    
-    /**
-     * Permet de passer un array de la forme `$data = [ 'id' =>  $primaryKeyValue, 'data' => [], 'result'  => bool ]` 
-     * après modification
-     * 
-     * @var array
-     */
-	protected $afterUpdate          = [];
-
-    /**
-     * FRelationships
-     *
-     * ``` 
-     * <?php
-     * # Use with arrays:
-     *
-     *      protected $hasOne = [
-     *           'properties1' => [
-     *                              'model' => 'Other_Model',
-     *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field'
-     *                             ]
-     *          ....................
-     *      ];
-     * ```
-     */
-    protected $hasOne        = [];
-
-    /**
-     * FRelationships
-     *
-     * ```
-     * <?php
-     * # Use with arrays:
-     * 
-     *      protected $hasMany = [
-     *           'properties1' => [
-     *                              'model' => 'Other_Model',
-     *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field'
-     *                             ]
-     *          ....................
-     *      ];
-     * ```
-     */
-    protected $hasMany       = [];
-
-    /**
-     * FRelationships
-     *
-     * ```
-     * <?php
-     * # Use with arrays:
-     *
-     *      protected $manyMany = [
-     *           'properties1' => [
-     *                              'model' => 'Other_Model',
-     *                              'pivot' => 'Pivot_Model',
-     *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field',
-     *                              'pivot_foreign_key' => 'modelKey_in_pivot_table',
-     *                              'pivot_local_key' => 'localKey_in_pivot_table',
-     *                             ]
-     *          ....................
-     *      ];
-     * ```
-     *
-     */
-    protected $manyMany      = [];
-
-    /**
-     * FRelationships
-     *
-     * ```
-     * <?php
-     * # Use with arrays:
-     *
-     *     protected $belongsTo = [
-     *           'properties1' => [
-     *                              'model' => 'Other_Model',
-     *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field'
-     *                             ]
-     *          ....................
-     *      ];
-     * ```
-     */
-    protected $belongsTo     = [];
-
-    /**
-     * FRelationships
-     *
-     * ```
-     * <?php
-     * # Use with arrays:
-     * 
-     *      protected $belongsToMany = [
-     *           'properties1' => [
-     *                              'model' => 'Other_Model',
-     *                              'pivot' => 'Pivot_Model',
-     *                              'foreign_key' => 'foreign_field',
-     *                              'local_key' => 'local_field',
-     *                              'pivot_foreign_key' => 'modelKey_in_pivot_table',
-     *                              'pivot_local_key' => 'localKey_in_pivot_table',
-     *                             ]
-     *          ....................
-     *      ];
-     * ```
-     */
-    protected $belongsToMany = [];
+    protected $data = [];
 
     /**
      * @var ModelQueryBuilder
      */
     protected $builder;
-    
+
     /**
      * @var \App\Config\Paginator
      */
@@ -328,13 +147,10 @@ class BaseModel implements \Countable, \IteratorAggregate
      */
     public function __construct(array $data = null, $config = null, $init = true)
     {
-        DbConnection::setDb($config, $init);
-        
-        $this->setBuilder(new ModelQueryBuilder($this, DbConnection::getDb()));
+        $this->setBuilder(new ModelQueryBuilder($this, DbConnection::setDb($config, $init)));
 
-        if(!empty($data))
-        {
-            $this->fill($data);
+        if (!empty($data)) {
+            $this->fill($data, true);
         }
         // allow callbacks
         $this->tmp_callbacks = $this->allow_callbacks;
@@ -344,40 +160,31 @@ class BaseModel implements \Countable, \IteratorAggregate
      * @param string $columns
      * @return int
      */
-    public function count($columns = "*")
+    public static function count($columns = "*")
     {
-        return $this->getBuilder()->count($columns);
+        return (new static)->getBuilder()->count($columns);
     }
 
     /**
      * @param array $data
      * @return BaseModel
      */
-    public function fill(array $data) 
+    public function fill(array $data, $original = false)
     {
         $fields = $this->getFieldNames();
 
-        // if we have a list to exclude, so we use it and we don't use the fillable
-        if(!empty($this->exclude)) {
-            $fields = array_filter($fields, function($field){
-                return !in_array($field, $this->exclude);
-            });
-        }else{
-            // as we don't have a list of excluded fields, we use the fillable
-            if(!empty($this->fillable)) {
-                $fields = array_filter($fields, function($field){
-                    return in_array($field, $this->fillable) || $field === $this->getPrimaryKey();
-                });
-            }
+        if ($original) {
+            $this->setOriginalData($data);
         }
 
-        // If fillable and exclude are empty, we'll use all fields of the table
-
         foreach ($fields as $field) {
+
+            if ($original == false && !$this->isFillable($field))
+                continue;
+
             # code...
-            if(isset($data[$field])) 
-                $this->data[$field] = $data[$field];
-                
+            $this->data[$field] = $data[$field] ?? null;
+
         }
         return $this;
     }
@@ -390,30 +197,30 @@ class BaseModel implements \Countable, \IteratorAggregate
      */
     public function insert(array $data = [])
     {
-        if (empty($data)) return false;
+        empty($data) && $data = $this->getData();
+
+        if (empty($data)) {
+            throw new Exception(text("Db.emptyData", ['INSERT']));
+        }
 
         $eventData = ['data' => $data];
 
-		if ($this->tmp_callbacks)
-		{
-			$eventData = $this->trigger('beforeInsert', $eventData);
-            $data = $eventData['data'];
-		}
+        if ($this->tmp_callbacks) {
+            $eventData = $this->trigger('beforeInsert', $eventData);
+        }
 
-        $inserted = $this->getBuilder()->insert(array_intersect_key($data, $this->getFillableKeys()));
+        $inserted = $this->getBuilder()->insert(array_intersect_key($eventData['data'], $this->getFillableKeys()));
 
-        $eventData = [
-			'id'     => $this->getBuilder()->getInsertID(),
-			'data'   => $data
-		];
+        $eventData['id'] = $this->getBuilder()->getInsertID();
 
-		if ($this->tmp_callbacks && $inserted)
-		{
-            $data[$this->getPrimaryKey()] = $eventData["id"];
-            $eventData["data"] = $data;
-            $this->fill($data);
-			$this->trigger('afterInsert', $eventData);
-		}
+        if ($inserted) {
+            $this->setOriginalData($eventData["data"]);
+            if ($this->tmp_callbacks) {
+                $eventData = $this->trigger('afterInsert', $eventData);
+                $eventData["data"][$this->getPrimaryKey()] = $eventData["id"];
+            }
+            $this->fill($eventData["data"]);
+        }
 
         $this->tmp_callbacks = $this->allow_callbacks;
 
@@ -426,47 +233,81 @@ class BaseModel implements \Countable, \IteratorAggregate
      * @param array $data Array of keys and values, or string literal
      * @return bool 
      */
-    public function update($data)
+    public function update(array $data = [])
     {
-        if (empty($data)) return false;
+        empty($data) && $data = $this->getData();
 
-        $id = isset($data[$this->getPrimaryKey()]) ? $data[$this->getPrimaryKey()] : $this->id();
+        if (empty($data)) {
+            throw new Exception(text("Db.emptyData", ['UPDATE']));
+        }
 
-        if(empty($id) && empty($this->builder->where)){
-            throw new Exception("No primary key value to use as reference & no where specified !");
+        $id = $this->id();
+
+        if (empty($id) && empty($this->builder->where)) {
+            throw new Exception(text("Db.noWhereRef"));
         }
 
         $eventData = [
-			'id'   => $id,
-			'data' => $data,
-		];
+            'id' => $id,
+            'data' => $data,
+        ];
 
-		if ($this->tmp_callbacks)
-		{
-			$eventData = $this->trigger('beforeUpdate', $eventData);
-            $data = isset($eventData['data']) && !empty($eventData['data']) ? $eventData['data'] : $data;
-		}
-
-        if($this->hasChanged()) {
-            $executed = $this->getBuilder()->update(array_intersect_key($data, $this->getFillableKeys()), $id);
+        if ($this->tmp_callbacks) {
+            $eventData = $this->trigger('beforeUpdate', $eventData);
         }
 
-		$eventData = [
-			'id'     => $id,
-			'data'   => $data,
-			'result' => $executed,
-		];
+        if ($this->hasChanged()) {
+            $executed = $this->getBuilder()->update(array_intersect_key($eventData['data'], $this->getFillableKeys()), $id);
+        } else {
+            // as nothing was changed, we don't throw error. just return a success to our user
+            $executed = true;
+        }
 
-        
-		if ($this->tmp_callbacks && $executed)
-		{
-            $this->fill($data);
-			$this->trigger('afterUpdate', $eventData);
-		}
+        $eventData['result'] = $executed;
 
-		$this->tmp_callbacks = $this->allow_callbacks;
+        if ($executed) {
+            $this->setOriginalData($eventData["data"]);
+            if ($this->tmp_callbacks) {
+                $eventData = $this->trigger('afterUpdate', $eventData);
+                $eventData["data"][$this->getPrimaryKey()] = $eventData["id"];
+            }
+            $this->fill($eventData['data']);
+        }
+
+        $this->tmp_callbacks = $this->allow_callbacks;
 
         return $executed;
+    }
+
+    /**
+     * Saves an object to the database.
+     *
+     * @param \Footup\Orm\BaseModel $object Class instance
+     * @param array $fields Select database fields to save
+     * @return bool
+     */
+    public function save(BaseModel $object = null, array $fields = null)
+    {
+        $object = is_null($object) ? $this : $object;
+
+        $this->from($object->getTable());
+
+        $data = $object->getData();
+
+        if ($fields !== null) {
+            $keys = array_flip($fields);
+            $data = array_intersect_key($data, $keys);
+        }
+
+        if ($this->id()) {
+            return $this->update($data);
+        } else {
+            if ($bool = $this->insert($data)
+            ) {
+                $object->{$this->getPrimaryKey()} = $this->getInsertID();
+            }
+            return $bool;
+        }
     }
 
     /**
@@ -477,32 +318,29 @@ class BaseModel implements \Countable, \IteratorAggregate
      */
     public function delete($where = null)
     {
-        if(empty($where) && $this->id())
-        {
-            $where = $this->getPrimaryKey()." = ".$this->getBuilder()->quote($this->id());
+        if (empty($where) && $this->id()) {
+            $where = $this->getPrimaryKey() . " = " . $this->getBuilder()->quote($this->id());
         }
 
         $eventData = [
-            'id'    => $this->id()
+            'id' => $this->id()
         ];
 
-		if ($this->tmp_callbacks)
-		{
-			// Call the before event and check for a return
-			$eventData = $this->trigger('beforeDelete', $eventData);
-		}
+        if ($this->tmp_callbacks) {
+            // Call the before event and check for a return
+            $eventData = $this->trigger('beforeDelete', $eventData);
+        }
 
         $executed = $this->getBuilder()->delete($where);
 
-		if ($this->tmp_callbacks && $executed)
-		{
+        if ($this->tmp_callbacks && $executed) {
             $eventData['result'] = $executed;
 
-			// Call the before event and check for a return
-			$this->trigger('afterDelete', $eventData);
-		}
+            // Call the before event and check for a return
+            $this->trigger('afterDelete', $eventData);
+        }
 
-		$this->tmp_callbacks = $this->allow_callbacks;
+        $this->tmp_callbacks = $this->allow_callbacks;
 
         return $executed;
     }
@@ -515,7 +353,7 @@ class BaseModel implements \Countable, \IteratorAggregate
      */
     public function id()
     {
-        return $this->data[$this->getPrimaryKey()];
+        return $this->data[$this->getPrimaryKey()] ?? null;
     }
 
     /**
@@ -523,15 +361,16 @@ class BaseModel implements \Countable, \IteratorAggregate
      *
      * @return boolean
      */
-    public function hasChanged() {
+    public function hasChanged()
+    {
         // if the length of original data and the current data is different, we have make a change
-        if(count($this->originalData) != count($this->data)){
+        if (count($this->originalData) != count($this->data)) {
             return true;
         }
 
         // if the length for the two arrays is the same we check for data value
-        foreach($this->data as $field => $value) {
-            if(isset($this->originalData[$field]) && $value != $this->originalData[$field]) {
+        foreach ($this->data as $field => $value) {
+            if (isset($this->originalData[$field]) && $value != $this->originalData[$field]) {
                 return true;
             }
         }
@@ -543,24 +382,11 @@ class BaseModel implements \Countable, \IteratorAggregate
      *
      * @return array
      */
-    public function getFillableKeys() {
-        $fillableKeys = $this->getFieldNames();
-        $returnedKeys = [];
-        // if we have a list to exclude, so we use it and we don't use the fillable
-        if(!empty($this->exclude)) {
-            $returnedKeys = array_filter($fillableKeys, function($field){
-                return !in_array($field, $this->exclude);
-            });
-        }else{
-            // as we don't have a list of excluded fields, we use the fillable
-            if(!empty($this->fillable)) {
-                $returnedKeys = array_filter($fillableKeys, function($field){
-                    return in_array($field, $this->fillable) || $field === $this->getPrimaryKey();
-                });
-            }
-        }
+    public function getFillableKeys()
+    {
+        $returnedKeys = $this->getRealFillableKeys($this->getFieldNames());
 
-        return empty($returnedKeys) ? array_flip($fillableKeys) : array_flip($returnedKeys);
+        return array_flip($returnedKeys);
     }
 
     /**
@@ -570,89 +396,66 @@ class BaseModel implements \Countable, \IteratorAggregate
      * @param array|string $where
      * @param int $limit
      * @param int $offset
-     * @return BaseModel[]
+     * @return  Collection <int, BaseModel|array|object>
      */
     public function get($select = "*", $where = null, $limit = null, $offset = null)
     {
-        if ($this->tmp_callbacks)
-		{
-			$eventData = $this->trigger('beforeFind', [
-                'data'      => [],
-                'where'     => $where,
-				'limit'     => $limit,
-				'offset'    => $offset
-			]);
-		}
+        if ($this->tmp_callbacks) {
+            $eventData = $this->trigger('beforeFind', [
+                'data' => [],
+                'where' => $where,
+                'limit' => $limit,
+                'offset' => $offset
+            ]);
+        }
 
         $data = $this->getBuilder()->get($select, $where, $limit, $offset);
 
-		if ($this->tmp_callbacks && !empty($data))
-		{
-			$eventData = $this->trigger('afterFind', [
-                'data'      => $data
+        if ($this->tmp_callbacks && !empty($data)) {
+            $eventData = $this->trigger('afterFind', [
+                'data' => $data
             ]);
-		}
+        }
 
-		$this->tmp_callbacks = $this->allow_callbacks;
+        $this->tmp_callbacks = $this->allow_callbacks;
 
         return $eventData['data'];
     }
-    
+
     /**
      * Fonction de pagination | paginate function
      *
      * @param integer|null $perPage
      * @param string $pageName
      * @param integer $page
-     * @return BaseModel[]
+     * @return  Collection<int, BaseModel|array|object>
      */
     public function paginate(int $perPage = null, string $pageName = 'page', int $page = 0)
-	{
+    {
         $this->paginatorConfig = new \App\Config\Paginator();
 
-        $this->per_page = $perPage ?? $this->paginatorConfig->perPage ?? $this->per_page;
+        $this->per_page = $perPage ?? $this->per_page ?? $this->paginatorConfig->perPage;
 
-        if($pageName)
-        {
+        if ($pageName) {
             $this->paginatorConfig->pageName = $pageName;
         }
 
 
-        $page = (int)request()->get($this->paginatorConfig->pageName, $page);
-		$page  = $page >= 1 ? $page : 1;
+        $page = (int) request()->get($this->paginatorConfig->pageName, $page);
+        $page = $page >= 1 ? $page : 1;
 
-		$total = (int)$this->getBuilder()->count();
+        $total = (int) $this->getBuilder()->count();
 
-		// Store it in the Pager library so it can be
-		// paginated in the views.
-		$this->page_count = $total / $this->per_page;
-		$this->current_page = $page;
+        // Store it in the Pager library so it can be
+        // paginated in the views.
+        $this->page_count = $total / $this->per_page;
+        $this->current_page = $page;
 
-		$offset      = ($page - 1) * $perPage;
+        $offset = ($page - 1) * $this->per_page;
 
         $this->setPaginator(new Paginator($total, $this->per_page, $page, request()->url(), $this->paginatorConfig));
 
-        $data = $this->get("*", null, (int)$this->per_page, (int)$offset);
-        
-        return $data;
-	}
-
-    /**
-     * Loads properties for an object.
-     *
-     * @param object $object Class instance
-     * @param array $data Property data
-     * @return object Populated object
-     */
-    public function load($object, array $data)
-    {
-        foreach ($data as $key => $value) {
-            if (property_exists($object, $key)) {
-                $object->$key = $value;
-            }
-        }
-
-        return $object;
+        return $this->get("*", null, (int) $this->per_page, (int) $offset);
     }
 
     /**
@@ -665,7 +468,7 @@ class BaseModel implements \Countable, \IteratorAggregate
     {
         if (empty($this->table))
             return $this->table = strtolower(basename(strtr(get_class($this), ['\\' => '/'])));
-            
+
         return $this->table;
     }
 
@@ -676,11 +479,10 @@ class BaseModel implements \Countable, \IteratorAggregate
      */
     public function getPrimaryKey()
     {
-        if (empty($this->primaryKey))
-        {
-            $this->primaryKey = "id_".strtolower(basename(strtr(get_class($this), ['\\' => '/'])));
+        if (empty($this->primaryKey)) {
+            $this->primaryKey = "id_" . strtolower(basename(strtr(get_class($this), ['\\' => '/'])));
         }
-            
+
         return $this->primaryKey;
     }
 
@@ -691,34 +493,31 @@ class BaseModel implements \Countable, \IteratorAggregate
      */
     public function getReturnType()
     {
-        if (empty($this->returnType))
-        {
+        if (empty($this->returnType)) {
             // We use our default 
             $this->returnType = "self";
         }
-            
+
         return $this->returnType;
     }
 
     public function __get($name)
     {
-        if(isset($this->data[$name]))
-        {
-            return $this->data[$name];
+        if (isset($this->data[$name])) {
+            return $this->castValue($name);
         }
-        if(in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany))))
-        {
+        if (in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany)))) {
             return $this->loadRelations($name);
         }
-        if(property_exists($this->builder, $name))
-        {
+        if (property_exists($this->builder, $name)) {
             return $this->builder->{$name};
         }
     }
 
     public function __set($property, $val)
     {
-        return $this->data[$property] = $val;
+        if ($this->isFillable($property))
+            $this->data[$property] = $val;
     }
 
     /**
@@ -735,39 +534,38 @@ class BaseModel implements \Countable, \IteratorAggregate
         // Note: value of $name is case sensitive.
         if (!method_exists($this, $name) && preg_match('/^findBy/', $name) == 1) {
             // it's a findBy{fieldname} dynamic method
-            $fieldname = substr($name, 6); // remove find by
-            $match     = isset($arguments[0]) ? $arguments[0] : null;
-            return $this->getBuilder()->find($match, strtolower($fieldname));
+            $fieldname = lcfirst(substr($name, 6)); // remove find by
+            $match = isset($arguments[0]) ? $arguments[0] : null;
+            return $this->getBuilder()->find($match, $fieldname);
         }
 
         if (!method_exists($this, $name) && preg_match('/^firstBy/', $name) == 1) {
             // it's a findBy{fieldname} dynamic method
-            $fieldname = substr($name, 7);
-            return $this->getBuilder()->first(strtolower($fieldname));
+            $fieldname = lcfirst(substr($name, 7));
+            $match = isset($arguments[0]) ? $arguments[0] : null;
+            return $this->getBuilder()->first($fieldname, $match);
         }
 
         if (!method_exists($this, $name) && preg_match('/^lastBy/', $name) == 1) {
             // it's a findBy{fieldname} dynamic method
-            $fieldname = substr($name, 6);
-            return $this->getBuilder()->last(strtolower($fieldname));
+            $fieldname = lcfirst(substr($name, 6));
+            $match = isset($arguments[0]) ? $arguments[0] : null;
+            return $this->getBuilder()->last($fieldname, $match);
         }
 
         $setter = substr($name, 0, 3);
         $field = strtolower(substr($name, 3));
 
-        if($setter === "set" && in_array($field, $this->getFieldNames()))
-        {
+        if ($setter === "set" && in_array($field, $this->getFieldNames())) {
             $this->data[$field] = isset($arguments[0]) ? $arguments[0] : null;
             return $this;
         }
 
-        if($setter === "get" && in_array($field, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany))))
-        {
+        if ($setter === "get" && in_array($field, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany)))) {
             return $this->loadRelations($field, (isset($arguments[0]) ? $arguments[0] : $this->per_page), (isset($arguments[1]) ? $arguments[1] : 0));
         }
 
-        if(in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany))))
-        {
+        if (in_array($name, array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany)))) {
             return $this->loadRelations($name, (isset($arguments[0]) ? $arguments[0] : $this->per_page), (isset($arguments[1]) ? $arguments[1] : 0));
         }
 
@@ -777,7 +575,7 @@ class BaseModel implements \Countable, \IteratorAggregate
             return $this->getBuilder()->{$name}(...$arguments);
         }
 
-        throw new Exception(text("Db.undefinedMethod", [$name , get_class($this)]));
+        throw new Exception(text("Db.undefinedMethod", [$name, get_class($this)]));
     }
 
     /**
@@ -788,7 +586,7 @@ class BaseModel implements \Countable, \IteratorAggregate
     public static function __callStatic($method, $args)
     {
         $model = (new static);
-        return $model->{$method}(...$args);
+        return $model->$method(...$args);
     }
 
     public function fieldTypes()
@@ -796,9 +594,9 @@ class BaseModel implements \Countable, \IteratorAggregate
         $fields = array();
         foreach ($this->getBuilder()->getTableInfo(PDO::FETCH_OBJ) as $field) {
             $type = explode("(", $field->Type);
-            
+
             $_type = $type[0];
-            
+
             if (isset($type[1])) {
                 if (substr($type[1], -1) == ')') {
                     $length = substr($type[1], 0, -1);
@@ -810,28 +608,81 @@ class BaseModel implements \Countable, \IteratorAggregate
                 $length = '';
             }
 
-            if(in_array(strtolower($_type), ['set', 'enum']))
-            {   $opt = strtr($length, ["'" => ""]);
+            if (in_array(strtolower($_type), ['set', 'enum'])) {
+                $opt = strtr($length, ["'" => ""]);
                 $field->options = explode(",", $opt);
             }
 
-            $field->maxLength       = (int)$length;
-            $field->label           = ucwords(strtr($field->Field, ["_"     => " "]));
-            $field->placeholder     = ucwords(strtr($field->Field, ["_"     => " "]));
-            $field->name            = $field->Field;
-            $field->id              = 'field_'.$field->Field;
-            $field->isPrimaryKey    = $field->Key == "PRI" ? true : false;
-            $field->type            = $_type;
-            $field->null            = $field->Null == 'YES' ? true : false;
-            $field->required        = !$field->null;
-            $field->extra           = $field->Extra;
-            $field->default         = $field->Default === "current_timestamp()" ? date("Y-m-d H:i:s") : $field->Default;
-            $field->crudType        = $this->getCrudType($_type, $length);
+            $this->getOptionsFromRelations($field, $_type);
+
+            $field->maxLength = (int) $length;
+            $field->label = ucwords(strtr($field->Field, ["_" => " "]));
+            $field->placeholder = ucwords(strtr($field->Field, ["_" => " "]));
+            $field->name = $field->Field;
+            $field->id = 'field_' . $field->Field;
+            $field->isPrimaryKey = $field->Key == "PRI" ? true : false;
+            $field->type = $_type;
+            $field->null = $field->Null == 'YES' ? true : false;
+            $field->required = !$field->null;
+            $field->extra = $field->Extra;
+            $field->default = $field->Default === "current_timestamp()" ? date("Y-m-d H:i:s") : $field->Default;
+            $field->crudType = $this->getCrudType($_type, $length);
 
             $fields[$field->Field] = $field;
         }
 
         return array_intersect_key($fields, $this->getFillableKeys());
+    }
+
+    /**
+     * Get input  options from db
+     *
+     * @param object $field
+     * @param string $type
+     * @return void
+     */
+    public function getOptionsFromRelations(&$field, &$type)
+    {
+        if ($field->Key === 'MUL') {
+            $targetTable = preg_replace('/_id/i', '', $field->Field);
+            $query = $this->getDb()->prepare("SHOW TABLE STATUS FROM `".request()->db_name."` WHERE Name = ?");
+            $stmt = $query->execute([$targetTable]);
+            
+            $options = [];
+
+            if ($stmt && $query->fetchObject()) { // yes a table exists
+                $queryTitle = $this->getDb()->query("SHOW COLUMNS FROM `" . $targetTable . "` WHERE Type LIKE '%varchar%' AND `Null` = 'NO'");
+                $queryPrimary = $this->getDb()->query("SHOW COLUMNS FROM `".$targetTable."` WHERE Type LIKE '%INT%' OR `Key` = 'PRI'");
+
+                if ($queryPrimary && $queryTitle) {
+                    $primary = $queryPrimary->fetch(PDO::FETCH_OBJ);
+                    $title = $queryTitle->fetch(PDO::FETCH_OBJ);
+                    
+
+                    $queryOptions = $this->getDb()->query("SELECT * FROM `" . $targetTable . "`");
+                    if ($queryOptions) {
+                        $data = $queryOptions->fetchAll(PDO::FETCH_OBJ);
+                        if ($data) {
+                            foreach ($data as $key => $valueObject) {
+                                # code...
+                                array_push($options, [
+                                    'label' =>  $valueObject->{$title->Field},
+                                    'value' =>  $valueObject->{$primary->Field},
+                                ]);
+                            }
+                        }
+                    }
+                }
+
+                if (!empty($options)) {
+                    $type = 'select';
+                    $field->options = $options;
+                }
+
+            }
+        }
+
+        return $field;
     }
 
     /**
@@ -886,7 +737,7 @@ class BaseModel implements \Countable, \IteratorAggregate
                 break;
             case 'datetime':
             case 'timestamp':
-                $type = 'datetime';
+                $type = 'datetime-local';
                 break;
             case 'tinyint':
             case 'smallint':
@@ -897,6 +748,7 @@ class BaseModel implements \Countable, \IteratorAggregate
                 break;
             case 'enum':
             case 'set':
+            case 'select':
                 $type = "select";
                 break;
             case 'double':
@@ -926,8 +778,7 @@ class BaseModel implements \Countable, \IteratorAggregate
 
     public function getForm($action = "#", $data = [], $print = false)
     {
-        if(empty($data))
-        {
+        if (empty($data)) {
             $data = $this->getData();
         }
 
@@ -942,7 +793,7 @@ class BaseModel implements \Countable, \IteratorAggregate
      * @param mixed $where
      * @param int $limit
      * @param int $offset
-     * @return BaseModel[]
+     * @return Collection<int, BaseModel|array|object>
      */
     public static function all($select = "*", $where = null, $limit = null, $offset = null)
     {
@@ -955,202 +806,10 @@ class BaseModel implements \Countable, \IteratorAggregate
     }
 
     /**
-     * Load the defined relation models
-     * and add them as property of this model.
-     *
-     * @return BaseModel|BaseModel[]|null
-     */
-    public function loadRelations($for, $limit = null, $offset = null)
-    {
-        if (count($this->hasOne) && isset($this->hasOne[$for])) {
-            $relation = $this->hasOne[$for];
-            return $this->{$for} = $this->hasOne($relation);
-        }
-
-        if (count($this->hasMany) && isset($this->hasMany[$for])) {
-            $relation = $this->hasMany[$for];
-            return $this->{$for} = $this->hasMany($relation, $limit, $offset);
-        }
-
-        if (count($this->belongsTo) && isset($this->belongsTo[$for])) {
-            $relation = $this->belongsTo[$for];
-            return $this->{$for} = $this->belongsTo($relation);
-        }
-
-        if (count($this->belongsToMany) && isset($this->belongsToMany[$for])) {
-            $relation = $this->belongsToMany[$for];
-            return $this->{$for} = $this->belongsToMany($relation, $limit, $offset);
-        }
-
-        if (count($this->manyMany) && isset($this->manyMany[$for])) {
-            $relation = $this->manyMany[$for];
-            return $this->{$for} = $this->manyMany($relation, $limit, $offset);
-        }
-        
-    }
-
-
-    /**
-     * Get object in relationship with.
-     *
-     * @param array $relationConfig
-     * @return BaseModel Model instance
-     */
-    protected function hasOne($relationConfig)
-    {
-        /**
-         * @var BaseModel
-         */
-        $class = new $relationConfig['model']();
-        $foreign_key = $relationConfig['foreign_key'];
-        $local_key = $relationConfig['local_key'];
-
-        $object = $class->where($foreign_key, $this->{$local_key})->one();
-        return $object;
-    }
-
-    /**
-     * Get all objects in relationship with.
-     *
-     * @param array $relationConfig
-     * @return BaseModel[] Models
-     */
-    protected function manyMany($relationConfig, $limit = null, $offset = null)
-    {
-        /**
-         * @var BaseModel
-         */
-        $class = new $relationConfig['model']();
-
-        /**
-         * @var BaseModel
-         */
-        $pivot = new $relationConfig['pivot']();
-        $foreign_key = $relationConfig['foreign_key'];
-        $local_key = $relationConfig['local_key'];
-        $pivot_foreign_key = $relationConfig['pivot_foreign_key'];
-        $pivot_local_key = $relationConfig['pivot_local_key'];
-
-        $objects = $class->join($pivot->getTable()." pivot", "pivot.$pivot_foreign_key = ".$class->getTable().".$foreign_key")
-                        ->join($this->table, $this->table.".$local_key = pivot.$pivot_local_key")
-                        ->get($class->getTable().".*, pivot.*", "pivot.$pivot_local_key = ".$this->{$local_key}, $limit, $offset);
-
-        return $objects;
-    }
-
-    /**
-     * Get all objects in relationship with.
-     *
-     * @param array $relationConfig
-     * @return BaseModel[] Models
-     */
-    protected function hasMany($relationConfig, $limit = null, $offset = null)
-    {
-        /**
-         * @var BaseModel
-         */
-        $class = new $relationConfig['model']();
-        $foreign_key = $relationConfig['foreign_key'];
-        $local_key = $relationConfig['local_key'];
-
-        $objects = $class->get("*", [$foreign_key => $this->{$local_key}], $limit, $offset);
-        return $objects;
-    }
-
-    /**
-     * Get object in relationship with.
-     *
-     * @param array $relationConfig
-     * @return BaseModel Model instance
-     */
-    protected function belongsTo($relationConfig)
-    {
-        /**
-         * @var BaseModel
-         */
-        $class = new $relationConfig['model']();
-        $foreign_key = $relationConfig['foreign_key'];
-        $local_key = $relationConfig['local_key'];
-
-        $object = $class->where($foreign_key, $this->{$local_key})->one();
-        return $object;
-    }
-
-
-    /**
-     * Get all objects in relationship with.
-     *
-     * @param array $relationConfig
-     * @return BaseModel[] Models
-     */
-    protected function belongsToMany($relationConfig, $limit = null, $offset = null)
-    {
-        /**
-         * @var BaseModel
-         */
-        $model = new $relationConfig['model']();
-        
-        /**
-         * @var BaseModel
-         */
-        $pivot = new $relationConfig['pivot']();
-        $foreign_key = $relationConfig['foreign_key'];
-        $local_key = $relationConfig['local_key'];
-        $pivot_foreign_key = $relationConfig['pivot_foreign_key'];
-        $pivot_local_key = $relationConfig['pivot_local_key'];
-
-        $objects = $model->join($pivot->getTable()." pivot", "pivot.$pivot_foreign_key = ".$model->getTable().".$foreign_key")
-                        ->join($this->table, $this->table.".$local_key = pivot.$pivot_local_key")
-                        ->get($model->getTable().".*, pivot.*", "pivot.$pivot_local_key = ".$this->{$local_key}, $limit, $offset);
-
-        return $objects;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param string $event
-     * @param array $eventData
-     * @return array
-     */
-    protected function trigger(string $event, array $eventData)
-    {
-        // Ensure it's a valid event
-        if (! isset($this->{$event}) || empty($this->{$event}))
-        {
-            return $eventData;
-        }
-
-        foreach ($this->{$event} as $callback)
-        {
-            if (! method_exists($this, $callback))
-            {
-                throw new Exception(text("Db.undefinedMethod", [$callback , get_class($this)]));
-            }
-
-            $eventData = $this->{$callback}($eventData);
-        }
-
-        return $eventData;
-    }
-
-
-	/**
-	 * Set the value of tmp_callbacks
-	 *
-	 * @return  self
-	 */ 
-	public function allowCallbacks($value = true)
-	{
-		$this->tmp_callbacks = $value;
-		return $this;
-	}
-
-    /**
      * Get the value of builder
      *
      * @return  ModelQueryBuilder
-     */ 
+     */
     public function getBuilder()
     {
         return $this->builder;
@@ -1162,7 +821,7 @@ class BaseModel implements \Countable, \IteratorAggregate
      * @param  ModelQueryBuilder  $builder
      *
      * @return  self
-     */ 
+     */
     public function setBuilder(ModelQueryBuilder $builder)
     {
         $this->builder = $builder;
@@ -1174,7 +833,7 @@ class BaseModel implements \Countable, \IteratorAggregate
      * Get the value of paginator
      *
      * @return  \Footup\Paginator\Paginator
-     */ 
+     */
     public function getPaginator()
     {
         return $this->paginator;
@@ -1186,7 +845,7 @@ class BaseModel implements \Countable, \IteratorAggregate
      * @param  \Footup\Paginator\Paginator  $paginator
      *
      * @return  self
-     */ 
+     */
     public function setPaginator(Paginator $paginator)
     {
         $this->paginator = $paginator;
@@ -1199,32 +858,11 @@ class BaseModel implements \Countable, \IteratorAggregate
         return new \ArrayIterator($this->paginate());
     }
 
-
-    /**
-     * Get all fillable fields here, if empty, all fields are fillable except fields added on the **exclude** array
-     *
-     * @return  string[]
-     */ 
-    public function getFillable()
-    {
-        return $this->fillable;
-    }
-
-    /**
-     * Get all non fillable fields here, if empty, all fields are fillable
-     *
-     * @return  string[]
-     */ 
-    public function getExclude()
-    {
-        return $this->exclude;
-    }
-
     /**
      * Get the value of originalData
      *
      * @return  array
-     */ 
+     */
     public function getOriginalData()
     {
         return $this->originalData;
@@ -1236,7 +874,7 @@ class BaseModel implements \Countable, \IteratorAggregate
      * @param  array  $originalData
      *
      * @return  self
-     */ 
+     */
     public function setOriginalData(array $originalData)
     {
         $this->originalData = $originalData;
@@ -1248,7 +886,37 @@ class BaseModel implements \Countable, \IteratorAggregate
      * Get the value of data
      *
      * @return  array
-     */ 
+     */
+    public function toArray()
+    {
+        if (empty($this->data)) {
+            $object = $this->getBuilder()->last();
+            if ($object) {
+                $this->fill(($object instanceof BaseModel) ? $object->getData() : (array) $object);
+            }
+        }
+        $relations = array_keys(array_merge($this->hasOne, $this->hasMany, $this->manyMany, $this->belongsTo, $this->belongsToMany));
+
+        foreach ($relations as $key => $relationName) {
+            # code...
+            $this->data[$relationName] = $this->loadRelations($relationName);
+        }
+        return $this->data;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return json_encode($this->toArray());
+    }
+
+    /**
+     * Get the value of data
+     *
+     * @return  array
+     */
     public function getData()
     {
         return $this->data;
@@ -1260,11 +928,21 @@ class BaseModel implements \Countable, \IteratorAggregate
      * @param  array  $data
      *
      * @return  self
-     */ 
+     */
     public function setData(array $data)
     {
         $this->data = $data;
 
         return $this;
     }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+
 }

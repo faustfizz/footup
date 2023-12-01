@@ -1,17 +1,18 @@
 <?php
 
 /**
- * FOOTUP -  2021 - 2023
+ * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Lang
+ * @package Footup\Lang
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 
 namespace Footup\Lang;
 
+use Footup\Utils\Arrays\ArrDots;
 use Locale;
 use MessageFormatter;
 
@@ -85,7 +86,7 @@ class Lang
 	public function getText(string $linea, array $args = [])
 	{
 		// if no file is given, just parse the line
-		if (strpos($linea, '.') === false)
+		if (strpos($linea, '.') === false && !$this->localeFileExists($this->locale))
 		{
 			return $this->formatMessage($linea, $args);
 		}
@@ -125,37 +126,37 @@ class Lang
 	 */
 	private function getOutput(string $locale, string $file, string $parsedLine)
 	{
-		$file = strtolower($file);
-
 		$output = $this->langs[$locale][$file][$parsedLine] ?? null;
 		if ($output !== null)
 		{
 			return $output;
 		}
 
-		foreach (explode('.', $parsedLine) as $row)
-		{
-			if (! isset($current))
-			{
-				$current = $this->langs[$locale][$file] ?? null;
-			}
+		return ArrDots::get($this->langs[$locale][$file], $parsedLine);
 
-			$output = $current[$row] ?? null;
-			if (is_array($output))
-			{
-				$current = $output;
-			}
-		}
+		// foreach (explode('.', $parsedLine) as $row)
+		// {
+		// 	if (! isset($current))
+		// 	{
+		// 		$current = $this->langs[$locale][$file] ?? null;
+		// 	}
 
-		if ($output !== null)
-		{
-			return $output;
-		}
+		// 	$output = $current[$row] ?? null;
+		// 	if (is_array($output))
+		// 	{
+		// 		$current = $output;
+		// 	}
+		// }
 
-		$row = current(explode('.', $parsedLine));
-		$key = substr($parsedLine, strlen($row) + 1);
+		// if ($output !== null)
+		// {
+		// 	return $output;
+		// }
 
-		return $this->langs[$locale][$file][$row][$key] ?? null;
+		// $row = current(explode('.', $parsedLine));
+		// $key = substr($parsedLine, strlen($row) + 1);
+
+		// return $this->langs[$locale][$file][$row][$key] ?? null;
 	}
 
 	//--------------------------------------------------------------------
@@ -174,7 +175,8 @@ class Lang
 		{
 			list($file, $key) = explode('.', $fileAndKey, 2);
 		}else{
-			$file = $fileAndKey;
+			$file = $locale ?? $this->locale;
+			$key = $fileAndKey;
 		}
 		
 		return $this->write(($locale ?? $this->locale), $file, $key, $value);
@@ -212,16 +214,36 @@ class Lang
 	 */
 	protected function parseLine(string $line, string $locale): array
 	{
+		$langFilePath = null;
+
+		// We try first to see if we have a lang file with the name of the current locale like fr.json so line become the key even in array dot notation
+		if ($fileExists = $this->localeFileExists($locale)) {
+			$langFilePath = $fileExists->file;
+
+			if (!isset($this->langs[$locale][$langFilePath]) || !ArrDots::has($this->langs[$locale][$langFilePath], $line)) {
+				$this->load($langFilePath, $locale);
+			}
+
+			return [
+				$langFilePath,
+				$line
+			];
+		}
+
 		list($file, $line) = explode(".", $line, 2);
 
-		if (! isset($this->langs[$locale][$file]) || ! array_key_exists($line, $this->langs[$locale][$file]))
+		// check if the $file like fr/message.json exists, we load it and $line become a key
+		$fileExists = $this->fileExists($file);
+		$langFilePath = $fileExists->file;
+		
+		if (! isset($this->langs[$locale][$langFilePath]) || ! ArrDots::has($this->langs[$locale][$langFilePath], $line))
 		{
-			$this->load($file, $locale);
+			$this->load($langFilePath, $locale);
 		}
 
 		return [
-			$file,
-			$line,
+			$langFilePath,
+			$line
 		];
 	}
 
@@ -278,7 +300,7 @@ class Lang
 	 * will return the file's contents, otherwise will merge with
 	 * the existing langs lines.
 	 *
-	 * @param string  $file
+	 * @param string  $file a file path
 	 * @param string  $locale
 	 * @param boolean $return
 	 *
@@ -286,9 +308,6 @@ class Lang
 	 */
 	protected function load(string $file, string $locale, bool $return = false)
 	{
-		$file = strtolower($file);
-
-
         $this->loadedFiles[$locale] = !array_key_exists($locale, $this->loadedFiles) ? [] : $this->loadedFiles[$locale];
 
 		if (in_array($file, $this->loadedFiles[$locale], true))
@@ -299,11 +318,7 @@ class Lang
         
         $this->langs[$locale] = !array_key_exists($locale, $this->langs) ? [] : $this->langs[$locale];
 
-        $this->langs[$locale][$file] = !array_key_exists($file, $this->langs[$locale]) ? [] : $this->langs[$locale][$file];
-
-		$path = "Lang/{$this->getLocaleDirname($locale)}/{$file}.json";
-
-		$lang = $this->require($path);
+		$lang = $this->require($file);
 		$lang = $lang ? json_decode($lang, true) : [];
 
 		if ($return)
@@ -331,58 +346,62 @@ class Lang
 	protected function write(string $locale, string $file, $key, mixed $value = null)
 	{
 		$file = strtolower($file);
+		$filePath = null;
 
+		if ($fileExists = $this->localeFileExists($locale)) {
+			$filePath = $fileExists->file;
+		}
+
+		if ($fileExists = $this->fileExists($file)) {
+			$filePath = $fileExists->file;
+		}
 
         $this->loadedFiles[$locale] = !array_key_exists($locale, $this->loadedFiles) ? [] : $this->loadedFiles[$locale];
 
-		if (!in_array($file, $this->loadedFiles[$locale], true))
+		if (!in_array($filePath, $this->loadedFiles[$locale], true))
 		{
 			// load it more.
-			$this->loadedFiles[$locale][] = $file;
+			$this->loadedFiles[$locale][] = $filePath;
 		}
 
-		$path = "Lang/{$this->getLocaleDirname($locale)}/{$file}.json";
-
-		if(isset($this->langs[$locale][$file]))
+		if(isset($this->langs[$locale][$filePath]))
 		{
-			$lang = $this->langs[$locale][$file];
+			$lang = $this->langs[$locale][$filePath];
 		}else{
-			$lang = $this->require($path);
+			$lang = $this->require($filePath);
 	
 			$lang = $lang ? json_decode($lang, true) : [];
 		}
 
 		if(is_array($key))
 		{
-			foreach($key as $k => $v)
-			{
-				$lang[$k] = $v;
+			if ($this->localeFileExists($locale)) {
+				$lang[$file] = $key;
+			} else {
+				foreach($key as $k => $v)
+				{
+					$lang[$k] = $v;
+				}
 			}
-		}else{
-			$lang[$key] = $value;
-		}
 
+		} else {
+			if ($this->localeFileExists($locale)) {
+				$lang[$file] = [$key => $value];
+			} else {
+				$lang[$key] = $value;
+			}
+		}
 
 		$json = json_encode($lang, JSON_PRETTY_PRINT);
 
 		try{
-			if(!is_dir(APP_PATH."Lang/{$this->getLocaleDirname($locale)}"))
-			{
-				@mkdir(APP_PATH."Lang/{$this->getLocaleDirname($locale)}", 0777, true);
-			}
-
-			if(!file_exists(APP_PATH.$path) && !file_exists(SYS_PATH.$path))
-			{
-				file_put_contents(APP_PATH.$path, $json);
-			}
-			file_put_contents(APP_PATH.$path, $json);
+			file_put_contents($filePath, $json);
 		}catch(\Exception $e){
 			return $e->getMessage();
 		}
-
 		
 		// Merge our string
-		$this->langs[$locale][$file] = $lang;
+		$this->langs[$locale][$filePath] = $lang;
 
 		return true;
 	}
@@ -394,70 +413,69 @@ class Lang
 	 *
 	 * @param string $locale
 	 * @param string $file
-	 * @param string|array $key
+	 * @param string|array|null $key
 	 * @param mixed $value
 	 * @return bool|string
 	 */
 	public function removeLine(string $file, $key = null, string $locale = null)
 	{
-		if (strpos($file, '.'))
-		{
+		if (strpos($file, ".") !== false) {
 			list($file, $key) = explode('.', $file, 2);
 		}
 
+		$locale = $locale ?? $this->locale;
+
 		$file = strtolower($file);
+		$filePath = null;
 
-
-        $this->loadedFiles[$locale] = !array_key_exists($locale, $this->loadedFiles) ? [] : $this->loadedFiles[$locale];
-
-		if (!in_array($file, $this->loadedFiles[$locale], true))
-		{
-			// load it more.
-			$this->loadedFiles[$locale][] = $file;
+		if ($fileExists = $this->localeFileExists($locale)) {
+			$filePath = $fileExists->file;
 		}
 
-		$path = "Lang/{$this->getLocaleDirname($locale)}/{$file}.json";
+		if ($fileExists = $this->fileExists($file)) {
+			$filePath = $fileExists->file;
+		}
 
-		if(isset($this->langs[$locale][$file]))
-		{
-			$lang = $this->langs[$locale][$file];
-		}else{
-			$lang = $this->require($path);
-	
+		$this->loadedFiles[$locale] = !array_key_exists($locale, $this->loadedFiles) ? [] : $this->loadedFiles[$locale];
+
+		if (!in_array($filePath, $this->loadedFiles[$locale], true)) {
+			// load it more.
+			$this->loadedFiles[$locale][] = $filePath;
+		}
+
+		if (isset($this->langs[$locale][$filePath])) {
+			$lang = $this->langs[$locale][$filePath];
+		} else {
+			$lang = $this->require($filePath);
+
 			$lang = $lang ? json_decode($lang, true) : [];
 		}
 
-		if(is_array($key))
-		{
-			foreach($key as $k)
-			{
-				unset($lang[$k]);
+		if (is_array($key)) {
+			if ($this->localeFileExists($locale)) {
+				unset($lang[$file]);
+			} else {
+				ArrDots::remove($lang, $key);
 			}
-		}else{
-			unset($lang[$key]);
+
+		} else {
+			if ($this->localeFileExists($locale)) {
+				unset($lang[$file]);
+			} elseif ($key) {
+				ArrDots::remove($lang, $key);
+			}
 		}
 
+		$json = json_encode($lang, JSON_PRETTY_PRINT);
 
-		$json = json_encode($lang ?? [], JSON_PRETTY_PRINT);
-
-		try{
-			if(!is_dir(APP_PATH."Lang/{$this->getLocaleDirname($locale)}"))
-			{
-				@mkdir(APP_PATH."Lang/{$this->getLocaleDirname($locale)}", 0777, true);
-			}
-
-			if(!file_exists(APP_PATH.$path) && !file_exists(SYS_PATH.$path))
-			{
-				file_put_contents(APP_PATH.$path, $json);
-			}
-			file_put_contents(APP_PATH.$path, $json);
-		}catch(\Exception $e){
+		try {
+			file_put_contents($filePath, $json);
+		} catch (\Exception $e) {
 			return $e->getMessage();
 		}
 
-		
 		// Merge our string
-		$this->langs[$locale][$file] = $lang;
+		$this->langs[$locale][$filePath] = $lang;
 
 		return true;
 	}
@@ -465,21 +483,61 @@ class Lang
 	//--------------------------------------------------------------------
 
 	/**
-	 * @param string $path
+	 * @param string $path -- come from fileExists function in this same class
 	 * @return mixed
 	 */
 	protected function require(string $path)
 	{
-        if(!file_exists(APP_PATH.$path) && !file_exists(SYS_PATH.$path))
+        if(!file_exists($path) && !file_exists($path))
         {
             return [];
         }
-
-        $path = file_exists(APP_PATH.$path) ? APP_PATH.$path : SYS_PATH.$path;
         
 		$strings = file_get_contents($path);
 
-
 		return $strings;
 	}
+
+	/**
+	 * If a single locale file exists like fr.json
+	 * 
+	 * @param string $locale
+	 * @return object|false
+	 */
+	protected function localeFileExists(string $locale)
+	{
+		$localFile = "Lang/{$locale}.json";
+
+		if(!file_exists(APP_PATH.$localFile) && !file_exists(SYS_PATH.$localFile))
+        {
+            return false;
+        }
+
+        $localFile = file_exists(APP_PATH.$localFile) ? APP_PATH.$localFile : SYS_PATH.$localFile;
+
+		return (object) ['exists' => true, 'file' => $localFile];
+	}
+
+	/**
+	 * If a single locale file exists like fr/file.json
+	 * 
+	 * @param string $file
+	 * @return object|false
+	 */
+	protected function fileExists(string $file)
+	{
+		$file = strtolower($file);
+
+		$localFile = "Lang/{$this->getLocaleDirname()}/{$file}.json";
+
+		if(!file_exists(APP_PATH.$localFile) && !file_exists(SYS_PATH.$localFile))
+        {
+            return false;
+        }
+
+        $localFile = file_exists(APP_PATH.$localFile) ? APP_PATH.$localFile : SYS_PATH.$localFile;
+
+		return (object) ['exists' => true, 'file' => $localFile];
+	}
+
 }

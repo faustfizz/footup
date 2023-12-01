@@ -3,9 +3,9 @@
 /**
  * FOOTUP FRAMEWORK
  * *************************
- * Hard Coded by Faustfizz Yous
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
- * @package Footup/Database
+ * @package Footup\Database
  * @version 0.1
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
@@ -41,6 +41,7 @@ use ErrorException;
  * @method Column mediumtext($name, $length = false) $length false to take default from database
  * @method Column char($name, $length = false) $length false to take default from database
  * @method Column varchar($name, $length = false) $length false to take default from database
+ * @method Column varbinary($name, $length = false) $length false to take default from database
  * @method Column string($name, $length = false) $length false to take default from database
  * @method Column tinytext($name, $length = false) $length false to take default from database
  */
@@ -64,7 +65,7 @@ class Table
 	/** @var array<string, string>  [name => value] */
 	private $options = [];
 
-	/** @var PDO */
+	/** @var \PDO */
 	private $db;
 
 	/** @var bool */
@@ -77,7 +78,7 @@ class Table
 	public function __construct($name, $db = null)
 	{
 		$this->name = $name;
-		$this->db = $db;
+		$this->db = &$db;
 	}
 
 
@@ -303,7 +304,7 @@ class Table
 	 * drop table
 	 * 
 	 * @param bool $ifNotExist
-	 * @return bool|PDOStatement|string
+	 * @return bool|\PDOStatement|string
 	 */
 	public function drop($ifNotExist = true)
 	{
@@ -335,7 +336,7 @@ class Table
 	 * @param bool $ifNotExist
 	 * @return bool|string
 	 */
-	public function execute($ifNotExist = true)
+	public function create($ifNotExist = true)
 	{
 		$this->ifNotExist = $ifNotExist;
 
@@ -346,7 +347,6 @@ class Table
 		return (bool)$this->db->query($this->toSQL()) ?: $this->db->errorInfo()[2];
 	}
 
-
 	/**
 	 * @param  string|ForeignKey $name
 	 * @param  string[]|string $columns
@@ -354,7 +354,7 @@ class Table
 	 * @param  string[]|string $targetColumns
 	 * @return ForeignKey
 	 */
-	public function addForeignKey($name, $columns = [], $targetTable = NULL, $targetColumns = [])
+	private function addForeignKey($name, $columns = [], $targetTable = NULL, $targetColumns = [])
 	{
 		$foreignKey = NULL;
 
@@ -375,22 +375,18 @@ class Table
 	}
 
 	/**
-	 * @param  ForeignKey[] $fks
-	 * 
-	 * @return Table
+	 * Add foreign key using a fluent syntax
+	 *
+	 * @param string $column
+	 * @param string|null $tagetTable
+	 * @return ForeignKey
 	 */
-	public function foreignKeys(array $fks)
-	{
-		/**
-		 * @var ForeignKey[] $fks
-		 */
-		foreach ($fks as $fk) {
-			# code...
-			$this->addForeignKey($fk);
+	public function foreign(string $column, string $tagetTable = null, $targetColumn) {
+		if (!isset($this->columns[$column])) {
+			$this->bigint($column);
 		}
-		return $this;
+		return $this->addForeignKey($this->getName().'_'.$column, [$column], $tagetTable, []);
 	}
-
 
 	/**
 	 * @param  string|ForeignKey $name
@@ -409,7 +405,6 @@ class Table
 		unset($this->foreignKeys[$name]);
 	}
 
-
 	/**
 	 * @param  string $name
 	 * @return ForeignKey|null
@@ -422,7 +417,6 @@ class Table
 		return NULL;
 	}
 
-
 	/**
 	 * @return ForeignKey[]
 	 */
@@ -430,7 +424,6 @@ class Table
 	{
 		return $this->foreignKeys;
 	}
-
 
 	/**
 	 * @throws ErrorException
@@ -473,11 +466,11 @@ class Table
 		
 		if(strtolower($type) === 'enum')
 		{
-			if($weHaveLength && !is_array($arguments[1]))
+			if($weHaveLength && !is_array($length))
 			{
 				throw new ErrorException("Type ENUM/SET should have values as choice");
 			}
-			$column->params($arguments[1]);
+			$column->params($length);
 
 			return $column;
 		}
@@ -489,7 +482,8 @@ class Table
      * get crud type
      *
      * @param string $type
-     * @param int|bool $length
+     * @param int|false $length
+	 * 
      * @return array
      */
     public static function matchTypeLength($type, $length = false)
@@ -520,24 +514,23 @@ class Table
 				return [$type, $length ?: 20];
             case 'enum':
             case 'set':
-				return ["ENUM", $length];
+				return ["enum", $length];
 			case 'float':
             case 'double':
 			case 'decimal':
-				return ["double", ((string)$length) ?: "25,3"];
+				return ["double", $length];
             case 'blob':
+            case 'mediumblob':
+            case 'longblob':
 				return [$type, $length];
             case 'binary':
+            case 'varbinary':
 				return [$type, $length ?: 249];
             case 'text':
-				return [$type, $length];
-            case 'mediumblob':
+			case 'json':
+			case 'longtext':
             case 'mediumtext':
-				return ["mediumtext", $length];
-            case 'json':
-            case 'longblob':
-            case 'longtext':
-				return ["longtext", $length];
+				return [$type, $length];
             case 'char':
 				return [$type, $length ?: 3];
 			case 'tinytext':
@@ -582,7 +575,7 @@ class Table
 				$output .= is_numeric($option) ? " ".strtoupper($value)." " : strtoupper($option). (in_array(strtolower($option), ["engine", "charset", "collate"]) ? "=" : " ") . $value." ";
 			}
 		}else{
-			$output .= " ENGINE=INNODB DEFAULT CHARSET=utf8";
+			$output .= " ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
 		}
 
 		if (strlen($this->comment) > 0) {
