@@ -86,7 +86,7 @@ class Migrate extends Command
             $versions = empty($migrations) ? [] : array_map(function ($mig) {
                 return $mig->version; }, $migrations);
                 
-            foreach (glob(APP_PATH . 'Migration/*') as $migFile) {
+            foreach (glob(APP_PATH . 'Migration/*.php') as $migFile) {
                 # code...
                 $explodeFile = explode('/', $migFile);
                 $migFile = end($explodeFile);
