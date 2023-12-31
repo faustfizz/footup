@@ -194,7 +194,6 @@ class Migrate extends Command
                         $this->app()->io()->error('Migrations table not updated : "' . $DB->errorInfo()[2] . '" !', true)->eol();
                         exit(0);
                     }
-                    ;
                 }
 
                 $this->generated[] = end($expl) . "/Migration/" . $filename . '.php';
