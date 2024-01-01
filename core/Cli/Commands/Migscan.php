@@ -9,7 +9,7 @@ use Footup\Database\DbConnection;
 use Footup\Database\Migration;
 use Footup\Database\Schema\Schema;
 
-class Migrate extends Command
+class Migscan extends Command
 {
     use MigrateTrait;
     public $scaffold = false;
