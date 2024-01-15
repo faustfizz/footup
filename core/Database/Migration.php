@@ -50,16 +50,6 @@ abstract class Migration
      */
     abstract protected function empty();
 
-    public function enableForeignKeyChecks() 
-    {
-        $this->schema->getDb()->query("SET FOREIGN_KEY_CHECKS = 1");
-    }
-
-    public function disableForeignKeyChecks() 
-    {
-        $this->schema->getDb()->query("SET FOREIGN_KEY_CHECKS = 0");
-    }
-
     /**
      * 
      * @param string $action
@@ -68,7 +58,7 @@ abstract class Migration
     public function execute($action = null)
     {
         $result = false;
-        $this->disableForeignKeyChecks();
+        Schema::disableForeignKeyChecks();
 
         switch ($action) {
             case self::DOWN: $result = $this->down(); break;
@@ -76,7 +66,7 @@ abstract class Migration
             case self::UP: $result = $this->up(); break;
         }
 
-        $this->enableForeignKeyChecks();
+        Schema::enableForeignKeyChecks();
 
         return $result;
     }
