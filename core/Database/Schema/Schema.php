@@ -255,7 +255,11 @@ class Schema
             {
                 throw new ErrorException("Table Object for `{$tableName}` not exists !");
             }else{
-                $exec = (bool)$this->db->query(strtoupper($action) ." TABLE "  . ($exists ? ($action === 'create' ? "IF NOT EXISTS" : "IF EXISTS") : "" )  . " `{$tableName}`;") ?:  $this->db->errorInfo()[2];
+                $query = $action === 'truncate' ?
+                    ("CREATE TABLE IF NOT EXISTS {$tableName}; TRUNCATE TABLE {$tableName}") :
+                    strtoupper($action) ." TABLE "  . ($exists ? ($action === 'create' ? "IF NOT EXISTS" : "IF EXISTS") : "" )  . " `{$tableName}`;";
+
+                $exec = (bool)$this->db->query($query) ?:  $this->db->errorInfo()[2];
                 if(is_string($exec)) return $exec;
                 return true;
             }
