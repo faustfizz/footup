@@ -16,6 +16,7 @@ class Migscan extends Command
     protected $table;
     protected $namespace = "App\\Migration";
     protected $generated = [];
+    protected Schema $schema;
 
     public function __construct(App $cli)
     {
@@ -27,6 +28,8 @@ class Migscan extends Command
         $this->inGroup("Migration");
 
         $this->alias("mg-scan");
+
+        $this->schema = new Schema();
 
         parent::__construct('migrate:scan', 'Scan the migration directory and add all migrations classes into the migrations table', false, $cli);
 

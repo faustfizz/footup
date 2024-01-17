@@ -30,6 +30,8 @@ class Migrown extends Command
 
         $this->alias("down");
 
+        $this->schema = new Schema();
+
         parent::__construct('migrate:down', 'Run down a migration or all migrations', false, $cli);
     }
 

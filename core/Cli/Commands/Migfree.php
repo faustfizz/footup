@@ -28,6 +28,8 @@ class Migfree extends Command
         $this->inGroup("Migration");
 
         $this->alias("empty");
+        
+        $this->schema = new Schema();
 
         parent::__construct('migrate:empty', 'Run a migration or all migrations', false, $cli);
     }

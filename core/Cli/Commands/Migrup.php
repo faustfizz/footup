@@ -30,6 +30,8 @@ class Migrup extends Command
 
         $this->alias("migrate");
 
+        $this->schema = new Schema();
+
         parent::__construct('migrate:up', 'Run up a migration or all migrations', false, $cli);
     }
 
