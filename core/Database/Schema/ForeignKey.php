@@ -242,7 +242,14 @@ class ForeignKey
 
     public function toSQL()
     {
-		$anEmptyThing = empty($this->columns) ? 'columns' : empty($this->targetTable) ? 'targetTable' : empty($this->targetColumns) ? 'targetColumns' : null;
+		$anEmptyThing = empty($this->columns) 
+			? 'columns' : (
+				empty($this->targetTable) ? 
+				'targetTable' : (
+					empty($this->targetColumns) ? 
+					'targetColumns' : 
+					null)
+				);
 
 		if ($anEmptyThing) {
 			throw new ErrorException("'$anEmptyThing' not specified for foreign key : {$this->getName()}.");

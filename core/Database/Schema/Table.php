@@ -381,11 +381,11 @@ class Table
 	 * @param string|null $tagetTable
 	 * @return ForeignKey
 	 */
-	public function foreign(string $column, string $tagetTable = null, $targetColumn) {
+	public function foreign(string $column, string $tagetTable = null, $targetColumn = []) {
 		if (!isset($this->columns[$column])) {
 			$this->bigint($column);
 		}
-		return $this->addForeignKey($this->getName().'_'.$column, [$column], $tagetTable, []);
+		return $this->addForeignKey($this->getName().'_'.$column, [$column], $tagetTable, $targetColumn);
 	}
 
 	/**

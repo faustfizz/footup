@@ -1405,7 +1405,7 @@ class QueryBuilder implements \IteratorAggregate
             }
 
             if ((!is_array($operatorOrValue) && !is_null($operatorOrValue)) && is_null($val)) {
-                list($operatorOrValue, $val) = ['=', $operatorOrValue];
+                list($operatorOrValue, $val) = ['=', $this->quote($operatorOrValue)];
             }
 
             $operator = strtoupper(trim($operatorOrValue));

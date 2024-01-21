@@ -54,6 +54,16 @@ class Schema
         return new self($db);
     }
 
+    public static function enableForeignKeyChecks()
+    {
+        DbConnection::getDb(true)->query("SET FOREIGN_KEY_CHECKS = 1");
+    }
+
+    public static function disableForeignKeyChecks()
+    {
+        DbConnection::getDb(true)->query("SET FOREIGN_KEY_CHECKS = 0");
+    }
+
 	/**
 	 * @param  string|Table $name
 	 * @return Table
@@ -245,7 +255,11 @@ class Schema
             {
                 throw new ErrorException("Table Object for `{$tableName}` not exists !");
             }else{
-                $exec = (bool)$this->db->query(strtoupper($action) ." TABLE "  . ($exists ? ($action === 'create' ? "IF NOT EXISTS" : "IF EXISTS") : "" )  . " `{$tableName}`;") ?:  $this->db->errorInfo()[2];
+                $query = $action === 'truncate' ?
+                    ("CREATE TABLE IF NOT EXISTS {$tableName}; TRUNCATE TABLE {$tableName}") :
+                    strtoupper($action) ." TABLE "  . ($exists ? ($action === 'create' ? "IF NOT EXISTS" : "IF EXISTS") : "" )  . " `{$tableName}`;";
+
+                $exec = (bool)$this->db->query($query) ?:  $this->db->errorInfo()[2];
                 if(is_string($exec)) return $exec;
                 return true;
             }

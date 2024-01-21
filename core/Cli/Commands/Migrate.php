@@ -19,6 +19,7 @@ class Migrate extends Command
         "{class_name}" => null
     );
     protected $generated = [];
+    protected Schema $schema;
 
     public function __construct(App $cli)
     {
@@ -34,6 +35,8 @@ class Migrate extends Command
         $this->inGroup("Migration");
 
         $this->alias("mg-create");
+
+        $this->schema = new Schema();
 
         parent::__construct('migrate:create', 'Generate migration file', false, $cli);
 
@@ -194,7 +197,6 @@ class Migrate extends Command
                         $this->app()->io()->error('Migrations table not updated : "' . $DB->errorInfo()[2] . '" !', true)->eol();
                         exit(0);
                     }
-                    ;
                 }
 
                 $this->generated[] = end($expl) . "/Migration/" . $filename . '.php';
