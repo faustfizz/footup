@@ -5,7 +5,7 @@
  * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1.7-alpha.6
+ * @version 0.1.7-alpha.8
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
