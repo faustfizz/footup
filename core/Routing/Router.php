@@ -12,6 +12,7 @@
 
 namespace Footup\Routing;
 
+use Footup\Config\Config;
 use Exception;
 use Footup\Http\Request;
 use Footup\Http\Response;
@@ -420,7 +421,7 @@ class Router
 
                     // Pass the variables to the route instance
                     $route = $route->withArgs($variables);
-    
+
                     // Add the URI arguments to the request
                     return $this->populateRequest($route);
                 }else{
@@ -464,9 +465,7 @@ class Router
              */
             $route = $this->routes[$requestMethod][$requestUri];
 
-            $this->setControllerAndMethodNames($route);
-            
-            return $route;
+            return $this->populateRequest($route);
         }
 
         /**
@@ -484,8 +483,7 @@ class Router
          */
         if ($this->autoRoute())
         {
-            $route = $this->doAutoRoute($requestUri);
-
+            return $this->doAutoRoute($requestUri);
         }
 
         $this->notFound(null, text("Http.pageNotFoundMessage", [$requestUri]));
