@@ -12,7 +12,6 @@
 
 namespace Footup\Routing;
 
-use Footup\Config\Config;
 use Exception;
 use Footup\Http\Request;
 use Footup\Http\Response;
@@ -421,8 +420,6 @@ class Router
 
                     // Pass the variables to the route instance
                     $route = $route->withArgs($variables);
-                    
-                    $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
     
                     // Add the URI arguments to the request
                     return $this->populateRequest($route);
@@ -466,6 +463,8 @@ class Router
              * @var Route
              */
             $route = $this->routes[$requestMethod][$requestUri];
+
+            $this->setControllerAndMethodNames($route);
             
             return $route;
         }
@@ -485,7 +484,8 @@ class Router
          */
         if ($this->autoRoute())
         {
-            return $this->doAutoRoute($requestUri);
+            $route = $this->doAutoRoute($requestUri);
+
         }
 
         $this->notFound(null, text("Http.pageNotFoundMessage", [$requestUri]));
@@ -555,11 +555,7 @@ class Router
         $route = (new Route($requestUri, $controller . Route::CONTROLLER_DELIMITER . $method))->withArgs($uriSegments ?? []);
 
         // Add the URI arguments to the request
-        $this->populateRequest($route);
-
-        $this->setControllerName($route->getHandler())->setControllerMethod($route->getMethod());
-
-        return $route;
+        return $this->populateRequest($route);
     }
 
     /**
@@ -574,6 +570,20 @@ class Router
             # code...
             $this->request->{$key} = $value;
         }
+        return $this->setControllerAndMethodNames($route);
+    }
+
+    /**
+     * Set controller and method names
+     *
+     * @param Route $route
+     * @return Route
+     */
+    private function setControllerAndMethodNames(Route $route)
+    {
+        $this->setControllerName($route->getHandler())
+            ->setControllerMethod($route->getMethod());
+
         $this->request->controllerName = $route->getHandler();
         $this->request->controllerMethod = $route->getMethod();
 

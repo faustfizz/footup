@@ -22,7 +22,7 @@ class Footup
     protected $router;
     public const NAME = "FootUP Framework";
 
-    public const VERSION = "0.1.7-alpha.6";
+    public const VERSION = "0.1.7-alpha.8";
 
     public function __construct(Router &$router)
     {
