@@ -467,7 +467,7 @@ if (!function_exists("frameworkVersion")) {
 	 */
 	function frameworkVersion()
 	{
-		return class_exists(Footup::class) ? Footup::VERSION : "0.1.7-alpha.8";
+		return class_exists(Footup::class) ? Footup::VERSION : "0.1.7-alpha.9";
 	}
 }
 

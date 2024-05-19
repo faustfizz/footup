@@ -5,7 +5,7 @@
  * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
  * 
  * @package Footup
- * @version 0.1.7-alpha.8
+ * @version 0.1.7-alpha.9
  * @author Faustfizz Yous <youssoufmbae2@gmail.com>
  */
 namespace Footup;
@@ -22,7 +22,7 @@ class Footup
     protected $router;
     public const NAME = "FootUP Framework";
 
-    public const VERSION = "0.1.7-alpha.8";
+    public const VERSION = "0.1.7-alpha.9";
 
     public function __construct(Router &$router)
     {

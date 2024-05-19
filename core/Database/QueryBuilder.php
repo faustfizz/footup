@@ -304,7 +304,7 @@ class QueryBuilder implements \IteratorAggregate
      * 
      * @return QueryBuilder
      */
-    public function orWhere($key, $val = null, $operatorOrValue = null, $escape = true)
+    public function orWhere($key, $operatorOrValue = null, $val = null, $escape = true)
     {
         return $this->where($key, $operatorOrValue, $val, ' OR ', $escape);
     }
@@ -1270,9 +1270,10 @@ class QueryBuilder implements \IteratorAggregate
      * Undocumented function
      *
      * @todo i need help here 
-     * @return \ArrayIterator
+     * @return \Traversable
      */
-    public function getIterator()
+    #[\ReturnTypeWillChange]
+    public function getIterator(): \Traversable
     {
         # code...
         $data = $this->get();
@@ -1425,7 +1426,7 @@ class QueryBuilder implements \IteratorAggregate
                     }
                 }
             }
-            $this->where .= trim($glue . $key . ' ' . $operatorOrValue . ' ' . $val);
+            $this->where .= rtrim($glue . $key . ' ' . $operatorOrValue . ' ' . $val);
         }
         
         return $this;

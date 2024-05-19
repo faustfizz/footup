@@ -78,7 +78,7 @@ class Handlers implements HandlersInterface
             $e->getTrace()
         );
 
-        error_log(var_export(debug_backtrace(), true), 3, dirname(__FILE__) . "/resources/logs/footup.log");
+        error_log(var_export($e->getTrace(), true), 3, dirname(__FILE__) . "/resources/logs/footup.log");
 
         die(
             View::render('500.php', (object) $this->errors, $this->env)
@@ -102,7 +102,7 @@ class Handlers implements HandlersInterface
                 'FatalErrorException'
             );
 
-            error_log(var_export(debug_backtrace(), true), 3, dirname(__FILE__) . "/resources/logs/footup.log");
+            error_log(var_export($errors, true), 3, dirname(__FILE__) . "/resources/logs/footup.log");
 
             die(
                 View::render('500.php', (object) $this->errors, $this->env)

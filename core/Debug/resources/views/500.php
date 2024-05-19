@@ -279,12 +279,12 @@ use function Footup\Debug\Support\{
     </footer>
 
     <script>
+        <?php echo ouch_assets('js/custom.min.js')?>
         EnlighterJS.init('pre', "code", {
             language : 'php',
             theme : 'beyond',
             title: <?= json_encode($ex->message) ?>
         });
-        <?php echo ouch_assets('js/custom.min.js')?>
     </script>
 
 </body>

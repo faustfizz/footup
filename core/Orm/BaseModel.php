@@ -639,7 +639,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
      *
      * @param object $field
      * @param string $type
-     * @return void
+     * @return mixed
      */
     public function getOptionsFromRelations(&$field, &$type)
     {
@@ -853,7 +853,8 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
         return $this;
     }
 
-    public function getIterator()
+    #[\ReturnTypeWillChange]
+    public function getIterator(): \Traversable
     {
         return new \ArrayIterator($this->paginate());
     }
@@ -939,6 +940,7 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
     /**
      * @return array
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return $this->toArray();
