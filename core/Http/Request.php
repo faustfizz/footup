@@ -404,7 +404,7 @@ class Request
 
         $value = !empty($this->file($key)) ? $this->file($key) : null;
 
-        if(!is_null($value))
+        if(!is_null($value) && !empty($value->name()))
         {
             return $value;
         }

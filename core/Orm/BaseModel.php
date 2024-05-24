@@ -644,7 +644,8 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
     {
         if ($field->Key === 'MUL') {
             $targetTable = preg_replace('/_id/i', '', $field->Field);
-            $query = $this->getDb()->prepare("SHOW TABLE STATUS FROM `".request()->db_name."` WHERE Name = ?");
+            $query = $this->getDb()->prepare("SHOW TABLE STATUS FROM `".config()->db_name."` WHERE Name = ?");
+            
             $stmt = $query->execute([$targetTable]);
             
             $options = [];
