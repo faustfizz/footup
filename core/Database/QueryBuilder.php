@@ -679,9 +679,9 @@ class QueryBuilder implements \IteratorAggregate
         $this->checkTable();
 
         $fields = is_array($fields) && !empty($fields) ? implode(',', $fields) : (is_string($fields) ? $fields : '*');
-
+        
         $this->limit($limit, $offset);
-
+        
         if ($fields === "*" && !empty($this->selectFields))
             return $this;
 
@@ -893,6 +893,7 @@ class QueryBuilder implements \IteratorAggregate
         if (!empty($where)) {
             $this->where($where);
         }
+            echo 'not empty';
 
         if (empty($this->sql)) {
             $this->select($select);
@@ -968,7 +969,7 @@ class QueryBuilder implements \IteratorAggregate
      *
      * @return object|null Row
      */
-    public function last($field = null, $value = null)
+    public function last($field = null, $value = null): object|null
     {
         if (empty($this->order)) {
             $this->desc($field);
@@ -1124,9 +1125,8 @@ class QueryBuilder implements \IteratorAggregate
                 $this->whereIn($field, $value);
             }
         }
-
-
-        return $field == $this->getPrimaryKey() && is_array($value) ? $this->get($field) : $this->one($field);
+        
+        return $field == $this->getPrimaryKey() && is_array($value) ? $this->get() : $this->one();
     }
 
     /**

@@ -184,7 +184,6 @@ class BaseModel implements \IteratorAggregate, \JsonSerializable, Arrayable
 
             # code...
             $this->data[$field] = $data[$field] ?? null;
-
         }
         return $this;
     }
