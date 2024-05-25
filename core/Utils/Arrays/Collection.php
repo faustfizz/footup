@@ -374,7 +374,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     /**
      * @InheritDoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return array_map(function ($value) {
             if ($value instanceof JsonSerializable) {
@@ -396,44 +396,42 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     /**
      * @InheritDoc
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return array_key_exists($offset, $this->items);
     }
     /**
      * @InheritDoc
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->items[$offset] ?? null;
     }
     /**
      * @InheritDoc
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         $this->items[$offset] = $value;
-        return $this;
     }
     /**
      * @InheritDoc
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         unset($this->items[$offset]);
-        return $this;
     }
     /**
      * @InheritDoc
      */
-    public function count()
+    public function count(): int
     {
         return count($this->items);
     }
     /**
      * @InheritDoc
      */
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         return new ArrayIterator($this->items);
     }

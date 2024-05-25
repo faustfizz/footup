@@ -22,6 +22,7 @@
 
 namespace Footup\Debug;
 
+use DateTime;
 use ErrorException;
 use Footup\Debug\Contracts\HandlersInterface;
 
@@ -78,7 +79,13 @@ class Handlers implements HandlersInterface
             $e->getTrace()
         );
 
-        error_log(var_export($e->getTrace(), true), 3, dirname(__FILE__) . "/resources/logs/footup.log");
+        $date = new DateTime();
+
+        $trace = $date->format('d-m-Y H:i:s') . ' ' . str_repeat("=", 100) . "\n";
+        $trace .= $e->getTraceAsString();
+        $trace .= "\n" . str_repeat("=", 120) . "\n\n";
+
+        error_log($trace, 3, dirname(__FILE__) . "/resources/logs/footup.log");
 
         die(
             View::render('500.php', (object) $this->errors, $this->env)
@@ -102,7 +109,12 @@ class Handlers implements HandlersInterface
                 'FatalErrorException'
             );
 
-            error_log(var_export($errors, true), 3, dirname(__FILE__) . "/resources/logs/footup.log");
+            $date = new DateTime();
+            
+            array_unshift($errors, $date->format('d-m-Y H:i:s') . ' ' . str_repeat("=", 100) . "\n");
+            array_push($errors, "\n" . str_repeat("=", 120) . "\n\n");
+
+            error_log(implode("\n", $errors), 3, dirname(__FILE__) . "/resources/logs/footup.log");
 
             die(
                 View::render('500.php', (object) $this->errors, $this->env)

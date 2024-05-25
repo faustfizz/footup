@@ -1409,7 +1409,7 @@ class QueryBuilder implements \IteratorAggregate
                 list($operatorOrValue, $val) = ['=', $this->quote($operatorOrValue)];
             }
 
-            $operator = strtoupper(trim($operatorOrValue));
+            $operator = is_null($operatorOrValue) ? null : strtoupper(trim($operatorOrValue));
 
             if (in_array($operator, self::OPERATORS)) {
                 if ($val === 'NULL') {
@@ -1426,6 +1426,7 @@ class QueryBuilder implements \IteratorAggregate
                     }
                 }
             }
+
             $this->where .= rtrim($glue . $key . ' ' . $operatorOrValue . ' ' . $val);
         }
         

@@ -17,6 +17,7 @@ use Footup\Utils\Arrays\ArrDots;
 use Footup\Utils\Shared;
 use Footup\Utils\Validator\Validator;
 
+#[\AllowDynamicProperties]
 class Request
 {
     /**
@@ -331,17 +332,7 @@ class Request
     public function files($field = null)
     {
         $files = [];
-        if (!is_null($field) && isset($this->files[$field])) {
-            foreach ($this->files[$field] as $name => $fs) {
-                foreach ($fs as $i => $val) {
-                    $files[$i][$name] = $val;
-                }
-            }
-
-            return array_map(function ($item) {
-                return new File($item);
-            }, $files);
-        } else {
+        if (is_null($field)) {
             foreach ($this->files as $name => $fs) {
                 $keys = array_keys($fs);
                 foreach ($keys as $k => $v) {
@@ -358,6 +349,20 @@ class Request
                 return $item;
             }, $files) : false;
         }
+
+        if (!is_null($field) && isset($this->files[$field])) {
+            foreach ($this->files[$field] as $name => $fs) {
+                foreach ($fs as $i => $val) {
+                    $files[$i][$name] = $val;
+                }
+            }
+
+            return array_map(function ($item) {
+                return new File($item);
+            }, $files);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -366,11 +371,15 @@ class Request
      */
     public function file($field = null)
     {
+        if (is_null($field)) {
+            $firstFile = reset($this->files);
+            return $firstFile ? new File($firstFile) : false;
+        }
+
         if (!is_null($field) && isset($this->files[$field]['name'])) {
             return new File($this->files[$field]);
         } else {
-            $firstFile = reset($this->files);
-            return $firstFile ? new File($firstFile) : false;
+            return false;
         }
     }
 

@@ -107,7 +107,7 @@ class Time extends DateTime
 			}
 		}
 
-		parent::__construct($time, $this->timezone);
+		parent::__construct($time ?? 'now', $this->timezone);
 	}
 
 	//--------------------------------------------------------------------
@@ -1352,7 +1352,7 @@ class Time extends DateTime
 	/**
 	 * This is called when we unserialize the Time object.
 	 */
-	public function __wakeup()
+	public function __wakeup(): void
 	{
 		/**
 		 * Prior to unserialization, this is a string.
