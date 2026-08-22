@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Footup\Http\Request;
+use Footup\Http\Response;
+use Footup\Routing\Controller;
+
+class HomeController extends Controller
+{
+    public function index(Request $request): Response
+    {
+        return $this->json([
+            'message' => 'Welcome to your micro-framework',
+            'app' => config('app.name'),
+            'method' => $request->method,
+        ]);
+    }
+
+    // Demonstrates the View layer: Core\View was injected into the base
+    // Controller's constructor automatically because it's bound in the
+    // container below, so $this->view() is just there to use.
+    public function welcome(): Response
+    {
+        return $this->view('home', [
+            'title' => 'It works!',
+            'items' => ['Container', 'Router', 'Middleware', 'View', 'ExceptionHandler'],
+        ]);
+    }
+}

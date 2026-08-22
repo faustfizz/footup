@@ -1,34 +1,24 @@
 {
-    "name": "footup/framework",
+    "name": "Footup Framework",
     "description": "FootUp MVC Framework: A Rich Featured LightWeight PHP MVC Framework",
     "keywords": ["MVC", "FootUp Framework", "PHP Framework", "POO"],
     "type": "project",
-    "version": "0.1.7-alpha.9",
     "license": "BSD-3-Clause",
-    "autoload": {
-        "psr-4": {
-            "Footup\\": "core/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Faustfizz Yous",
-            "email": "youssoufmbae2@gmail.com",
-            "homepage": "https://faustfizz.slashz.net"
-        }
-    ],
-    "prefer-stable": true,
-    "minimum-stability": "dev",
     "require": {
-        "php": ">=7.4||^8.2.7",
-        "ext-pdo": "*",
-        "ext-intl": "*",
-        "ext-json": "*",
-        "ext-mbstring": "*"
+        "php": ">=8.1"
     },
-    "require-dev": {},
-    "readme": "./README.md",
-	"support": {
-        "source": "https://github.com/faustfizz/footup"
-    }
+    "autoload": {
+        "files": [
+            "framework/helpers.php"
+        ],
+        "psr-4": {
+            "Footup\\": "framework/",
+            "App\\": "app/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "minimum-stability": "stable"
 }
