@@ -143,7 +143,6 @@ if (! function_exists('benchmark')) {
 
 if (! function_exists('logger')) {
     /**
-     * Quick one-liner logging to storage/logs/app.log, e.g.
      * logger('User logged in', ['id' => 42]).
      */
     function logger(string $message, array $context = []): void

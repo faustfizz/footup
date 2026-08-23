@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Footup\Exceptions;
 
+use Footup\Debug\Handlers;
+use Footup\Debug\View as DebugView;
 use Footup\Http\Request;
 use Footup\Http\Response;
 use Footup\View;
@@ -72,16 +74,22 @@ class ExceptionHandler implements ExceptionHandlerInterface
     protected function renderHtml(\Throwable $e): Response
     {
         $status = $e instanceof HttpException ? $e->getStatusCode() : 500;
-        $view = new View(ui_path('/views/errors'));
-
+        $statusView = $e instanceof HttpException ? '400.php' : '500.php';
+        
         try {
-            $html = $view->render((string)$status, [
+          if (env('APP_ENV', 'dev') === 'prod') {
+            $view = new View(ui_path('/views/errors'));
+            $html = $view->render($statusView, [
                 'message' => $e->getMessage(),
                 'exception' => $e,
             ]);
+          } else {
+            $html = Handlers::handleExceptionError($e);
+          }
 
-            return Response::make($html, $status, ['Content-Type' => 'text/html; charset=utf-8']);
-        } catch (\Throwable) {
+          return Response::make($html, $status, ['Content-Type' => 'text/html; charset=utf-8']);
+        } catch (\Throwable $ex) {
+          echo $ex->getMessage();
             // View doesn't exist, fall back to JSON
             return $this->renderJson($e);
         }

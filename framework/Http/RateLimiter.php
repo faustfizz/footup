@@ -22,7 +22,10 @@ class RateLimiter
     public function allow(string $key): bool
     {
         $dir = storage_path('rate-limit');
-        @mkdir($dir, 0775, true);
+
+        if (! is_dir($dir)) {
+          @mkdir($dir, 0775, true);
+        }
 
         $file = $dir . '/' . hash('sha256', $key) . '.txt';
         $now = time();

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Footup\Engine;
 
 use Footup\Database\Connection;
+use Footup\Debug\Reporter;
 use Footup\Env;
 use Footup\Exceptions\ExceptionHandler;
 use Footup\Http\Request;
@@ -12,6 +13,7 @@ use Footup\Http\Response;
 use Footup\Exceptions\ExceptionHandlerInterface;
 use Footup\Routing\Router;
 use Footup\Http\Middleware\MiddlewareInterface;
+use Footup\i18n;
 use Footup\Log;
 use Footup\View;
 
@@ -125,9 +127,17 @@ class Application extends Container
     return self::$instance;
   }
 
+  protected function loadEnvAndSetErrorHandler() {
+    Env::load($this->basePath . '/.env');
+    i18n::setLocale(env('APP_LOCALE', 'en'));
+    Reporter::new()->enableFatalErrorHandler(
+      env('APP_ENV', 'dev')
+    );
+  }
+
   protected function loadConfigs()
   {
-    Env::load($this->basePath . '/.env');
+    $this->loadEnvAndSetErrorHandler();
 
     $config = [];
 
@@ -190,6 +200,11 @@ class Application extends Container
       $router->group(['context' => 'web'], function () use ($web) {
         require $web;
       });
+
+      $this->currentContext = 'cli';
+      $router->group(['context' => 'cli'], function () use ($cli) {
+        require $cli;
+      });
     })($this->router);
 
     return $this;
@@ -203,12 +218,13 @@ class Application extends Container
    */
   public function handle(Request $request): Response
   {
-    $this->loadConfigs();
     // Bind the live request so any class can simply type-hint Request
     // in its constructor or method signature and receive it via DI.
     $this->instance(Request::class, $request);
 
     try {
+      $this->loadConfigs();
+      
       [$route, $params] = $this->router->match($request);
 
       foreach ($params as $key => $value) {

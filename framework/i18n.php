@@ -34,7 +34,7 @@ class i18n
     public static function trans(string $key, array $replace = [], $locale = null): string
     {
         $parts = explode('.', $key);
-        $file = array_shift($parts);
+        $file = strtolower(array_shift($parts));
         $key = implode('.', $parts);
 
         $messages = self::load($file, $locale);
@@ -43,6 +43,10 @@ class i18n
         foreach ($parts as $part) {
             $value = $value[$part] ?? $key;
         }
+
+        $placeholders = array_map(fn($key) => "{" . $key . "}", array_keys($replace));
+
+        $value = str_replace($placeholders, array_values($replace), $value);
 
         foreach ($replace as $search => $replace_val) {
             $value = str_replace(':' . $search, $replace_val, $value);
@@ -59,15 +63,15 @@ class i18n
             return self::$messages[$key];
         }
 
-        $path = base_path(app()->uiPath . "/lang/" . ($locale ?? self::$locale) . "/{$file}.");
+        $path = app()->uiPath . "/lang/" . ($locale ?? self::$locale) . "/{$file}.";
 
         if (is_file($path . 'json')) {
           self::$messages[$key] = json_decode(
-            file_get_contents($path)
+            file_get_contents($path . 'json')
             , true
           );
         } elseif (is_file($path . 'php')) {
-          self::$messages[$key] = require $path;
+          self::$messages[$key] = require $path . 'php';
         } else {
           return [];
         }

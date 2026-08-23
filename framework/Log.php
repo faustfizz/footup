@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Footup;
 
+use Footup\Engine\Application;
+
 /*
 |--------------------------------------------------------------------------
-| Tiny file logger, one line per entry in storage/logs/app.log.
 | Swap for a PSR-3 logger (e.g. `composer require monolog/monolog`)
 | once you need multiple channels, rotation, or remote handlers.
 |--------------------------------------------------------------------------
@@ -22,7 +23,7 @@ class Log
             $basePath = sys_get_temp_dir();
         }
 
-        $path = rtrim($basePath, '/') . '/storage/logs/app.log';
+        $path = rtrim($basePath, '/') . '/storage/logs/footup.log';
         $dir = dirname($path);
 
         if (! is_dir($dir)) {
