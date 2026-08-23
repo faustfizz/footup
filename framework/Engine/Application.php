@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Footup\Engine;
 
 use Footup\Database\Connection;
+use Footup\Env;
 use Footup\Exceptions\ExceptionHandler;
 use Footup\Http\Request;
 use Footup\Http\Response;
@@ -114,6 +115,8 @@ class Application extends Container
 
   protected function loadConfigs()
   {
+    Env::load($this->basePath . '/.env');
+
     $config = [];
 
     foreach (glob($this->configPath . '/*.php') as $file) {

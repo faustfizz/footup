@@ -21,10 +21,7 @@ declare(strict_types=1);
 
 require dirname(__DIR__) . '/framework/autoload.php';
 
-use Footup\Env;
 use Footup\Http\Request;
-
-Env::load('./../.env');
 
 /** @var \Footup\Engine\Application $app */
 $app = require '../bootstrap/app.php';

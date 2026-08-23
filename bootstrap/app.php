@@ -12,11 +12,6 @@ declare(strict_types=1);
 */
 
 use Footup\Engine\Application as FootupEngine;
-use Footup\Auth;
-use Footup\Auth\Auth as FootupAuth;
-use Footup\Connection;
-use Footup\Controller;
-use Footup\Facades\Route;
 use Footup\Http\Middleware\CorsMiddleware;
 use Footup\Http\Middleware\CsrfMiddleware;
 use Footup\Http\Middleware\RateLimitMiddleware;
