@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Footup\Engine;
 
-use Core\Database\Connection;
+use Footup\Database\Connection;
 use Footup\Exceptions\ExceptionHandler;
 use Footup\Http\Request;
 use Footup\Http\Response;
 use Footup\Exceptions\ExceptionHandlerInterface;
-use Footup\Exceptions\HtmlExceptionHandler;
 use Footup\Routing\Router;
 use Footup\Http\Middleware\MiddlewareInterface;
 use Footup\Log;
