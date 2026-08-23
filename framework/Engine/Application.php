@@ -31,6 +31,10 @@ class Application extends Container
   protected Router $router;
   protected ?string $currentContext = null; // 'web', 'api', or null
 
+  public const NAME = "FootUP Framework";
+
+  public const VERSION = "1.0.0-beta";
+
   /** @var array<class-string<\Footup\Http\Middleware\MiddlewareInterface>> global middleware, run on every request */
   protected array $middleware = [];
 
@@ -91,6 +95,14 @@ class Application extends Container
       $this->configPath = $configPath;
     if ($databasePath)
       $this->databasePath = $databasePath;
+  }
+
+  public function version() {
+    return static::VERSION;
+  }
+
+  public function name() {
+    return static::NAME;
   }
 
   public function useView(

@@ -106,6 +106,13 @@ if (! function_exists('base_path')) {
     }
 }
 
+if (! function_exists('public_path')) {
+    function public_path(string $path = ''): string
+    {
+        return app()->publicPath . ($path !== '' ? '/' . ltrim($path, '/') : '');
+    }
+}
+
 if (! function_exists('storage_path')) {
     function storage_path(string $path = ''): string
     {
@@ -149,13 +156,6 @@ if (! function_exists('csrf_token')) {
     function csrf_token(): string
     {
         return \Footup\Http\Csrf::token();
-    }
-}
-
-if (! function_exists('validate')) {
-    function validate(array $data, array $rules): \Footup\Http\Validator
-    {
-        return new \Footup\Http\Validator($data, $rules);
     }
 }
 
@@ -214,4 +214,20 @@ if (! function_exists('queue')) {
     {
         \Footup\Queue::push($jobClass, $data);
     }
+}
+
+if (!function_exists('text')) {
+	/**
+	 * Translation
+	 * get language entry
+	 *
+	 * @param string $indice
+	 * @param array $params
+	 * @param string|null $locale
+	 * @return string
+	 */
+	function text(string $indice, array $params = [], string $locale = null): string
+	{
+		return \Footup\i18n::trans($indice, $params, $locale);
+	}
 }

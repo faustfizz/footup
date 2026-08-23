@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Footup;
 
+use Footup\Database\DB;
+use Footup\Database\QueryBuilder;
+
 /*
 |--------------------------------------------------------------------------
 | Minimal Active-Record-ish base. Deliberately small: attributes

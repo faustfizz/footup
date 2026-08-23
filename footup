@@ -1,0 +1,44 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * FOOTUP FRAMEWORK  2021 - 2026
+ * *****************************
+ * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
+ * 
+ * @package Footup
+ * @version 0.2
+ * @author Faustfizz Yous <youssoufmbae2@gmail.com>
+ */
+
+// Valid PHP Version?
+$minPHPVersion = '8.1';
+if (version_compare(PHP_VERSION, $minPHPVersion, '<'))
+{
+	die("Your PHP version must be {$minPHPVersion} or higher to run FootUp. Current version: " . PHP_VERSION);
+}
+unset($minPHPVersion);
+
+if (strpos(PHP_SAPI, 'cgi') === 0)
+{
+	die("The cli tool is not supported when running php-cgi. It needs php-cli to function!\n\n");
+}
+
+$basePath = dirname(__DIR__);
+
+require $basePath . '/framework/autoload.php';
+
+/** @var \Footup\Engine\Application $app */
+$footup = require $basePath . '/app/app.php';
+
+$command = $argv[1] ?? 'list';
+
+/**
+ * On se positionne dans le dossier public
+ */
+chdir($footup->publicPath);
+
+/**
+ * Démarre le console
+ */
+(new Footup\Cli\Konsole($footup->name(), $footup->version()))->run();

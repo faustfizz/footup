@@ -1,0 +1,4 @@
+{
+    "invalidNumber"     : "The number of the page is invalid: {0}",
+    "templateNotFound"  : "The template {0} is not found !"
+}

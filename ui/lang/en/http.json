@@ -1,0 +1,17 @@
+{
+	"invalidBodyType" 	: "The body of the answer must be a string or an object implementing the __tostring () method.The type found is {0}",
+	"invalidRoute" 	: "{0} is not a valid route.",
+	"error500" 		: "Can not work with {0} ! Reason : <b>{1}</b>",
+	"pageNotFound"       : "Page not found",
+	"pageNotFoundMessage"  : "404 Error : Url <code style='color: blue;background-color: #0aabb345;padding: 2px 6px;border: 1px solid #eff2f4;border-radius: 6px;'>{0}</code> does not correspond to any of the defined routes",
+	"emptyController"    : "No specified controller.",
+	"controllerNotFound" : "The controller is not found : {0}",
+	"controllerBailed"	 : "The controller must be of the String type (function, class) or object. Type found : {0}",
+	"methodNotFound"     : "The method `{0}` of the controller {1} is not found",
+	"routeMethodNotFound"     : "The routing method {0} is not found",
+	"disallowedAction" : "Your request is not allowed.",
+
+	"alreadyMoved" : "The uploaded file has already been moved.",
+	"invalidFile"  : "The original file is not a valid file.",
+	"moveFailed"   : "Unable to move the file {0} to {1} ({2})"
+}

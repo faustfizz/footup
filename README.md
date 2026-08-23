@@ -1,165 +1,216 @@
-# Micro Framework
+# Footup MVC PHP Framework
 
-A tiny, Laravel-flavoured PHP framework: a service container, HTTP
-request/response, a router with grouping and `{params}`, a middleware
-pipeline, a view layer, an exception handler, `.env` config, a DB
-layer with migrations, a logger, built-in request timing/benchmarking,
-and Composer support — one class per file, PSR-4 throughout.
+<div align="center">
+  <img src="framework/footup-ascii-art.png" alt="Footup Logo" width="400px" />
+  <h2 class="name_title">FOOTUP MVC FRAMEWORK - 1.0.0-beta</h2>
+</div>
 
-## Layout
+<p align="center">
+    <a href="https://twitter.com/intent/follow?screen_name=JohnnyFaustfizz">
+      <img src="https://img.shields.io/twitter/follow/JohnnyFaustfizz?style=social&logo=twitter" alt="follow on Twitter">
+    </a>
+    <a href="https://github.com/faustfizz/footup/">
+      <img src="https://img.shields.io/github/stars/faustfizz/footup?style=social">
+    </a>
+    <a href="https://github.com/badges/shields/pulse" alt="Activity">
+      <img src="https://img.shields.io/github/commit-activity/m/faustfizz/footup" />
+    </a>
+    <a href="https://github.com/faustfizz/footup/releases">
+      <img src="https://img.shields.io/github/v/release/faustfizz/footup?include_prereleases">
+    </a>
+    <a href="https://github.com/faustfizz/footup/releases">
+      <img src="https://img.shields.io/github/release-date/faustfizz/footup?include_prereleases">
+    </a>
+    <a href="https://github.com/faustfizz/footup">
+      <img src="https://img.shields.io/badge/php-^7.4-green">
+    </a>
+    <a href="https://github.com/faustfizz/footup">
+      <img src="https://img.shields.io/github/license/faustfizz/footup">
+    </a>
+    <a href="https://github.com/faustfizz/footup">
+      <img src="https://img.shields.io/github/languages/code-size/faustfizz/footup">
+    </a>
+</p>
 
+
+A Rich Featured LightWeight PHP MVC Framework :
+
+* CLI support for generating **Controller**, **Model**, **Middle**, **Migration**, **Seeder**, **Assets** and **View** files ( [adhocore/php-cli](https://github.com/adhocore/php-cli) modified and used thanks :) )
+* Translation support
+* Config using PHP File or .env (Rename env to .env)
+* Request
+* Response
+* Validator (Form Validation - Not validating UploadedFile) Thanks to [pdscopes/php-form-validator](https://github.com/pdscopes/php-form-validator)
+* Pagination (Pagination and Pagination View) Thanks to [iranianpep/paginator](https://github.com/iranianpep/paginator)
+* Session
+* Email (CodeIgniter 4 Email Class)
+* Routing
+* Controller AND Middleware (But here we call it just Middle and are specific)
+* Model RelationShips ($hasOne, $hasMany, $belongsTo, $belongsToMany)
+* Model QueryBuilder
+* Model Events CallBacks
+* Files (Upload File)
+* Extensible (You can integrate any library you want and you can add (news folders and class) in the App Directory using psr4 autoloading mecanism)
+
+## Project structure
+
+```text
+.
+├── app/
+│   ├── bootstrap.php
+│   ├── controllers/
+│   ├── models/
+│   ├── requests/
+│   └── routes.php
+├── bin/
+│   └── console.php
+├── config/
+│   ├── app.php
+│   ├── database.php
+│   └── services.php
+├── core/
+│   ├── Application.php
+│   ├── Benchmark.php
+│   ├── Connection.php
+│   ├── Container.php
+│   ├── DB.php
+│   ├── Env.php
+│   ├── helpers.php
+│   ├── HttpException.php
+│   ├── Model.php
+│   ├── QueryBuilder.php
+│   ├── Request.php
+│   ├── Response.php
+│   ├── Router.php
+│   ├── Route.php
+│   ├── View.php
+│   └── autoload.php
+├── database/
+│   └── migrations/
+├── public/
+│   ├── .htaccess
+│   └── index.php
+├── storage/
+│   └── logs/
+├── views/
+├── .env.example
+├── composer.json
+├── composer.lock
+├── phpunit.xml
+└── README.md
 ```
-bin/console.php       Tiny CLI (serve, route:list, migrate, bench)
-config/app.php         App config (reads from .env)
-config/database.php    DB connection config (sqlite by default)
-core/autoload.php      Composer if present, else a tiny built-in autoloader
-core/*.php             One class/interface per file — see "Core classes" below
-core/Facades/Route.php Route::get()/post()/group() static facade
-core/helpers.php       Global sugar: app(), env(), config(), view(), abort(), benchmark()...
-app/bootstrap.php      YOUR app: middleware, controllers, models, routes
-database/migrations/   Plain .sql migrations, run via bin/console.php migrate
-public/index.php       Front controller — the single HTTP entry point
-public/.htaccess       Apache rewrite rules (routes everything to index.php)
-views/home.php         Example plain-PHP template
-storage/logs/          app.log lands here
-composer.json          PSR-4 autoloads core/ + app/, plus any packages you require
-.env.example            Copy to .env and adjust
-```
 
-### Core classes (`core/*.php`)
+## Requirements
 
-| File | What it is |
-|---|---|
-| `Container.php` | Service container — `bind()`/`singleton()`/`make()`, reflection-based autowiring |
-| `Application.php` | The Kernel — boots everything, turns a `Request` into a `Response` |
-| `Request.php` / `Response.php` | HTTP request/response |
-| `Route.php` / `Router.php` | A registered route, and the router that matches against them |
-| `Pipeline.php` / `MiddlewareInterface.php` | Middleware execution ("onion" style) |
-| `Controller.php` | Optional base controller — `json()`/`view()`/`response()` helpers |
-| `View.php` | Plain-PHP template renderer |
-| `Env.php` | `.env` loader |
-| `Log.php` | Tiny file logger |
-| `Benchmark.php` | Labeled stopwatch — powers request timing/benchmarking |
-| `Connection.php` / `QueryBuilder.php` / `DB.php` / `Model.php` / `Migrator.php` | The DB layer |
-| `HttpException.php` / `NotFoundHttpException.php` / `MethodNotAllowedHttpException.php` | HTTP error types |
-| `ExceptionHandlerInterface.php` / `ExceptionHandler.php` | Turns uncaught errors into a `Response` |
-| `Facades/Route.php` | `Core\Facades\Route` — static `Route::get()`/`post()`/`group()` |
+- PHP 8.1+
+- Composer (optional, but recommended)
+- SQLite support in PHP
 
 ## Quick start
 
 ```bash
 cp .env.example .env
-
-# Optional — only needed once you want Composer packages. Without this,
-# core/autoload.php falls back to a small built-in PSR-4 autoloader.
 composer install
-
 php bin/console.php migrate
 php bin/console.php serve
-# or: php -S localhost:8000 -t public
 ```
 
-Then visit `http://localhost:8000/`, `/welcome`, `/ping`, `/api/users`,
-`/api/users/1`, or `POST /api/users` with `Authorization: Bearer secret-token`.
+Then open:
 
-## Using Composer packages
+- http://localhost:8000/
+- http://localhost:8000/welcome
+- http://localhost:8000/ping
+- http://localhost:8000/api/users
 
-`composer require` anything and it's available everywhere — no extra
-wiring. Both entry points (`public/index.php`, `bin/console.php`) load
-`core/autoload.php`, which loads `vendor/autoload.php` if present.
-`composer.json` maps the `Core\` namespace to `core/` (PSR-4) and
-`App\` to `app/`, so Composer becomes the single autoloader for
-everything: your packages, the framework's own classes, and any
-classes you add under `app/`.
+## Environment configuration
 
-Without Composer installed, `core/autoload.php` falls back to a ~15-line
-hand-rolled autoloader that resolves `Core\Foo\Bar` to
-`core/Foo/Bar.php` — the same convention PSR-4 uses, so nothing has to
-change if you add Composer later.
+The app reads configuration from `.env` files and loads them through the framework config layer.
 
-The `/uuid` route in `app/bootstrap.php` demonstrates this: it's a dead
-route until you run `composer require ramsey/uuid`, then it works with
-zero code changes.
+Example:
 
-## Adding a route
+```env
+APP_ENV=local
+APP_DEBUG=true
+DB_CONNECTION=sqlite
+DB_DATABASE=database.sqlite
+```
+
+You can also set MySQL/PostgreSQL values if needed. The `config/database.php` file already includes the common connection variables.
+
+## App bootstrap
+
+Application startup is centralized in `app/bootstrap.php`.
+
+This is where you:
+
+- register routes
+- attach middleware
+- bind services to the container
+- configure app-level behavior
+- define custom exception handling
+
+Example:
 
 ```php
-// in app/bootstrap.php, inside $app->routes(function () { ... })
+$app->routes(function () {
+    Route::get('/', [HomeController::class, 'index']);
+    Route::get('/welcome', [WelcomeController::class, 'index']);
+});
+```
+
+## Routing
+
+Routes are defined with the framework router and can take path parameters.
+
+```php
 use Footup\Facades\Route;
 
-Route::get('/hello/{name}', fn (Request $request, string $name) => json([
-    'hello' => $name,
-]));
+Route::get('/hello/{name}', function ($request, $name) {
+    return json(['hello' => $name]);
+});
 ```
 
-`Route::get()`/`post()`/`group()`/etc. are a static facade
-(`Core\Facades\Route`) over the booted `Router` — Laravel-style syntax
-with no `$router` instance to pass around. It's a separate class/
-namespace from `Core\Route` (the object representing one registered
-route: method, uri, action, middleware) to avoid a naming collision,
-same as Laravel keeps its facade and its route model apart.
+You can also define grouped routes and attach middleware at the route or app level.
 
-## Adding middleware
+## Controllers and views
+
+Controllers live under `app/controllers/` and can return JSON, redirect responses, or render views.
+
+Typical flow:
 
 ```php
-final class RateLimitMiddleware implements MiddlewareInterface
+final class HomeController extends Controller
 {
-    public function handle(Request $request, Closure $next): Response
+    public function index(): Response
     {
-        // ... check/update a counter ...
-        return $next($request);
+        return view('home', ['name' => 'Footup']);
     }
 }
-
-// global (every request):
-$app->middleware([...$existing, RateLimitMiddleware::class]);
-
-// or per-route/group:
-Route::get('/expensive', $action)->middleware = [RateLimitMiddleware::class];
 ```
 
-## Adding config
-
-Drop a new file in `config/`, e.g. `config/mail.php` returning an
-array — it's auto-loaded and available as `config('mail.driver')`.
-
-## Custom error pages
-
-Bind your own handler once and every uncaught exception renders
-through it:
-
-```php
-$app->singleton(ExceptionHandlerInterface::class, MyExceptionHandler::class);
-```
-
-`app/bootstrap.php` ships a commented-out `HtmlExceptionHandler`
-example.
-
-## Logging
-
-```php
-logger('User logged in', ['id' => $user->id]);
-```
-
-Writes to `storage/logs/app.log`. Uncaught exceptions are logged there
-automatically.
+Views live in `views/` and are plain PHP templates.
 
 ## Database
 
-SQLite by default — zero setup. Run migrations, then hit the API:
+SQLite is enabled by default and requires no setup beyond creating the database file.
+
+Run migrations:
 
 ```bash
 php bin/console.php migrate
-php bin/console.php serve
-curl -X POST localhost:8000/api/users -d name="Ada Lovelace" -H "Authorization: Bearer secret-token"
+```
+
+Then query the app via the API, for example:
+
+```bash
+curl -X POST localhost:8000/api/users \
+  -d name="Ada Lovelace" \
+  -H "Authorization: Bearer secret-token"
+
 curl localhost:8000/api/users
 ```
 
-Swap to MySQL/Postgres by setting `DB_CONNECTION=mysql` (or `pgsql`) and
-the `DB_HOST`/`DB_DATABASE`/etc. vars in `.env` — `config/database.php`
-already has both ready to go.
-
-**Query builder**, for one-off queries:
+### Query builder
 
 ```php
 use Footup\DB;
@@ -168,84 +219,77 @@ DB::table('users')->where('name', 'like', '%Ada%')->get();
 DB::table('users')->insert(['name' => 'Grace Hopper']);
 ```
 
-**Models**, for anything you'll reuse:
+### Models
 
 ```php
 final class User extends \Core\Model
 {
-    protected static string $table = 'users'; // optional — guessed from class name otherwise
+    protected static string $table = 'users';
 }
 
-User::all();                       // User[] — hydrated for you
-User::find(1);                     // ?User  — hydrated for you
-User::where('name', 'Ada Lovelace')->get(); // array[] — raw rows, not models (see note)
-
+User::all();
+User::find(1);
 $user = (new User(['name' => 'Grace Hopper']))->save();
-$user->name = 'Grace Brewster Hopper';
-$user->save();
-$user->delete();
 ```
 
-> `Model::where()` returns the `QueryBuilder` directly, so `->get()`/`->first()`
-> give you plain arrays, not model instances — only `all()`/`find()` hydrate.
-> Wrap a row yourself if you need a model back: `new User($row)`.
+### Migrations
 
-**Migrations** live in `database/migrations/` as plain `.sql` files
-(statements separated by `;`), applied in filename order and tracked
-in a `migrations` table by `Core\Migrator`. `php bin/console.php migrate`
-runs whatever hasn't run yet. There's no rollback ("down") support —
-this is deliberately the simplest thing that works; add one if you need it.
+Migrations live in `database/migrations/` as SQL files. Files are applied in order by filename and tracked in a `migrations` table.
 
-Outgrew this? `composer require illuminate/database` and bind a
-Capsule-backed connection instead of `Core\Connection` — nothing else
-in the framework is coupled to these specific classes.
+```bash
+php bin/console.php migrate
+```
 
-## Benchmarking / timing
+This project intentionally keeps migrations simple: plain SQL, no rollback support, and no complex migration DSL.
 
-Every response already comes back with timing info, no setup needed:
+## Logging
+
+The app includes a lightweight logger.
+
+```php
+logger('User logged in', ['id' => $user->id]);
+```
+
+Logs are written to `storage/logs/app.log`.
+
+## Exceptions and error handling
+
+Unhandled exceptions are caught by the framework and can be customized from `app/bootstrap.php`.
+
+A commented example exists for a custom HTML exception handler.
+
+## Timing and benchmarking
+
+The framework includes request timing instrumentation.
 
 ```bash
 curl -I localhost:8000/welcome
-# X-Response-Time: 3.42ms
-# Server-Timing: view_home;dur=1.87, total;dur=3.42
 ```
 
-That's `TimingMiddleware` (in `app/bootstrap.php`) reading from
-`Core\Benchmark` — a small labeled stopwatch. `View::render()` and
-every `Connection::statement()` call already report into it
-automatically, so view-render and per-query time show up for free.
-Open the Network tab in your browser's devtools and you'll see the
-`Server-Timing` breakdown right there with zero extra tooling.
+You will see headers such as:
 
-Time anything else the same way:
-
-```php
-$report = benchmark('report.generate', fn () => $this->buildReport());
+```text
+X-Response-Time: 3.42ms
+Server-Timing: view_home;dur=1.87, total;dur=3.42
 ```
 
-For repeated sampling — e.g. "how fast does this route render on
-average, p95, worst case" — use the CLI. It calls the route directly
-through `Application::handle()` in-process, so the numbers measure
-pure framework + controller + view time, with no PHP built-in server
-or network round-trip in the way:
+You can also benchmark routes from the CLI:
 
 ```bash
 php bin/console.php bench /welcome 100
-# Requests: 100
-# Min:      1.12 ms
-# Avg:      1.64 ms
-# Median:   1.53 ms
-# P95:      2.20 ms
-# Max:      3.87 ms
 ```
 
-## Where to go from here
+This runs the route in-process and reports timings without the overhead of a real network round trip.
 
-- **Validation**: a `Core\Validator` class, or `composer require`
-  something like `rakit/validation`.
-- **Events**: a simple `Core\Event` dispatcher (`listen()`/`dispatch()`)
-  is a natural next addition — drop it in as `core/Event.php`.
-- **Named routes / URL generation**: give `Route` a `->name('users.show')`
-  and add a `route('users.show', ['id' => 1])` helper.
-- **Caching**: bind a `Core\Cache` interface with a file/array driver,
-  swap for Redis later without touching call sites.
+## CLI commands
+
+```bash
+php bin/console.php serve
+php bin/console.php migrate
+php bin/console.php route:list
+php bin/console.php bench /welcome 100
+```
+
+## Notes
+
+This project is intentionally compact and framework-like rather than full-stack framework heavy. It is meant to be a readable base for small apps, prototypes, and internal tools.

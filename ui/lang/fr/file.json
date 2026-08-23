@@ -1,0 +1,8 @@
+{
+	"fileNotFound" : "Fichier non trouvé : {0}",
+	"fileNotExist" : "Fichier n\"existe pas '{0}' ",
+	"dirNotExist" : "Répertoire innéxistant : '{0}' ",
+	"cannotMove"   : "Impossible de déplacer le fichier {0} vers {1} ({2})",
+	"cannotCopy"   : "Impossible de copier vers {0} - vérifiez que votre répertoire est accessible en écriture",
+	"unreadable"   : "Fichier {0} illisible - vérifiez que votre fichier existe et est accessible"
+}

@@ -31,13 +31,13 @@ class i18n
         return self::$locale;
     }
 
-    public static function trans(string $key, array $replace = []): string
+    public static function trans(string $key, array $replace = [], $locale = null): string
     {
         $parts = explode('.', $key);
         $file = array_shift($parts);
         $key = implode('.', $parts);
 
-        $messages = self::load($file);
+        $messages = self::load($file, $locale);
         $value = $messages;
 
         foreach ($parts as $part) {
@@ -51,21 +51,26 @@ class i18n
         return $value;
     }
 
-    protected static function load(string $file): array
+    protected static function load(string $file, $locale = null): array
     {
-        $key = self::$locale . '.' . $file;
+        $key = ($locale ?? self::$locale) . '.' . $file;
 
         if (isset(self::$messages[$key])) {
             return self::$messages[$key];
         }
 
-        $path = base_path("resources/lang/" . self::$locale . "/{$file}.php");
+        $path = base_path(app()->uiPath . "/lang/" . ($locale ?? self::$locale) . "/{$file}.");
 
-        if (! is_file($path)) {
-            return [];
+        if (is_file($path . 'json')) {
+          self::$messages[$key] = json_decode(
+            file_get_contents($path)
+            , true
+          );
+        } elseif (is_file($path . 'php')) {
+          self::$messages[$key] = require $path;
+        } else {
+          return [];
         }
-
-        self::$messages[$key] = require $path;
 
         return self::$messages[$key];
     }
