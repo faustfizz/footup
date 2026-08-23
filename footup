@@ -24,12 +24,12 @@ if (strpos(PHP_SAPI, 'cgi') === 0)
 	die("The cli tool is not supported when running php-cgi. It needs php-cli to function!\n\n");
 }
 
-$basePath = dirname(__DIR__);
+$basePath = dirname(__FILE__);
 
 require $basePath . '/framework/autoload.php';
 
-/** @var \Footup\Engine\Application $app */
-$footup = require $basePath . '/app/app.php';
+/** @var \Footup\Engine\Application $footup */
+$footup = require $basePath . '/bootstrap/app.php';
 
 $command = $argv[1] ?? 'list';
 
@@ -41,4 +41,4 @@ chdir($footup->publicPath);
 /**
  * Démarre le console
  */
-(new Footup\Cli\Konsole($footup->name(), $footup->version()))->run();
+(new App\Console\Konsole($footup->name(), $footup->version()))->handle($argv);
