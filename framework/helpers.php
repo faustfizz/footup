@@ -370,7 +370,7 @@ if (!function_exists("favicon")) {
 
 		return file_exists(app()->basePath .'/'. $file) ? Html::link(null, [
 			"rel" => "icon",
-			"href" => '/' . $file,
+			"href" => asset($file),
 			"type" => $mime
 		]) : "";
 	}
@@ -418,7 +418,7 @@ if (!function_exists("img")) {
       if (file_exists(public_path("/assets/$folder/" . $file))) {
         return Html::img(null, array_filter([
           "rel" => "image",
-          "src" => "/assets/$folder/" . $file,
+          "src" => asset("assets/$folder/" . $file),
           "width" => $width,
           "height" => $height,
           "class" => $class
@@ -443,7 +443,7 @@ if (!function_exists("css")) {
 
 		return file_exists(public_path("/assets/css/" . $file)) ? Html::link(null, [
 			"rel" => "stylesheet",
-			"href" => "/assets/css/" . $file,
+			"href" => asset("assets/css/" . $file),
 			"type" => "text/css"
 		]) : "";
 	}
@@ -461,7 +461,7 @@ if (!function_exists("js")) {
 		$file = strtr($file, [".js" => ""]) . ".js";
 
 		return file_exists(public_path("/assets/js/" . $file)) ? Html::script(null, [
-			"src" => "/assets/js/" . $file,
+			"src" => asset("assets/js/" . $file),
 			"type" => "text/javascript"
 		]) : "";
 	}
@@ -475,18 +475,19 @@ if (! function_exists('url')) {
      */
     function url(string $path = ''): string
     {
-        // If it's a full URL, return as-is
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
- 
-        // If it starts with /, it's already absolute within the app
-        if (str_starts_with($path, '/')) {
-            return config('app.url') . $path;
-        }
- 
-        // Otherwise, add / and the base URL
-        return config('app.url') . '/' . $path;
+      if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+          return $path;
+      }
+
+      $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443 
+          ? 'https://' 
+          : 'http://';
+
+      $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
+
+      $baseUrl = $protocol . $host;
+
+      return $baseUrl . '/' . ltrim($path, '/');
     }
 }
  
@@ -533,7 +534,7 @@ if (! function_exists('asset')) {
      */
     function asset(string $path): string
     {
-        return url('public/' . ltrim($path, '/'));
+        return url(ltrim($path, '/'));
     }
 }
  

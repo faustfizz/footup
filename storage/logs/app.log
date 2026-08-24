@@ -1,4 +1,0 @@
-[2026-08-22 15:57:34] ERROR: Core\Pipeline::Core\{closure}(): Argument #2 ($pipe) must be of type string, Core\RateLimitMiddleware given {"exception":"TypeError","file":"/Library/WebServer/www/footup_upgrade/core/Pipeline.php","line":51}
-[2026-08-22 15:57:34] ERROR: No route matched [GET /favicon.ico] {"exception":"Core\\NotFoundHttpException","file":"/Library/WebServer/www/footup_upgrade/core/Router.php","line":132}
-[2026-08-22 15:57:35] ERROR: Core\Pipeline::Core\{closure}(): Argument #2 ($pipe) must be of type string, Core\RateLimitMiddleware given {"exception":"TypeError","file":"/Library/WebServer/www/footup_upgrade/core/Pipeline.php","line":51}
-[2026-08-22 16:05:23] ERROR: Class "Core\CsrfMiddleware" does not exist {"exception":"ReflectionException","file":"/Library/WebServer/www/footup_upgrade/core/Container.php","line":80}
