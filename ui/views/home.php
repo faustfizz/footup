@@ -1,27 +1,115 @@
-<?php
-/**
- * A plain-PHP template. Data passed to View::render() is extract()'ed
- * into local variables, so $title and $items below come straight from
- * HomeController::welcome(). Always escape output with htmlspecialchars()
- * unless you specifically want raw HTML.
- */
-?>
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title><?= htmlspecialchars($title ?? 'Micro Framework') ?></title>
-</head>
-<body>
-    <h1><?= htmlspecialchars($title ?? '') ?></h1>
-    <p>Rendered by <code>Footup\View</code> from <code>ui/views/home.php</code>.</p>
+<!DOCTYPE html>
+<html lang="fr">
 
-    <?php if (! empty($items)): ?>
-        <ul>
-            <?php foreach ($items as $item): ?>
-                <li><?= htmlspecialchars($item) ?></li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
+<head>
+	<meta charset="UTF-8">
+	<title>Bienvenu |
+		<?= frameworkName() ?> -
+		<?= frameworkVersion() ?>
+	</title>
+	<meta name="description" content="A Rich Featured LightWeight PHP MVC Framework">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" type="image/png" href="/favicon.svg" />
+
+	<!-- STYLES -->
+	<?= css("style") ?>
+
+</head>
+
+<body>
+
+	<!-- HEADER: MENU + HEROE SECTION -->
+	<header>
+
+		<div class="menu">
+			<ul>
+				<li class="logo">
+					<a href="/">
+						<img height="44" title="logo" src="/favicon.svg" />
+					</a>
+				</li>
+				<li class="menu-toggle">
+					<button onclick="toggleMenu();">&#9776;</button>
+				</li>
+				<li class="menu-item hidden"><a href="<?= base_url('/') ?>">Home</a></li>
+				<li class="menu-item hidden"><a href="<?= base_url('/docs') ?>">Docs API</a></li>
+				<li class="menu-item hidden"><a href="https://github.io/faustfizz/footup" target="_blank">Github</a>
+			</ul>
+		</div>
+
+		<div class="heroe">
+
+			<h1><b>
+					<?= frameworkName() ?>
+				</b> - <b>
+					<?= frameworkVersion() ?>
+				</b></h1>
+
+			<h2>A Rich Featured LightWeight PHP MVC Framework</h2>
+
+		</div>
+
+	</header>
+
+	<!-- CONTENT -->
+
+	<section class="about">
+		<div class="col">
+			<h1>About this page</h1>
+			<p>The page you are looking at is being generated dynamically by FootUp.</p>
+
+			<p>If you would like to edit this page you will find it located at:</p>
+
+			<pre><code>ui/Views/home.php</code></pre>
+
+			<p>The corresponding controller for this page can be found at:</p>
+
+			<pre><code><?= lcfirst(strtr(calledController(), ["\\" => DS])) ?>.php</code></pre>
+		</div>
+		<div class="col board">
+			<p>You can create a controller like this using the command below :</p>
+
+			<pre><code><span class="path">project_dir</span><span class="dollar">$</span> <span class="command">php footup make:controller ControllerName</span></code></pre>
+
+			<p>To see all availables commands, use :</p>
+
+			<pre><code><span class="path">project_dir</span><span class="dollar">$</span> <span class="command">php footup</span></code></pre>
+		</div>
+
+	</section>
+
+	<!-- FOOTER: DEBUG INFO + COPYRIGHTS -->
+
+	<footer>
+		<div class="environment">
+
+			<p>Boot + Render time <b>
+					_ELAPSED_TIME_
+				</b></p>
+
+			<p>Environment: <b>
+					<?= ENVIRONMENT ?>
+				</b> -
+				<?= "PHP " . PHP_VERSION ?>
+			</p>
+
+		</div>
+
+		<div class="copyrights">
+			<p>&copy;
+				<?= date('Y') ?> <b>
+					<?= frameworkName() ?>
+				</b>. FootUp is open source project released under the BSD-3 open source licence.
+			</p>
+		</div>
+
+	</footer>
+
+	<!-- SCRIPTS -->
+	<?= js("script") ?>
+
+	<!-- -->
+
 </body>
+
 </html>

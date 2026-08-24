@@ -12,7 +12,7 @@ class TimingMiddleware implements MiddlewareInterface
     public function handle(Request $request, \Closure $next): Response
     {
         \Footup\Benchmark::reset();
-        $start = microtime(true);
+        $start = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
 
         /** @var Response $response */
         $response = $next($request);
@@ -29,7 +29,10 @@ class TimingMiddleware implements MiddlewareInterface
         // Server-Timing: shows up right in the browser DevTools Network
         // tab / `curl -I` — no extra tooling needed to see the breakdown.
         return $response
-            ->withHeader('Server-Timing', implode(', ', $entries))
-            ->withHeader('X-Response-Time', "{$totalMs}ms");
+          ->withBody(
+            str_replace('_ELAPSED_TIME_', "{$totalMs}ms", $response->body())
+          )
+          ->withHeader('Server-Timing', implode(', ', $entries))
+          ->withHeader('X-Response-Time', "{$totalMs}ms");
     }
 }

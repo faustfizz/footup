@@ -15,6 +15,7 @@ class Route
 {
     protected string $pattern;
     protected array $paramNames = [];
+    protected ?string $routeName = null;
 
     public function __construct(
         public string $method,
@@ -24,6 +25,22 @@ class Route
         public ?string $context = null, // 'web', 'api', or null
     ) {
         $this->compile();
+    }
+ 
+    /**
+     * Assign a name to this route for URL generation
+     * e.g. $route->name('users.show')
+     */
+    public function name(string $name): self
+    {
+        $this->routeName = $name;
+ 
+        return $this;
+    }
+ 
+    public function getName(): ?string
+    {
+        return $this->routeName;
     }
 
     protected function compile(): void
@@ -91,5 +108,13 @@ class Route
         array_shift($matches);
 
         return array_combine($this->paramNames, $matches) ?: [];
+    }
+
+    public function getController() {
+      return is_array($this->action) ? $this->action[0] : '';
+    }
+
+    public function getControllerMethod() {
+      return $this->action instanceof \Closure ? $this->action : $this->action[1];
     }
 }

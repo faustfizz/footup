@@ -10,11 +10,7 @@ class HomeController extends Controller
 {
     public function index(Request $request): Response
     {
-        return $this->json([
-            'message' => 'Welcome to your micro-framework',
-            'app' => config('app.name'),
-            'method' => $request->method,
-        ]);
+        return $this->welcome();
     }
 
     // Demonstrates the View layer: Core\View was injected into the base

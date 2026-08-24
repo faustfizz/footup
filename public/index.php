@@ -18,6 +18,7 @@ declare(strict_types=1);
 |   3. Boot the Application (container, config, middleware, routes).
 |   4. Capture the Request, hand it to the app, send back the Response.
 */
+define('DS', DIRECTORY_SEPARATOR);
 
 require dirname(__DIR__) . '/framework/autoload.php';
 
@@ -25,6 +26,8 @@ use Footup\Http\Request;
 
 /** @var \Footup\Engine\Application $app */
 $app = require '../bootstrap/app.php';
+
+define('ENVIRONMENT', env('APP_ENV', 'dev'));
 
 $request = Request::capture();
 

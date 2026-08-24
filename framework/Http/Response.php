@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Footup\Http;
 
+use Footup\Utils\Arrays\Arrayable;
+
 /*
 |--------------------------------------------------------------------------
 | HTTP response — status, headers, body, and send() to emit it.
@@ -19,9 +21,23 @@ class Response
     ) {
     }
 
+    public function body()
+    {
+      return $this->content;
+    }
+
+    public function withBody(string $content)
+    {
+      $this->content = $content;
+      return $this;
+    }
+
     public static function make(mixed $content = '', int $status = 200, array $headers = []): self
     {
-        return new self($content, $status, $headers);
+      if (is_array($content) || $content instanceof Arrayable) {
+        return static::json($content, $status, $headers);
+      }
+      return new self($content, $status, $headers);
     }
 
     public static function json(mixed $data, int $status = 200, array $headers = []): self

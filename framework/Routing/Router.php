@@ -20,6 +20,9 @@ class Router
 {
     /** @var Route[] flat list — kept only for the rare 404-vs-405 fallback scan */
     protected array $routes = [];
+    
+    /** @var Route*/
+    protected Route $matched;
 
     /** @var array<string, array<string, Route[]>> method => staticSegment => Route[] */
     protected array $staticIndex = [];
@@ -98,6 +101,20 @@ class Router
 
         return $route;
     }
+ 
+    /**
+     * Find a route by its name
+     */
+    public function namedRoute(string $name): ?Route
+    {
+        foreach ($this->routes as $route) {
+            if ($route->getName() === $name) {
+                return $route;
+            }
+        }
+ 
+        return null;
+    }
 
     /** @return Route[] */
     public function all(): array
@@ -125,6 +142,7 @@ class Router
             $params = $route->matches($method, $request->uri);
 
             if ($params !== null) {
+              $this->matched = $route;
                 return [$route, $params];
             }
         }
@@ -138,5 +156,10 @@ class Router
         }
 
         throw new NotFoundHttpException("No route matched [{$method} {$request->uri}]");
+    }
+
+    public function current()
+    {
+      return $this->matched;
     }
 }
