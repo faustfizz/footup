@@ -17,7 +17,10 @@ use Footup\Http\Response;
 interface MiddlewareInterface
 {
     /**
-     * @param \Closure(Request):Response $next
+     * @param \Footup\Http\Request $request
+     * @param \Closure(\Footup\Http\Request):\Footup\Http\Response $next
+     * 
+     * @return \Footup\Http\Response
      */
-    public function handle(Request $request, \Closure $next): Response;
+    public function handle(Request $request, \Closure $next);
 }

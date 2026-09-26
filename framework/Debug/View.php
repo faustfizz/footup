@@ -62,7 +62,7 @@ class View
         if (php_sapi_name() === 'cli') { // if cli
 
             self::writeLn("\n   ");
-            self::writeLn(' => '.$ex->class.' ', '37', '41', '3');
+            self::writeLn(' => '.get_class($ex).' ', '37', '41', '3');
             self::writeLn("\n\n          ");
             self::writeLn(wordwrap($ex->message, 100), '32');
 
@@ -106,7 +106,7 @@ class View
 
         // if http
         http_response_code(500);
-        $view = file_get_contents(app()->uiPath."/views/errors/500.html");
+        $view = file_get_contents(app()->getUiPath()."/views/errors/500.html");
         die(
             strtr($view, ["{title}" => "Internal Error", "{status}" => "Error 500", "{message}" => "Internal Server Error !"])
         );

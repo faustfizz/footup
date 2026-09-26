@@ -1,262 +1,267 @@
 <?php
-/**
- * FOOTUP FRAMEWORK
- * *************************
- * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
- * 
- * @package Footup\Files
- * @version 0.1
- * @author Faustfizz Yous <youssoufmbae2@gmail.com>
- */
+
+declare(strict_types=1);
+
 namespace Footup\Files;
 
-use Exception;
-use SplFileInfo;
+/*
+|--------------------------------------------------------------------------
+| File — file system operations
+|
+| Usage:
+|   File::get('storage/file.txt')                    // Read content
+|   File::put('storage/file.txt', 'content')         // Write
+|   File::append('storage/file.txt', 'more')         // Append
+|   File::delete('storage/file.txt')                 // Delete
+|   File::exists('storage/file.txt')                 // Check exists
+|   File::copy('from.txt', 'to.txt')                 // Copy
+|   File::move('from.txt', 'to.txt')                 // Move
+|   File::size('file.txt')                           // Size in bytes
+|   File::mime('file.txt')                           // MIME type
+|--------------------------------------------------------------------------
+*/
 
-class File extends SplFileInfo
+class File
 {
     /**
-     * @var object
+     * Get file contents
      */
-    protected $file;
-
-    /**
-     * @var boolean
-     */
-    protected $moved = false;
-
-    /**
-     * @var \SplFileInfo
-     */
-    protected $moved_file = null;
-
-    /**
-     * @param array $file
-     */
-    public function __construct(array $file)
+    public static function get(string $path): string
     {
-        $this->file = $file;
-        parent::__construct($file['tmp_name']);
+        if (!file_exists($path)) {
+            throw new \RuntimeException("File not found: {$path}");
+        }
+
+        $contents = file_get_contents($path);
+
+        if ($contents === false) {
+            throw new \RuntimeException("Failed to read file: {$path}");
+        }
+
+        return $contents;
     }
 
     /**
-     * Alias of rename
-     *
-     * @param string $name
-     * @return File
+     * Write content to file (overwrites if exists)
      */
-    public function setName(string $name)
+    public static function put(string $path, string $content): void
     {
-        return $this->rename($name);
-    }
+        $dir = dirname($path);
 
-    /**
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
-     */
-    public function __call($name, $arguments)
-    {
-        if(method_exists($this, 'get'.ucfirst($name)))
-        {
-            return $this->{'get'.ucfirst($name)}(...$arguments);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        if (file_put_contents($path, $content) === false) {
+            throw new \RuntimeException("Failed to write file: {$path}");
         }
     }
 
     /**
-     * @param string $name
-     * @return string|null
+     * Append content to file
      */
-    public function __get($name)
+    public static function append(string $path, string $content): void
     {
-        if(property_exists($this, $name))
-        {
-            return $this->{$name};
+        if (!file_exists($path)) {
+            self::put($path, $content);
+
+            return;
         }
 
-        if(isset($this->file[$name]))
-        {
-            return $this->file[$name];
-        }
-
-        if($name === "random_name")
-        {
-            return $this->random_name()->name();
-        }
-
-        return null;
-    }
-
-    public function __set($name, $value)
-    {
-        if(isset($this->file[$name]))
-        {
-            return $this->file[$name] = $value;
-        }
-
-        if(property_exists($this, $name))
-        {
-            return $this->{$name} = $value;
+        if (file_put_contents($path, $content, FILE_APPEND) === false) {
+            throw new \RuntimeException("Failed to append to file: {$path}");
         }
     }
 
     /**
-    * @return bool
-    */
-    public function isImage() : bool
-    {
-        return in_array($this->ext(), ["jpg", "jpeg", "jpe", "jif", "jfif", "jfi", "webp", "png"]);
-    }
-
-    /**
-    * @return string
-    */
-    public function name() : string
-    {
-        return $this->file['name'];
-    }
-
-    /**
-    * @return string
-    */
-    public function tmp_name() : string
-    {
-        return $this->file['tmp_name'];
-    }
-
-    /**
-     * @return string
+     * Delete a file
      */
-    public function type() : string
+    public static function delete(string $path): void
     {
-        return $this->file['type'];
+        if (file_exists($path) && !unlink($path)) {
+            throw new \RuntimeException("Failed to delete file: {$path}");
+        }
     }
 
     /**
-     * @return int
+     * Check if file exists
      */
-    public function size() : int
+    public static function exists(string $path): bool
     {
-        return $this->file['size'];
+        return file_exists($path) && is_file($path);
     }
 
     /**
-     * @param string $format
-     * @param bool $return_string true to return as string representation
-     * @return int|string
+     * Check if path is directory
      */
-    public function counted_size($format = 'MB', $return_string = false) : int
+    public static function isDirectory(string $path): bool
     {
-        $sizes = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-        $flip = array_flip($sizes);
-        $i = isset($flip[$format]) ? $flip[$format] : floor(log($this->size()) / log(1024));
-        $size = $this->size() / pow(1024, $i);
-        return $return_string ? $this->file_size($format) : $size;
+        return is_dir($path);
     }
 
     /**
-     * Alias of getExtension()
-     *
-     * @return string
+     * Copy a file
      */
-    public function ext()
+    public static function copy(string $from, string $to): void
     {
-        return $this->getExtension();
-    }
-
-    /**
-     * Retrouve l'extension
-     *
-     * @return string
-     */
-    public function getExtension(): string
-    {
-        return pathinfo(mb_strtolower( $this->name() ), PATHINFO_EXTENSION);
-    }
-    
-    public function rename(string $name)
-    {
-        $ext = $this->ext();
-        $name = strtr($name, [".$ext" => ""]);
-        $this->name = (preg_replace('/[^\00-\255]+/u', '', $name).'.'.$ext);
-        return $this;
-    }
-    
-    /**
-     * set a random name to the file
-     *
-     * @param integer $len
-     * @return File
-     */
-    public function random_name($len = 20)
-    {
-        $this->name = substr(uniqid(date("His"), true), 0, $len).'.'.$this->ext();
-        return $this;
-    }
-
-    /**
-     * Format Bytes
-     *
-     * @param string $format
-     * @return string formated bytes
-     */
-    public function file_size($format = 'MB')
-    {
-        $sizes = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-        $flip = array_flip($sizes);
-        $i = isset($flip[$format]) ? $flip[$format] : floor(log($this->size()) / log(1024));
-        return number_format($this->size() / pow(1024, $i), 2, '.', ' '). ' ' . @$sizes[$i];
-    }
-
-    /**
-     * @return int
-     */
-    public function error() : int
-    {
-        return $this->file['error'];
-    }
-
-    /**
-     * @param  string $destination
-     * @return bool
-     */
-    public function save(string $destination = null, bool $replace = true) : bool
-    {
-        return $this->move($destination, $replace);
-    }
-
-    /**
-     * @param  string $destination
-     * @return bool
-     */
-    public function move(string $destination = null, bool $replace = true) : bool
-    {
-        if ($this->error() > 0) {
-            return false;
+        if (!self::exists($from)) {
+            throw new \RuntimeException("File not found: {$from}");
         }
 
-        if (is_null($destination)) {
-            $this->name = $this->random_name()->name();
-            $destination = storage_path('/public') . '/' .$this->name();
+        $dir = dirname($to);
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
         }
 
-        if(stripos($destination, '/') === false)
-        {
-            $destination = storage_path('/public') . '/' .$this->rename($destination);
+        if (!copy($from, $to)) {
+            throw new \RuntimeException("Failed to copy file from {$from} to {$to}");
+        }
+    }
+
+    /**
+     * Move/rename a file
+     */
+    public static function move(string $from, string $to): void
+    {
+        if (!self::exists($from)) {
+            throw new \RuntimeException("File not found: {$from}");
         }
 
-        if (! $replace && file_exists($destination)) {
-            $this->moved_file = new SplFileInfo($destination);
-            return $this->moved = true;
-        }
-        
-        try {
-            $this->moved = move_uploaded_file($this->file['tmp_name'], $destination);
-            $this->moved == true && $this->moved_file = new SplFileInfo($destination);
-        } catch (Exception $exception) {
-            throw new Exception(text("File.cannotMove", [$this->name, $destination, $exception->getMessage()]));
+        $dir = dirname($to);
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
         }
 
-        return $this->moved;
+        if (!rename($from, $to)) {
+            throw new \RuntimeException("Failed to move file from {$from} to {$to}");
+        }
+    }
+
+    /**
+     * Get file size in bytes
+     */
+    public static function size(string $path): int
+    {
+        if (!self::exists($path)) {
+            throw new \RuntimeException("File not found: {$path}");
+        }
+
+        $size = filesize($path);
+
+        if ($size === false) {
+            throw new \RuntimeException("Failed to get file size: {$path}");
+        }
+
+        return $size;
+    }
+
+    /**
+     * Get MIME type
+     */
+    public static function mime(string $path): string
+    {
+        if (!self::exists($path)) {
+            throw new \RuntimeException("File not found: {$path}");
+        }
+
+        // Try finfo first
+        if (function_exists('finfo_file')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $path);
+            finfo_close($finfo);
+
+            if ($mime !== false) {
+                return $mime;
+            }
+        }
+
+        // Fallback to extension mapping
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        return match ($ext) {
+            'txt' => 'text/plain',
+            'html', 'htm' => 'text/html',
+            'pdf' => 'application/pdf',
+            'json' => 'application/json',
+            'xml' => 'application/xml',
+            'csv' => 'text/csv',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'mp4' => 'video/mp4',
+            'mp3' => 'audio/mpeg',
+            'zip' => 'application/zip',
+            default => 'application/octet-stream',
+        };
+    }
+
+    /**
+     * Get file extension
+     */
+    public static function extension(string $path): string
+    {
+        return strtolower(pathinfo($path, PATHINFO_EXTENSION));
+    }
+
+    /**
+     * Get file name without extension
+     */
+    public static function name(string $path): string
+    {
+        return pathinfo($path, PATHINFO_FILENAME);
+    }
+
+    /**
+     * Get directory name
+     */
+    public static function directory(string $path): string
+    {
+        return dirname($path);
+    }
+
+    /**
+     * Create directory if not exists
+     */
+    public static function makeDirectory(string $path, int $mode = 0755, bool $recursive = true): void
+    {
+        if (!is_dir($path) && !mkdir($path, $mode, $recursive)) {
+            throw new \RuntimeException("Failed to create directory: {$path}");
+        }
+    }
+
+    /**
+     * Delete directory recursively
+     */
+    public static function deleteDirectory(string $path): void
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $files = scandir($path);
+
+        if ($files === false) {
+            throw new \RuntimeException("Failed to read directory: {$path}");
+        }
+
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            $fullPath = "{$path}/{$file}";
+
+            if (is_dir($fullPath)) {
+                self::deleteDirectory($fullPath);
+            } else {
+                self::delete($fullPath);
+            }
+        }
+
+        if (!rmdir($path)) {
+            throw new \RuntimeException("Failed to delete directory: {$path}");
+        }
     }
 }

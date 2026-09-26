@@ -72,9 +72,12 @@ if (!function_exists('str_last')) {
      */
     function str_last($str, $del = '\\')
     {
-        $str = explode($del, $str);
+      if (!$str || stripos($str, $del) === false) {
+        return $str;
+      }
+      $str = explode($del, $str);
 
-        return $str[count($str) - 1];
+      return $str[count($str) - 1];
     }
 }
 

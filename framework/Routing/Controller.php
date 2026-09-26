@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Footup\Routing;
 
 use Footup\Http\Response;
-use Footup\View;
+use Footup\View\View;
 
 /*
 |--------------------------------------------------------------------------

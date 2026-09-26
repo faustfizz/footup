@@ -11,7 +11,7 @@ class TimingMiddleware implements MiddlewareInterface
 {
     public function handle(Request $request, \Closure $next): Response
     {
-        \Footup\Benchmark::reset();
+        \Footup\Monitoring\Benchmark::reset();
         $start = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
 
         /** @var Response $response */
@@ -20,7 +20,7 @@ class TimingMiddleware implements MiddlewareInterface
         $totalMs = round((microtime(true) - $start) * 1000, 3);
 
         $entries = [];
-        foreach (\Footup\Benchmark::summary() as $label => $stat) {
+        foreach (\Footup\Monitoring\Benchmark::summary() as $label => $stat) {
             $token = preg_replace('/[^a-zA-Z0-9_-]/', '_', $label);
             $entries[] = "{$token};dur={$stat['total_ms']}";
         }

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Footup\Engine;
 
-use Footup\Database\Connection;
+use Footup\Orm\Connection;
 use Footup\Debug\Reporter;
-use Footup\Env;
+use Footup\Engine\Env;
 use Footup\Exceptions\ExceptionHandler;
 use Footup\Http\Request;
 use Footup\Http\Response;
 use Footup\Exceptions\ExceptionHandlerInterface;
 use Footup\Routing\Router;
 use Footup\Http\Middleware\MiddlewareInterface;
-use Footup\i18n;
-use Footup\Log;
-use Footup\View;
+use Footup\Utils\i18n;
+use Footup\Monitoring\Log;
+use Footup\View\View;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,13 +40,22 @@ class Application extends Container
   /** @var array<class-string<\Footup\Http\Middleware\MiddlewareInterface>> global middleware, run on every request */
   protected array $middleware = [];
 
+  // Default service providers to register on boot. Can be overridden in bootstrap/app.php
+  protected array $defaultProviders = [
+    \Footup\Providers\ModuleServiceProvider::class,
+  ];
+
+  // Path configuration
+  protected string $appPath = '';
+  protected string $databasePath = '';
+  protected string $configPath = '';
+  protected string $uiPath = '';
+  protected string $publicPath = '';
+  protected string $storagePath = '';
+  protected string $assetPath = '';
+
   public function __construct(
-    public readonly string $basePath = '',
-    public ?string $publicPath = '',
-    public ?string $storagePath  = '',
-    public ?string $uiPath  = '',
-    public ?string $configPath  = '',
-    public ?string $databasePath  = '',
+    public readonly string $basePath = ''
   ) {
     self::$instance = $this;
 
@@ -56,18 +65,18 @@ class Application extends Container
     $this->router = new Router();
     $this->instance(Router::class, $this->router);
 
-    if (!$publicPath)
-      $this->publicPath = $this->basePath . '/public';
-    if (!$storagePath)
-      $this->storagePath = $this->basePath . '/storage';
-    if (!$uiPath)
-      $this->uiPath = $this->basePath . '/ui';
-    if (!$configPath)
-      $this->configPath = $this->basePath . '/config';
-    if (!$databasePath)
-      $this->databasePath = $this->basePath . '/database';
+    // Initialize default paths
+    $this->appPath = $basePath . '/app';
+    $this->databasePath = $basePath . '/database';
+    $this->configPath = $basePath . '/config';
+    $this->storagePath = $basePath . '/storage';
+    $this->publicPath = $basePath . '/public';
+    $this->assetPath = $basePath . '/public/assets';
+    $this->uiPath = $basePath . '/ui';
 
     $this->singleton(View::class, fn(self $app) => new View($app->uiPath . '/views'));
+
+    $this->loadConfigs();
 
     $this->singleton(Connection::class, function (Application $app) {
       $default = config('database.default');
@@ -78,32 +87,68 @@ class Application extends Container
     // Default error rendering — override with:
     //   $app->singleton(ExceptionHandlerInterface::class, MyHandler::class);
     $this->singleton(ExceptionHandlerInterface::class, ExceptionHandler::class);
+
+    $this->registerFatalErrorHandler();
   }
 
-  public function usePaths(
-    ?string $publicPath,
-    ?string $storagePath,
-    ?string $uiPath,
-    ?string $configPath,
-    ?string $databasePath,
-  ) {
-    if ($publicPath)
-      $this->publicPath = $publicPath;
-    if ($storagePath)
-      $this->storagePath = $storagePath;
-    if ($uiPath)
-      $this->uiPath = $uiPath;
-    if ($configPath)
-      $this->configPath = $configPath;
-    if ($databasePath)
-      $this->databasePath = $databasePath;
+/**
+ * Register shutdown handler for fatal errors
+ * Internal — automatically called during Application initialization
+ * 
+ * @return void
+ */
+private function registerFatalErrorHandler(): void
+{
+    register_shutdown_function(function () {
+        $error = error_get_last();
+        
+        if ($error === null) {
+            return;
+        }
+        
+        $fatalErrors = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR];
+        
+        if (!in_array($error['type'], $fatalErrors, true)) {
+            return;
+        }
+        
+        try {
+          /** @var ExceptionHandler */
+            $handler = $this->make(ExceptionHandlerInterface::class);
+            
+            $exception = new \ErrorException(
+                $error['message'],
+                0,
+                $error['type'],
+                $error['file'],
+                $error['line']
+            );
+
+            $response = $handler->render($exception, Request::capture());
+            
+            if ($response) {
+                $response->send();
+            }
+        } catch (\Throwable $e) {
+          dd($e);
+            http_response_code(500);
+            echo 'Internal Server Error';
+        }
+    });
+}
+
+  public static function getInstance()
+  {
+    return self::current();
   }
 
-  public function version() {
+  public function version()
+  {
     return static::VERSION;
   }
 
-  public function name() {
+  public function name()
+  {
     return static::NAME;
   }
 
@@ -127,12 +172,20 @@ class Application extends Container
     return self::$instance;
   }
 
-  protected function loadEnvAndSetErrorHandler() {
+  protected function loadEnvAndSetErrorHandler()
+  {
     Env::load($this->basePath . '/.env');
     i18n::setLocale(env('APP_LOCALE', 'en'));
     Reporter::new()->enableFatalErrorHandler(
       env('APP_ENV', 'dev')
     );
+  }
+
+  protected function bootDefaultProviders()
+  {
+    foreach ($this->defaultProviders as $providerClass) {
+      $this->provider($providerClass);
+    }
   }
 
   protected function loadConfigs()
@@ -161,7 +214,7 @@ class Application extends Container
     return $this;
   }
 
-  /** @param array<class-string<\Footup\ServiceProvider>> $providers */
+  /** @param array<class-string<\Footup\Providers\ServiceProvider>> $providers */
   public function providers(array $providers): self
   {
     foreach ($providers as $provider) {
@@ -187,10 +240,9 @@ class Application extends Container
 
   public function routesFrom(
     string $web,
-    string $api,
-    string $cli
+    string $api
   ): self {
-    (function (Router $router) use ($web, $api, $cli) {
+    (function (Router $router) use ($web, $api) {
       $this->currentContext = 'api';
       $router->group(['prefix' => 'api', 'context' => 'api'], function () use ($api) {
         require $api;
@@ -199,11 +251,6 @@ class Application extends Container
       $this->currentContext = 'web';
       $router->group(['context' => 'web'], function () use ($web) {
         require $web;
-      });
-
-      $this->currentContext = 'cli';
-      $router->group(['context' => 'cli'], function () use ($cli) {
-        require $cli;
       });
     })($this->router);
 
@@ -223,8 +270,8 @@ class Application extends Container
     $this->instance(Request::class, $request);
 
     try {
-      $this->loadConfigs();
-      
+      $this->bootDefaultProviders();
+
       [$route, $params] = $this->router->match($request);
 
       foreach ($params as $key => $value) {
@@ -246,6 +293,7 @@ class Application extends Container
     } catch (\Throwable $e) {
       Log::error($e->getMessage(), [
         'exception' => get_class($e),
+        'class' => get_class($e),
         'file' => $e->getFile(),
         'line' => $e->getLine(),
       ]);
@@ -263,10 +311,212 @@ class Application extends Container
       return $result;
     }
 
-    if (is_array($result) || is_object($result)) {
+    if (is_array($result) || $result instanceof \JsonSerializable || (is_object($result) && method_exists($result, 'toArray'))) {
       return Response::json($result);
     }
 
     return Response::make((string) $result);
+  }
+
+  /**
+   * Check if running in production
+   */
+  public function isProduction(): bool
+  {
+    return env('APP_ENV') === 'production';
+  }
+
+  /**
+   * Check if running in local development
+   */
+  public function isLocal(): bool
+  {
+    return env('APP_ENV') === 'local';
+  }
+
+  /**
+   * Check if running in test mode
+   */
+  public function isTest(): bool
+  {
+    return env('APP_ENV') === 'testing';
+  }
+
+  /**
+   * Check if debug mode is enabled
+   */
+  public function isDebug(): bool
+  {
+    return (bool) env('APP_DEBUG', false);
+  }
+
+  /**
+   * Set the app directory path (fluent)
+   * Usage: $app->appPath('/custom/app')
+   */
+  public function appPath(string $path): self
+  {
+    $this->appPath = $path;
+    return $this;
+  }
+
+  /**
+   * Set the app directory path (fluent)
+   */
+  public function uiPath(string $path): self
+  {
+    $this->uiPath = $path;
+    return $this;
+  }
+
+  /**
+   * Set the app directory path (fluent)
+   */
+  public function configPath(string $path): self
+  {
+    $this->configPath = $path;
+    return $this;
+  }
+
+  /**
+   * Set the app directory path (fluent)
+   */
+  public function publicPath(string $path): self
+  {
+    $this->publicPath = $path;
+    return $this;
+  }
+
+  /**
+   * Set the database directory path (fluent)
+   * Usage: $app->databasePath('/custom/database')
+   */
+  public function databasePath(string $path): self
+  {
+    $this->databasePath = $path;
+    return $this;
+  }
+
+  /**
+   * Set the storage directory path (fluent)
+   * Usage: $app->storagePath('/custom/storage')
+   */
+  public function storagePath(string $path): self
+  {
+    $this->storagePath = $path;
+    return $this;
+  }
+
+  /**
+   * Set the assets directory path (fluent)
+   * Usage: $app->assetPath('/custom/assets')
+   */
+  public function assetPath(string $path): self
+  {
+    $this->assetPath = $path;
+    return $this;
+  }
+
+  /**
+   * Set multiple paths at once (fluent)
+   * Usage: $app->usePaths([
+   *     'app' => '/custom/app',
+   *     'database' => '/custom/database',
+   *     'storage' => '/custom/storage',
+   *     'assets' => '/custom/assets',
+   * ])
+   */
+  public function usePaths(array $paths): self
+  {
+    if (isset($paths['app'])) {
+      $this->appPath = $paths['app'];
+    }
+    if (isset($paths['public'])) {
+      $this->publicPath = $paths['public'];
+    }
+    if (isset($paths['config'])) {
+      $this->configPath = $paths['config'];
+    }
+    if (isset($paths['ui'])) {
+      $this->uiPath = $paths['ui'];
+    }
+    if (isset($paths['database'])) {
+      $this->databasePath = $paths['database'];
+    }
+    if (isset($paths['storage'])) {
+      $this->storagePath = $paths['storage'];
+    }
+    if (isset($paths['assets'])) {
+      $this->assetPath = $paths['assets'];
+    }
+    return $this;
+  }
+
+  /**
+   * Get the app directory path
+   */
+  public function getAppPath(): string
+  {
+    return $this->appPath;
+  }
+
+  /**
+   * Get the public directory path
+   */
+  public function getPublicPath(): string
+  {
+    return $this->publicPath;
+  }
+
+  /**
+   * Get the config directory path
+   */
+  public function getConfigPath(): string
+  {
+    return $this->configPath;
+  }
+
+  /**
+   * Get the database directory path
+   */
+  public function getDatabasePath(): string
+  {
+    return $this->databasePath;
+  }
+
+  /**
+   * Get the database directory path
+   */
+  public function getUiPath(): string
+  {
+    return $this->uiPath;
+  }
+
+  /**
+   * Get the storage directory path
+   */
+  public function getStoragePath(): string
+  {
+    return $this->storagePath;
+  }
+
+  /**
+   * Get the assets directory path
+   */
+  public function getAssetPath(): string
+  {
+    return $this->assetPath;
+  }
+
+  public function pathToUrl(string $path): string
+  {
+    $basePath = rtrim($this->basePath, '/');
+    $relativePath = str_replace(
+      'public',
+      '',
+      ltrim(str_replace($basePath, '', $path), '/')
+    );
+
+    return url('/' . ltrim($relativePath, '/'));
   }
 }

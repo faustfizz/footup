@@ -10,11 +10,7 @@ use Footup\Engine\Application;
 |--------------------------------------------------------------------------
 | Facades
 |--------------------------------------------------------------------------
-| Static, Laravel-style sugar over the booted Router. Lives in its own
-| namespace (Footup\Routing\Facades) so it doesn't collide with Footup\Routing\Route — the
-| object representing a single registered route (method/uri/action) —
-| exactly how Laravel keeps Illuminate\Support\Facades\Route separate
-| from Illuminate\Routing\Route.
+| Static, Laravel-style sugar over the booted Router. 
 |
 | Route::get('/users', [UserController::class, 'index']);
 | Route::group(['prefix' => 'api'], function () {
