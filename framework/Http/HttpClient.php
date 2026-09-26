@@ -1,259 +1,100 @@
 <?php
 
-/**
- * FOOTUP FRAMEWORK
- * *************************
- * A Rich Featured LightWeight PHP MVC Framework - Hard Coded by Faustfizz Yous
- * 
- * @package Footup\Http
- * @version 0.1
- * @author Faustfizz Yous <youssoufmbae2@gmail.com>
- */
+declare(strict_types=1);
 
 namespace Footup\Http;
 
 class HttpClient
 {
-    /**
-     * GET constant value.
-     */
-    const TYPE_GET = 'GET';
+  protected static array $defaultHeaders = [];
+  protected array $headers = [];
+  protected ?int $timeout = 30;
 
-    /**
-     * POST constant value.
-     */
-    const TYPE_POST = 'POST';
+  public static function get(string $url, array $query = []): HttpResponse
+  {
+    return (new static())->request('GET', $url, query: $query);
+  }
 
-    /**
-     * Hold the requested.
-     *
-     * @var string
-     */
-    private $url;
+  public static function post(string $url, array $data = []): HttpResponse
+  {
+    return (new static())->request('POST', $url, $data);
+  }
 
-    /**
-     * Hold response raw body.
-     *
-     * @var mixed
-     */
-    private $body;
+  public static function put(string $url, array $data = []): HttpResponse
+  {
+    return (new static())->request('PUT', $url, $data);
+  }
 
-    /**
-     * Hold response code
-     *
-     * @var int
-     */
-    private $status;
+  public static function patch(string $url, array $data = []): HttpResponse
+  {
+    return (new static())->request('PATCH', $url, $data);
+  }
 
-    /**
-     * Hold response raw headers.
-     *
-     * @var string
-     */
-    private $headers;
+  public static function delete(string $url): HttpResponse
+  {
+    return (new static())->request('DELETE', $url);
+  }
 
-    /**
-     * Hold response parsed headers.
-     *
-     * @var array
-     */
-    private $parsedHeaders;
+  public static function withHeaders(array $headers): self
+  {
+    $instance = new static();
+    $instance->headers = array_merge(self::$defaultHeaders, $headers);
 
-    /**
-     * Common curl request method for GET and POST request
-     *
-     * @param string    $type          GET or POST.
-     * @param string    $url           Request URL.
-     * @param array     $data          Request data.
-     * @param array     $headers       Headers data.
-     * @param array     $curlOptions   curl options.
-     * @return self
-     */
-    private function curlRequest($type, $url, $data = [], $headers = [], $curlOptions = [])
-    {
-        $curl = curl_init();
-        $type = strtoupper($type);
+    return $instance;
+  }
 
-        if (self::TYPE_GET === $type && count($data)) {
-            $url = $url . '?' . http_build_query($data);
-        }
+  public static function withoutVerifying(): self
+  {
+    $instance = new static();
+    $instance->verifySsl = false;
 
-        $this->url = $url;
+    return $instance;
+  }
 
-        $default = array(
-            CURLOPT_URL             => $url,
-            CURLOPT_RETURNTRANSFER  => true,
-            CURLOPT_ENCODING        => "",
-            CURLOPT_MAXREDIRS       => 10,
-            CURLOPT_TIMEOUT         => 30,
-            CURLOPT_CUSTOMREQUEST   => $type,
-            CURLOPT_HTTPHEADER      => $headers,
-        );
+  public static function timeout(int $seconds): self
+  {
+    $instance = new static();
+    $instance->timeout = $seconds;
 
-        $finalCurlOptions = array_replace($default, $curlOptions);
+    return $instance;
+  }
 
-        // Must required for get headers and body
-        $finalCurlOptions[CURLOPT_HEADER] = true;
+  protected bool $verifySsl = true;
 
-        if (self::TYPE_POST === $type && count($data)) {
-            $finalCurlOptions[CURLOPT_POSTFIELDS] = json_encode($data);
-        }
-
-        curl_setopt_array($curl, $finalCurlOptions);
-
-        $response = curl_exec($curl);
-        
-        $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-        $this->headers = substr($response, 0, $header_size);
-        $this->setBody(substr($response, $header_size));
-        
-        curl_close($curl);
-        
-        return $this->parseHeaders();
+  protected function request(string $method, string $url, array $body = [], array $query = []): HttpResponse
+  {
+    if ($query) {
+      $url .= '?' . http_build_query($query);
     }
 
-    /**
-     * GET request
-     *
-     * @param   string    $url
-     * @param   array     $data
-     * @param   array     $headers
-     * @param   array     $curlOptions
-     * @return  HttpClient
-     */
-    public static function get($url, $data = [], $headers = [], $curlOptions = [])
-    {
-        $obj = new self;
-        return $obj->curlRequest(self::TYPE_GET, $url, $data, $headers, $curlOptions);
+    $ch = curl_init($url);
+
+    curl_setopt_array($ch, [
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_TIMEOUT => $this->timeout,
+      CURLOPT_CUSTOMREQUEST => $method,
+      CURLOPT_SSL_VERIFYPEER => $this->verifySsl,
+    ]);
+
+    // Set headers
+    $headers = array_merge(['Content-Type: application/json'], $this->headers);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    // Set body for POST/PUT/PATCH
+    if (!empty($body)) {
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
     }
 
-    /**
-     * POST request
-     *
-     * @param   string  $url
-     * @param   array   $data
-     * @param   array   $headers
-     * @param   array   $curlOptions
-     * @return  HttpClient
-     */
-    public static function post($url, $data = [], $headers = [], $curlOptions = [])
-    {
-        $obj = new self;
-        return $obj->curlRequest(self::TYPE_POST, $url, $data, $headers, $curlOptions);
+    $response = curl_exec($ch);
+    $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE) ?? 0;
+    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($error) {
+      throw new \RuntimeException("HTTP request failed: {$error}");
     }
 
-    /**
-     * Get response status code
-     *
-     * @return int
-     */
-    public function getstatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * Parse response headers
-     *
-     * @return self
-     */
-    protected function parseHeaders()
-    {
-        $headers = array();
-        $arrRequests = explode("\r\n\r\n", $this->headers);
-        for ($index = 0; $index < count($arrRequests) - 1; $index++) {
-
-            foreach (explode("\r\n", $arrRequests[$index]) as $i => $line) {
-                if ($i === 0)
-                    $headers[$index]['http_code'] = $line;
-                else {
-                    list($key, $value) = explode(': ', $line);
-                    $headers[$index][$key] = $value;
-                }
-            }
-        }
-
-        $this->parsedHeaders = isset($headers[0]) ? $headers[0] : [];
-
-        return $this;
-    }
-
-    /**
-     * Get response headers
-     *
-     * @param boolean $parsed
-     * @return array
-     */
-    public function getHeaders($parsed = true)
-    {
-        return $parsed ? $this->parsedHeaders : $this->headers;
-    }
-
-    /**
-     * Get response header's specific key's value
-     *
-     * @param string $key
-     * @return mixed
-     */
-    public function getHeader($key)
-    {
-        if (!empty($this->parsedHeaders)) {
-            return $this->parsedHeaders[$key] ?? null;
-        }
-        return null;
-    }
-
-    /**
-     * Get response raw body
-     *
-     * @return mixed
-     */
-    public function getBody()
-    {
-        return $this->body;
-    }
-
-    /**
-     * Get response body as JSON array.
-     *
-     * @return array|mixed
-     */
-    public function getJson()
-    {
-        return json_decode($this->body, true);
-    }
-
-    /**
-     * Get response as standard PHP object
-     *
-     * @return object
-     */
-    public function getObject()
-    {
-        return json_decode($this->body);
-    }
-
-    /**
-     * Set hold response raw body.
-     *
-     * @param  mixed  $body  Hold response raw body.
-     *
-     * @return  self
-     */ 
-    public function setBody($body)
-    {
-        $parseUrlHost = parse_url($this->url, PHP_URL_HOST);
-        $parseUrlScheme = parse_url($this->url, PHP_URL_SCHEME);
-
-        // Parse the body for style and scripts 
-        $body = preg_replace(['/<(link.[^>]*href=")(\/?[^\/\/])(?!http)([^"]*)(".[^>]*)>/', '/<(link.[^>]*href=\')(\/?[^\/\/])(?!http)([^\']*)(\'.[^>]*)>/'], '<$1'.$parseUrlScheme.'://'.$parseUrlHost.'$2$3$4 >', $body);
-        $body = preg_replace(['/<((script|img|iframe|video|source|audio).[^>]*src=")(\/?[^\/\/])(?!http)([^"]*)(".[^>]*)>/', '/<((script|img|iframe|video|source|audio).[^>]*src=\')(\/?[^\/\/])(?!http)([^\']*)(\'.[^>]*)>/'], '<$1'.$parseUrlScheme.'://'.$parseUrlHost.'$3$4$5 >', $body);
-
-        $this->body = $body;
-
-        return $this;
-    }
+    return new HttpResponse((string) $response, $status, $headerSize);
+  }
 }
