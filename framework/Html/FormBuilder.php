@@ -328,6 +328,7 @@ class FormBuilder
         
         // Render fields
         foreach ($columns as $name => $info) {
+          /** @var FieldConfig */
             $config = $this->fieldConfigs[$name] ?? new FieldConfig($name);
             
             // Auto-set type if not already set
@@ -365,8 +366,8 @@ class FormBuilder
             }
             
             // Get value from model if available
-            if ($this->model && isset($this->model->attributes[$name])) {
-                $config->value = $this->model->attributes[$name];
+            if ($this->model && $this->model->$name) {
+                $config->value = $this->model->$name;
             }
             
             $html .= $config->render() . "\n";

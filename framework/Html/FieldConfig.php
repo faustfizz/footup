@@ -16,7 +16,7 @@ class FieldConfig
     public string $type = 'text';
     public ?string $label = null;
     public ?string $placeholder = null;
-    public ?string $value = null;
+    public mixed $value = null;
     public array $options = [];
     public bool $required = false;
     public array $attributes = [];
@@ -141,7 +141,7 @@ class FieldConfig
         $html .= 'id="' . htmlspecialchars($this->name) . '" ';
         
         if ($this->value !== null) {
-            $html .= 'value="' . htmlspecialchars($this->value) . '" ';
+            $html .= 'value="' . (is_numeric($this->value) ? $this->value : htmlspecialchars($this->value)) . '" ';
         }
         
         if ($this->placeholder) {
