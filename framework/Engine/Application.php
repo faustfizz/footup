@@ -519,4 +519,16 @@ private function registerFatalErrorHandler(): void
 
     return url('/' . ltrim($relativePath, '/'));
   }
+
+  public function removeBasePath(string $path, $withoutPublicDir = true): string
+  {
+    $basePath = rtrim($this->basePath, '/');
+    $relativePath = ltrim(str_replace($basePath, '', $path), '/');
+    
+    return $withoutPublicDir ? str_replace(
+      'public',
+      '',
+      $relativePath
+    ) : $relativePath;
+  }
 }

@@ -1,0 +1,12 @@
+{
+  "Welcome to Footup": "Bienvenue dans le framework Footup",
+  "Welcome to :appname": "Bienvenue dans :appname - Commencez à construire!",
+  "Hello :name": "Bonjour :name, ravi de vous rencontrer",
+  "You have :count messages": "{0} Vous n'avez pas de messages|{1} Vous avez un message|[2,*] Vous avez :count messages",
+  "Simple message": "Ceci est un simple message en ligne",
+  "Loading :item...": "Chargement de :item, veuillez patienter...",
+  "Click :button to continue": "Cliquez sur le bouton :button pour continuer",
+  "Feature coming soon": "Cette fonctionnalité sera bientôt disponible",
+  "Under construction": "Cette page est actuellement en construction",
+  "Database connection failed": "Impossible de se connecter à la base de données"
+}

@@ -36,9 +36,13 @@ $command = $argv[1] ?? 'list';
 /**
  * On se positionne dans le dossier public
  */
-chdir($footup->publicPath);
+chdir($basePath.'/public');
+
+\Footup\Engine\ModuleManager::bootAll();
+
+$footup->instance(\Footup\Cli\Konsole::class, new \App\Console\Konsole($footup->name(), $footup->version()));
 
 /**
  * Démarre le console
  */
-(new App\Console\Konsole($footup->name(), $footup->version()))->handle($argv);
+$footup->make(\Footup\Cli\Konsole::class)->handle($argv);

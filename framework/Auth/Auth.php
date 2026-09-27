@@ -4,112 +4,156 @@ declare(strict_types=1);
 
 namespace Footup\Auth;
 
+use Footup\Hashing\Hash;
+
 /*
 |--------------------------------------------------------------------------
-| Auth — session + JWT authentication
+| Auth — Authentication system
 |
 | Usage:
-|   Auth::login($user); // store in session
-|   Auth::user();       // get current user
+|   Auth::attempt(['email' => 'john@example.com', 'password' => 'secret']);
+|   Auth::user();
+|   Auth::check();
 |   Auth::logout();
-|   Auth::token($user); // generate JWT
-|   Auth::fromToken($token); // decode JWT
+|
+|   Auth::create([
+|       'name' => 'John Doe',
+|       'email' => 'john@example.com',
+|       'password' => Hash::make('secret'),
+|   ]);
 |--------------------------------------------------------------------------
 */
 
 class Auth
 {
-    protected static ?object $user = null;
-    protected static string $jwtSecret = '';
+    private static ?object $user = null;
+    private static string $userModel = Authenticable::class;
+    private static string $sessionKey = 'ft_user_id';
 
-    public static function setSecret(string $secret): void
+    /**
+     * Attempt to authenticate user with credentials
+     */
+    public static function attempt(array $credentials): bool
     {
-        self::$jwtSecret = $secret;
+        $email = $credentials['email'] ?? null;
+        $password = $credentials['password'] ?? null;
+
+        if (!$email || !$password) {
+            return false;
+        }
+
+        $userClass = self::$userModel;
+        $user = $userClass::where('email', $email)->first();
+
+        if (!$user) {
+            return false;
+        }
+
+        if (!Hash::check($password, $user->password)) {
+            return false;
+        }
+
+        self::login($user);
+        return true;
     }
 
+    /**
+     * Login a user
+     */
     public static function login(object $user): void
     {
         session_start();
-        $_SESSION['user_id'] = $user->id ?? null;
+        $_SESSION[self::$sessionKey] = $user->id;
         self::$user = $user;
     }
 
+    /**
+     * Logout the current user
+     */
     public static function logout(): void
     {
         session_start();
-        unset($_SESSION['user_id']);
+        unset($_SESSION[self::$sessionKey]);
         self::$user = null;
+        session_destroy();
     }
 
-    public static function user(): ?User
+    /**
+     * Get the current user
+     */
+    public static function user(): ?object
     {
         if (self::$user) {
             return self::$user;
         }
 
         session_start();
-        $userId = $_SESSION['user_id'] ?? null;
 
-        if ($userId && class_exists(User::class)) {
-            self::$user = User::find($userId);
+        if (!isset($_SESSION[self::$sessionKey])) {
+            return null;
         }
 
+        $userClass = self::$userModel;
+        $userId = $_SESSION[self::$sessionKey];
+
+        self::$user = $userClass::find($userId);
         return self::$user;
     }
 
+    /**
+     * Check if user is authenticated
+     */
     public static function check(): bool
     {
         return self::user() !== null;
     }
 
-    public static function token(object $user): string
+    /**
+     * Check if user is NOT authenticated
+     */
+    public static function guest(): bool
     {
-        $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
-        $payload = json_encode(['sub' => $user->id ?? null, 'iat' => time()]);
-
-        $headerB64 = self::base64UrlEncode($header);
-        $payloadB64 = self::base64UrlEncode($payload);
-        $signature = hash_hmac('sha256', "{$headerB64}.{$payloadB64}", self::$jwtSecret, true);
-        $signatureB64 = self::base64UrlEncode($signature);
-
-        return "{$headerB64}.{$payloadB64}.{$signatureB64}";
+        return !self::check();
     }
 
-    public static function fromToken(string $token): ?object
+    /**
+     * Get user ID
+     */
+    public static function id(): ?int
     {
-        $parts = explode('.', $token);
-
-        if (count($parts) !== 3) {
-            return null;
-        }
-
-        [$headerB64, $payloadB64, $signatureB64] = $parts;
-        $signature = hash_hmac('sha256', "{$headerB64}.{$payloadB64}", self::$jwtSecret, true);
-
-        if (self::base64UrlEncode($signature) !== $signatureB64) {
-            return null;
-        }
-
-        $payload = json_decode(self::base64UrlDecode($payloadB64), true);
-
-        if (! $payload || ! isset($payload['sub'])) {
-            return null;
-        }
-
-        if (class_exists(User::class)) {
-            return User::find($payload['sub']);
-        }
-
-        return null;
+        return self::user()?->id;
     }
 
-    protected static function base64UrlEncode(string $data): string
+    /**
+     * Create a new user
+     */
+    public static function create(array $data): object
     {
-        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+        $userClass = self::$userModel;
+        return $userClass::create($data);
     }
 
-    protected static function base64UrlDecode(string $data): string
+    /**
+     * Set the user model class
+     */
+    public static function setUserModel(string $model): void
     {
-        return base64_decode(strtr($data, '-_', '+/') . str_repeat('=', 4 - strlen($data) % 4));
+        self::$userModel = $model;
+    }
+
+    /**
+     * Set the session key
+     */
+    public static function setSessionKey(string $key): void
+    {
+        self::$sessionKey = $key;
+    }
+
+    public function __call($method, $args)
+    {
+      if (method_exists(__CLASS__, $method)) {
+          static::$method(...$args);
+      }
+      return null;
     }
 }

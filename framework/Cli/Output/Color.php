@@ -104,6 +104,14 @@ class Color
     }
 
     /**
+     * Returns a line formatted as ok msg.
+     */
+    public function success(string $text, array $style = []): string
+    {
+        return $this->line($text, static::$styles['ok'] + $style);
+    }
+
+    /**
      * Returns a line formatted as warning.
      */
     public function warn(string $text, array $style = []): string

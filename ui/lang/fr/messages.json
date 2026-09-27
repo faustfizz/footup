@@ -1,0 +1,20 @@
+{
+  "welcome": "Bienvenue dans l'application",
+  "auth": {
+    "login_success": "Connecté avec succès en tant que :name",
+    "logout_success": "Vous avez été déconnecté",
+    "unauthorized": "Vous ne disposez pas des autorisations nécessaires pour accéder à {resource}"
+  },
+  "validation": {
+    "required": "Le champ :field est obligatoire",
+    "email": "Le champ {field} doit être une adresse email valide",
+    "min": "Le champ :field doit contenir au moins :min caractères",
+    "max": "Le champ {field} ne peut pas dépasser {max} caractères"
+  },
+  "pluralization": {
+    "items": "{0} Aucun article|{1} Un article|[2,*] :count articles",
+    "files": "{0} Aucun fichier|{1} Un fichier|[2,*] :count fichiers",
+    "messages": "{0} Aucun message|{1} Un message|[2,*] :count messages",
+    "followers": "{0} Aucun abonné|{1} Un abonné|[2,*] :count abonnés"
+  }
+}

@@ -34,7 +34,7 @@ class QueueCommand extends Command
         
         // Get the party started.
         $io->info($this->app()->name() . "Processing queue...", true)->eol();
-        \Footup\Queue::work();
+        \Footup\Queuing\Queue::work();
         $io->info($this->app()->name() . "Queue processed.", true)->eol();
 
         // If you return integer from here, that will be taken as exit error code

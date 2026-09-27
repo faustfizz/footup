@@ -1,0 +1,22 @@
+{
+  "welcome": "Welcome to the application",
+  "auth": {
+    "failed": "Authentication failed",
+    "unauthorized": "You are not authorized to perform this action",
+    "unauthenticated": "Please log in to continue"
+  },
+  "validation": {
+    "required": "The :field field is required",
+    "email": "The :field must be a valid email address",
+    "min": "The :field must be at least :min characters",
+    "max": "The :field may not be greater than :max characters"
+  },
+  "pluralization": {
+    "items": "{0} No items|{1} One item|[2,*] :count items",
+    "files": "{0} No files|{1} One file|[2,*] :count files",
+    "messages": "{0} No messages|{1} One message|[2,*] :count messages",
+    "followers": "{0} No followers|{1} One follower|[2,*] :count followers",
+    "likes": "{0} Nobody liked this|{1} You liked this|[2,*] :name and :count others liked this",
+    "visitors": "{0} No visitors|{1} One visitor|[2,10] A few visitors|[11,*] Many visitors"
+  }
+}

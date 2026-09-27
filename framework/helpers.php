@@ -136,6 +136,13 @@ if (! function_exists('app_path')) {
     }
 }
 
+if (! function_exists('database_path')) {
+    function database_path(string $path = ''): string
+    {
+        return app()->getDatabasePath() . ($path !== '' ? '/' . ltrim($path, '/') : '');
+    }
+}
+
 if (! function_exists('public_path')) {
     function public_path(string $path = ''): string
     {
@@ -171,6 +178,21 @@ if (! function_exists('ui_path')) {
     }
 }
 
+if (! function_exists('without_base_path')) {
+  /**
+   * Get a path relative to the base path, e.g. without_base_path('storage/logs') → storage/logs
+   * 
+   * @param string $path
+   * @param bool $withoutPublicDir
+   * @return string
+   * 
+   */
+  function without_base_path(string $path = '', $withoutPublicDir = true): string
+  {
+      return app()->removeBasePath($path, $withoutPublicDir);
+  }
+}
+
 if (! function_exists('benchmark')) {
     /**
      * Time a block of code and get its own return value back — the
@@ -203,9 +225,9 @@ if (! function_exists('csrf_token')) {
 }
  
 if (! function_exists('validate')) {
-    function validate(array $data, array $rules): \Footup\Validation\Validator
+    function validate(array $data, array $rules)
     {
-        return new \Footup\Validation\Validator($data, $rules);
+        return \Footup\Validation\Validator::check($data, $rules);
     }
 }
 

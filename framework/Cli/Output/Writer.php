@@ -159,6 +159,7 @@ use const STDOUT;
  * @method Writer info($text, $eol = false)
  * @method Writer logo($text, $eol = false)
  * @method Writer ok($text, $eol = false)
+ * @method Writer success($text, $eol = false)
  * @method Writer purple($text, $eol = false)
  * @method Writer purpleBgBlack($text, $eol = false)
  * @method Writer purpleBgBlue($text, $eol = false)
