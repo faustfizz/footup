@@ -1,0 +1,139 @@
+{*
+|--------------------------------------------------------------------------
+| Pagination Component
+|--------------------------------------------------------------------------
+|
+| Display pagination links for PaginatedResult objects.
+|
+| Usage:
+|   {include 'components/pagination', ['results' => $results]}
+|   
+| Or with custom current page class:
+|   {include 'components/pagination', [
+|       'results' => $results,
+|       'activeClass' => 'current',
+|       'showEllipsis' => true
+|   ]}
+|--------------------------------------------------------------------------
+*}
+
+{var $pagination = $results->pagination()}
+
+{if $pagination->total() > 0}
+    <nav class="pagination" aria-label="Pagination">
+        {* Showing info *}
+        <div class="pagination-info">
+            Showing {$results->from()} to {$results->to()} of {$pagination->total()} results
+        </div>
+
+        {* Previous link *}
+        <div class="pagination-nav">
+            {if $pagination->hasPrevious()}
+                <a href="?page={$pagination->previousPage()}" class="pagination-link pagination-prev">
+                    ← Previous
+                </a>
+            {else}
+                <span class="pagination-link pagination-prev disabled">
+                    ← Previous
+                </span>
+            {/if}
+
+            {* Page numbers *}
+            <div class="pagination-numbers">
+                {foreach $pagination->links() as $page}
+                    {if $page == $pagination->currentPage()}
+                        <span class="pagination-number active">
+                            {$page}
+                        </span>
+                    {else}
+                        <a href="?page={$page}" class="pagination-number">
+                            {$page}
+                        </a>
+                    {/if}
+                {/foreach}
+            </div>
+
+            {* Next link *}
+            {if $pagination->hasMore()}
+                <a href="?page={$pagination->nextPage()}" class="pagination-link pagination-next">
+                    Next →
+                </a>
+            {else}
+                <span class="pagination-link pagination-next disabled">
+                    Next →
+                </span>
+            {/if}
+        </div>
+
+        {* Page indicator *}
+        <div class="pagination-indicator">
+            Page {$pagination->currentPage()} of {$pagination->lastPage()}
+        </div>
+    </nav>
+{/if}
+
+{*
+|--------------------------------------------------------------------------
+| Styling Example (add to your CSS)
+|--------------------------------------------------------------------------
+
+.pagination {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.pagination-info {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.pagination-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.pagination-link,
+.pagination-number {
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.pagination-link:hover:not(.disabled),
+.pagination-number:hover:not(.active) {
+    background-color: #f5f5f5;
+    border-color: #999;
+}
+
+.pagination-number.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-link.disabled,
+.pagination-number.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-numbers {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.pagination-indicator {
+    font-size: 0.85rem;
+    color: #999;
+    text-align: center;
+}
+|--------------------------------------------------------------------------
+*}

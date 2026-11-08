@@ -14,6 +14,18 @@ class Konsole extends CliKonsole {
     
     $this->loadCommands(dirname(__DIR__) . '/Commands');
 
-    require_once __DIR__ . '/../../routes/console.php';
+    $commands = require_once __DIR__ . '/../../routes/console.php';
+
+    if (is_array($commands)) {
+      foreach ($commands as $command) {
+        if (is_string($command) && class_exists($command)) {
+          /** @var \Footup\Cli\Input\Command $instance */
+          $intance = new $command($this);
+          $this->add($intance, $instance->alias());
+        } elseif ($command instanceof \Footup\Cli\Input\Command) {
+          $this->add($command, $command->alias()); 
+        }
+      }
+    }
   }
 }

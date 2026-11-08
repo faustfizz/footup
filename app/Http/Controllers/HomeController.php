@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contact;
 use Footup\Http\Request;
 use Footup\Http\Response;
 use Footup\Routing\Controller;
@@ -16,8 +17,9 @@ class HomeController extends Controller
     // Demonstrates the View layer: Core\View was injected into the base
     // Controller's constructor automatically because it's bound in the
     // container below, so $this->view() is just there to use.
-    public function welcome(): Response
-    {
+    public function welcome()
+    { 
+        return Contact::whereIdcont(6)->first()->formFor();
         return $this->view('home', [
             'title' => 'It works!',
             'items' => ['Container', 'Router', 'Middleware', 'View', 'ExceptionHandler'],

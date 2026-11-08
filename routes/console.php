@@ -2,16 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\HomeController;
-use Footup\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| Console Routes / Commands
 |--------------------------------------------------------------------------
-| These routes return HTML responses. Exceptions render as HTML error pages.
+| Define custom CLI commands here for the application.
+| you can return array of commands or just call $this->add() to register a command class.
 */
 
-Route::get('/', [HomeController::class, 'index']);
-Route::get('/welcome', [HomeController::class, 'welcome']);
-Route::get('/ping', fn () => json(['pong' => true]));
+/** @var \App\Console\Konsole $this */

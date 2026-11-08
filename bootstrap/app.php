@@ -24,11 +24,14 @@ use Footup\Http\Middleware\TrimStringsMiddleware;
 $app = new FootupEngine(basePath: dirname(__DIR__));
 
 // Initialize i18n with locale from .env
-\Footup\i18n::setLocale(env('APP_LOCALE', 'en'));
+\Footup\Utils\i18n::setLocale(env('APP_LOCALE', 'en'));
 
-// Global middleware stack (the "Kernel"), executed on every request,
-// in the order listed — mirrors App\Http\Kernel::$middleware in Laravel.
-$app->middleware([
+
+$app->providers([
+    \App\Providers\AppServiceProvider::class,
+    // \App\Providers\AuthServiceProvider::class,
+    // \App\Providers\ModelServiceProvider::class,
+])->middleware([
     TimingMiddleware::class,
     TrimStringsMiddleware::class,
     CorsMiddleware::class,
@@ -37,14 +40,9 @@ $app->middleware([
         (int) env('RATE_LIMIT_REQUESTS', '100')
     ),
     CsrfMiddleware::class, 
-]);
-
-// Routes — mirrors routes/web.php + routes/api.php in Laravel. The
-// Route facade proxies to the booted Router, so no $router param needed.
-$app->routesFrom(
+])->routesFrom(
   web: __DIR__.'/../routes/web.php',
-  api: __DIR__.'/../routes/api.php',
-  cli: __DIR__.'/../routes/console.php',
+  api: __DIR__.'/../routes/api.php'
 );
 
 return $app;
