@@ -18,8 +18,7 @@ class HomeController extends Controller
     // Controller's constructor automatically because it's bound in the
     // container below, so $this->view() is just there to use.
     public function welcome()
-    { 
-        return Contact::whereIdcont(6)->first()->formFor();
+    {
         return $this->view('home', [
             'title' => 'It works!',
             'items' => ['Container', 'Router', 'Middleware', 'View', 'ExceptionHandler'],
